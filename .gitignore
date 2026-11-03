@@ -1,0 +1,31 @@
+# ---- Android / Gradle ----
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ---- Firmas y secretos (NUNCA subir) ----
+*.keystore
+*.jks
+keystore.properties
+.env
+.env.*
+
+# ---- Local ----
+local.properties
+*.log
+*.hprof
+
+# ---- Generados ----
+/app/build/
+/app/release/
+/app/debug/
