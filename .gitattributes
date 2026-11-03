@@ -1,0 +1,8 @@
+# Los scripts de shell deben conservar LF aunque se editen en Windows.
+* text=auto eol=lf
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.ttf binary
+*.png binary
+*.webp binary

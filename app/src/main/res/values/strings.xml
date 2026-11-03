@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FinanzasApp</string>
+
+    <string name="tab_inicio">Inicio</string>
+    <string name="tab_movimientos">Movimientos</string>
+    <string name="tab_presupuestos">Presupuestos</string>
+    <string name="tab_metas">Metas</string>
+    <string name="tab_ajustes">Ajustes</string>
+</resources>
