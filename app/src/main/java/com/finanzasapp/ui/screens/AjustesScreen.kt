@@ -171,7 +171,7 @@ fun AjustesScreen() {
         }
 
         Text(
-            text = "FinanzasApp 0.1.0 · Hecha para tus finanzas, no para tus datos.",
+            text = "FinanzasApp 0.2.0 · Hecha para tus finanzas, no para tus datos.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

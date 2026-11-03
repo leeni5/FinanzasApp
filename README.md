@@ -7,6 +7,8 @@ no se leen notificaciones bancarias.
 ## Estado
 
 - **Fase 0 completa:** base de datos Room, tema, navegación y datos iniciales.
+- **Fase 1 completa:** movimientos por mes con búsqueda y filtros, alta, edición y
+  borrado con confirmación. Cada cambio queda registrado en un historial de auditoría.
 - **Rediseño visual:** tipografía Inter suave, paleta cálida con acentos, inicio
   con saldo real, gasto por categoría, próximos pagos y avance de metas.
 - **Seguridad:** base de datos cifrada con SQLCipher y clave protegida por el
@@ -64,9 +66,8 @@ compilación release firmada con tu propia llave.
 
 ## Fases siguientes
 
-1. Movimientos: registrar, editar, buscar y filtrar.
-2. Presupuestos: límites, ritmo de gasto y avisos.
-3. Metas: aportes y proyección.
-4. Importación CSV/XLSX e importación de PDF.
-5. Pagos programados con notificaciones locales.
-6. Resúmenes con Gemini.
+1. Presupuestos: límites, ritmo de gasto y avisos.
+2. Metas: aportes y proyección.
+3. Importación CSV/XLSX e importación de PDF.
+4. Pagos programados con notificaciones locales.
+5. Resúmenes con Gemini.

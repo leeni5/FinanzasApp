@@ -38,6 +38,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE requiresReview = 1 ORDER BY date DESC, id DESC")
     fun observePendingReview(): Flow<List<Transaction>>
 
+    @Query("SELECT * FROM transactions WHERE id = :id")
+    suspend fun findById(id: Long): Transaction?
+
     @Query("SELECT * FROM transactions WHERE uniqueHash = :hash LIMIT 1")
     suspend fun findByHash(hash: String): Transaction?
 
