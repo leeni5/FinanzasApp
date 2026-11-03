@@ -6,6 +6,8 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.finanzasapp.data.entity.Transaction
+import com.finanzasapp.data.model.CategorySpending
+import com.finanzasapp.data.model.MonthTotals
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -53,6 +55,37 @@ interface TransactionDao {
             "WHERE type = 'INGRESO' AND date BETWEEN :from AND :to"
     )
     suspend fun sumIncomeBetween(from: LocalDate, to: LocalDate): Long
+
+    /** Ingresos y gastos del rango en una sola pasada. */
+    @Query(
+        """
+        SELECT COALESCE(SUM(CASE WHEN type = 'INGRESO' THEN amount ELSE 0 END), 0) AS income,
+               COALESCE(SUM(CASE WHEN type = 'GASTO' THEN amount ELSE 0 END), 0) AS expenses
+        FROM transactions
+        WHERE date BETWEEN :from AND :to
+        """
+    )
+    fun observeMonthTotals(from: LocalDate, to: LocalDate): Flow<MonthTotals>
+
+    /** Gasto del rango por categoría, de mayor a menor. */
+    @Query(
+        """
+        SELECT c.id AS categoryId,
+               c.name AS name,
+               c.color AS color,
+               c.monthlyBudget AS budget,
+               COALESCE(SUM(t.amount), 0) AS spent
+        FROM categories c
+        LEFT JOIN transactions t ON t.categoryId = c.id
+            AND t.type = 'GASTO'
+            AND t.date BETWEEN :from AND :to
+        WHERE c.archived = 0
+        GROUP BY c.id
+        HAVING COALESCE(SUM(t.amount), 0) > 0
+        ORDER BY COALESCE(SUM(t.amount), 0) DESC
+        """
+    )
+    fun observeCategorySpending(from: LocalDate, to: LocalDate): Flow<List<CategorySpending>>
 
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun count(): Int

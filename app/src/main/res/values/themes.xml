@@ -2,7 +2,7 @@
 <resources>
 
     <style name="Theme.FinanzasApp" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:windowBackground">#FFFFFFFF</item>
+        <item name="android:windowBackground">#FFFAF7F2</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowLightStatusBar">true</item>

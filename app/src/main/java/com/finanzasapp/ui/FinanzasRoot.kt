@@ -21,7 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.finanzasapp.ui.navigation.AppNavHost
 import com.finanzasapp.ui.navigation.Destination
-import com.finanzasapp.ui.theme.NotionPalette
+import com.finanzasapp.ui.theme.AppPalette
 
 /**
  * Armazón único: barra inferior fija y contenido que cambia.
@@ -72,11 +72,11 @@ fun FinanzasRoot() {
                                 )
                             },
                             colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.onBackground,
-                                selectedTextColor = MaterialTheme.colorScheme.onBackground,
-                                indicatorColor = NotionPalette.SurfaceHover,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                selectedIconColor = AppPalette.Indigo,
+                                selectedTextColor = AppPalette.Indigo,
+                                indicatorColor = AppPalette.IndigoSoft,
+                                unselectedIconColor = AppPalette.InkFaint,
+                                unselectedTextColor = AppPalette.InkFaint
                             )
                         )
                     }

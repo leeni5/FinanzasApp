@@ -20,6 +20,8 @@ import com.finanzasapp.data.entity.ImportJob
 import com.finanzasapp.data.entity.SavingsGoal
 import com.finanzasapp.data.entity.ScheduledPayment
 import com.finanzasapp.data.entity.Transaction
+import com.finanzasapp.data.security.DatabaseKeyProvider
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [
@@ -52,13 +54,25 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var instance: AppDatabase? = null
 
+        /**
+         * Base cifrada con SQLCipher. La frase se obtiene del Keystore;
+         * nunca se escribe en claro ni se comparte entre dispositivos.
+         */
         fun get(context: Context): AppDatabase =
             instance ?: synchronized(this) {
-                instance ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    DB_NAME
-                ).build().also { instance = it }
+                instance ?: build(context.applicationContext).also { instance = it }
             }
+
+        private fun build(context: Context): AppDatabase {
+            System.loadLibrary("sqlcipher")
+            val passphrase = DatabaseKeyProvider.getOrCreatePassphrase(context)
+            return Room.databaseBuilder(
+                context,
+                AppDatabase::class.java,
+                DB_NAME
+            )
+                .openHelperFactory(SupportOpenHelperFactory(passphrase))
+                .build()
+        }
     }
 }

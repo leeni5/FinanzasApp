@@ -1,20 +1,27 @@
 package com.finanzasapp.ui.screens
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.PageScaffold
+import com.finanzasapp.ui.theme.AppPalette
 
 @Composable
 fun MetasScreen() {
     PageScaffold(
         title = "Metas",
-        subtitle = "Ahorrar también es parte del plan."
+        subtitle = "Ahorrar también es parte del plan.",
+        eyebrow = "Fase 3",
+        accent = AppPalette.Violet
     ) {
         EmptyState(
             title = "El seguimiento llega en la fase 3",
             message = "Una meta no guarda un \"monto actual\" escrito a mano: se calcula sumando " +
                 "sus aportes. Así el avance y el ritmo de los últimos tres meses nunca mienten. " +
-                "La estructura ya está lista."
+                "La estructura ya está lista.",
+            icon = Icons.Filled.Star,
+            accent = AppPalette.Violet
         )
     }
 }

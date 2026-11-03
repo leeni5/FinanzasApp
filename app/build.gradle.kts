@@ -77,6 +77,11 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
 
+    // Cifrado real en reposo: SQLCipher + la interfaz de androidx.sqlite
+    // que usan Room y el driver cifrado.
+    implementation(libs.androidx.sqlite)
+    implementation(libs.sqlcipher.android)
+
     implementation(libs.androidx.datastore.preferences)
 
     implementation(libs.kotlinx.coroutines.android)

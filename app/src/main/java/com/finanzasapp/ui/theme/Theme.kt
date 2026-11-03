@@ -6,17 +6,17 @@ import androidx.compose.runtime.Composable
 /**
  * Tema único de la app.
  *
- * Deliberadamente NO usamos color dinámico de Android: el estilo Notion
- * depende de que la paleta sea siempre la misma.
+ * Deliberadamente NO usamos color dinámico de Android: la identidad depende
+ * de que la paleta cálida sea siempre la misma, en cualquier teléfono.
  */
 @Composable
 fun FinanzasTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = NotionColorScheme,
-        typography = NotionTypography,
-        shapes = NotionShapes,
+        colorScheme = AppColorScheme,
+        typography = AppTypography,
+        shapes = AppShapes,
         content = content
     )
 }

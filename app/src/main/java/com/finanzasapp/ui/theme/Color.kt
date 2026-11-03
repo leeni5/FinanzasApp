@@ -1,54 +1,111 @@
 package com.finanzasapp.ui.theme
 
 import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 /**
- * Paleta base del sistema visual, inspirada en Notion.
- * Ningún color de aquí debería usarse directamente en pantallas:
- * siempre a través de MaterialTheme.colorScheme o de [NotionPalette].
+ * Paleta de la app: papel cálido, tinta suave y acentos vivos.
+ *
+ * La base sigue siendo tranquila (fondo crema, tarjetas blancas, bordes finos),
+ * pero cada sección tiene un acento propio. Así la app se siente viva sin
+ * convertirse en un arcoíris: el color se usa para señalar, no para decorar.
+ *
+ * Ningún color se usa directamente en pantallas: siempre a través de
+ * MaterialTheme.colorScheme o de [AppPalette].
  */
-object NotionPalette {
-    val Background = Color(0xFFFFFFFF)
-    val Surface = Color(0xFFF7F7F5)
-    val SurfaceHover = Color(0xFFEFEFED)
-    val TextPrimary = Color(0xFF37352F)
-    val TextSecondary = Color(0xFF787774)
-    val TextTertiary = Color(0xFF9B9A97)
-    val Border = Color(0xFFE9E9E7)
-    val Accent = Color(0xFF2383E2)
-    val AccentSoft = Color(0xFFE7F1FB)
-    val Success = Color(0xFF448361)
-    val Warning = Color(0xFFCB912F)
-    val Danger = Color(0xFFD44C47)
+object AppPalette {
+    // Base
+    val Background = Color(0xFFFAF7F2)
+    val BackgroundTint = Color(0xFFF3ECE3)
+    val Surface = Color(0xFFFFFFFF)
+    val SurfaceMuted = Color(0xFFF5F0E9)
+    val SurfaceStrong = Color(0xFFEDE5DA)
+
+    // Texto
+    val Ink = Color(0xFF2E2A26)
+    val InkSoft = Color(0xFF6D675F)
+    val InkFaint = Color(0xFF9A938A)
+    val Border = Color(0xFFEAE2D8)
+
+    // Acentos
+    val Indigo = Color(0xFF4C5FD5)
+    val IndigoSoft = Color(0xFFE8EBFB)
+    val IndigoDeep = Color(0xFF2A3694)
+
+    val Violet = Color(0xFF8A5CF6)
+    val VioletSoft = Color(0xFFF1EAFF)
+
+    val Teal = Color(0xFF0F9D8F)
+    val TealSoft = Color(0xFFDDF5F1)
+
+    val Green = Color(0xFF2F9E63)
+    val GreenSoft = Color(0xFFE1F4E9)
+
+    val Amber = Color(0xFFD99A18)
+    val AmberSoft = Color(0xFFFCF1D9)
+
+    val Coral = Color(0xFFE06A4E)
+    val CoralSoft = Color(0xFFFCEAE4)
+
+    val Rose = Color(0xFFD9548C)
+    val RoseSoft = Color(0xFFFBE7F0)
+
+    val Sky = Color(0xFF2E86C8)
+    val SkySoft = Color(0xFFE3F0FA)
+
+    val Orange = Color(0xFFEE8A4A)
+
+    /**
+     * Degradado del saldo. Es el único degradado de la app: el punto focal
+     * de la pantalla de inicio. Del resto, superficies planas.
+     */
+    val HeroGradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFF3947BE),
+            Color(0xFF5B50D6),
+            Color(0xFF8A5CF6)
+        )
+    )
 }
 
-val NotionColorScheme = lightColorScheme(
-    primary = NotionPalette.Accent,
+val AppColorScheme = lightColorScheme(
+    primary = AppPalette.Indigo,
     onPrimary = Color.White,
-    primaryContainer = NotionPalette.AccentSoft,
-    onPrimaryContainer = NotionPalette.TextPrimary,
+    primaryContainer = AppPalette.IndigoSoft,
+    onPrimaryContainer = AppPalette.IndigoDeep,
 
-    secondary = NotionPalette.TextPrimary,
+    secondary = AppPalette.Teal,
     onSecondary = Color.White,
-    secondaryContainer = NotionPalette.Surface,
-    onSecondaryContainer = NotionPalette.TextPrimary,
+    secondaryContainer = AppPalette.TealSoft,
+    onSecondaryContainer = Color(0xFF0A5F57),
 
-    background = NotionPalette.Background,
-    onBackground = NotionPalette.TextPrimary,
+    tertiary = AppPalette.Violet,
+    onTertiary = Color.White,
+    tertiaryContainer = AppPalette.VioletSoft,
+    onTertiaryContainer = Color(0xFF4A2A96),
 
-    surface = NotionPalette.Background,
-    onSurface = NotionPalette.TextPrimary,
-    surfaceVariant = NotionPalette.Surface,
-    onSurfaceVariant = NotionPalette.TextSecondary,
+    background = AppPalette.Background,
+    onBackground = AppPalette.Ink,
 
-    outline = NotionPalette.Border,
-    outlineVariant = NotionPalette.Border,
+    surface = AppPalette.Surface,
+    onSurface = AppPalette.Ink,
+    surfaceVariant = AppPalette.SurfaceMuted,
+    onSurfaceVariant = AppPalette.InkSoft,
 
-    error = NotionPalette.Danger,
+    surfaceContainerLowest = AppPalette.Surface,
+    surfaceContainerLow = AppPalette.Background,
+    surfaceContainer = AppPalette.SurfaceMuted,
+    surfaceContainerHigh = AppPalette.SurfaceStrong,
+    surfaceContainerHighest = AppPalette.SurfaceStrong,
+
+    outline = AppPalette.Border,
+    outlineVariant = AppPalette.Border,
+
+    error = AppPalette.Coral,
     onError = Color.White,
-    errorContainer = Color(0xFFFBECEC),
-    onErrorContainer = NotionPalette.Danger,
+    errorContainer = AppPalette.CoralSoft,
+    onErrorContainer = Color(0xFF9B3620),
 
     scrim = Color(0x66000000)
 )

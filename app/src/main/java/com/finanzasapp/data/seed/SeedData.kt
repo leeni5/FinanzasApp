@@ -59,15 +59,15 @@ object SeedData {
     )
 
     private val categories = listOf(
-        SeedCategory("Arriendo", 1_150_000L, "#D44C47", 0),
-        SeedCategory("Mercado", 850_000L, "#448361", 1),
-        SeedCategory("Servicios", 320_000L, "#CB912F", 2),
-        SeedCategory("Transporte", 250_000L, "#2383E2", 3),
-        SeedCategory("Restaurantes", 280_000L, "#D9730D", 4),
-        SeedCategory("Salud", 150_000L, "#0F7B6C", 5),
-        SeedCategory("Ocio", 120_000L, "#6940A5", 6),
-        SeedCategory("Otros", 100_000L, "#787774", 7),
-        SeedCategory("Ingresos", 0L, "#448361", 8)
+        SeedCategory("Arriendo", 1_150_000L, "#E06A4E", 0),
+        SeedCategory("Mercado", 850_000L, "#2F9E63", 1),
+        SeedCategory("Servicios", 320_000L, "#D99A18", 2),
+        SeedCategory("Transporte", 250_000L, "#2E86C8", 3),
+        SeedCategory("Restaurantes", 280_000L, "#EE8A4A", 4),
+        SeedCategory("Salud", 150_000L, "#0F9D8F", 5),
+        SeedCategory("Ocio", 120_000L, "#8A5CF6", 6),
+        SeedCategory("Otros", 100_000L, "#8C857B", 7),
+        SeedCategory("Ingresos", 0L, "#2F9E63", 8)
     )
 
     private suspend fun insertCategories(database: AppDatabase): Map<String, Long> {
@@ -94,7 +94,7 @@ object SeedData {
                 name = "Efectivo",
                 type = AccountType.EFECTIVO,
                 initialBalance = 0L,
-                color = "#448361"
+                color = "#2F9E63"
             )
         )
     }
@@ -110,9 +110,9 @@ object SeedData {
     )
 
     private val accounts = listOf(
-        SeedAccount("Bancolombia Ahorros", AccountType.AHORRO, 2_400_000L, color = "#CB912F"),
-        SeedAccount("Nequi", AccountType.DEBITO, 350_000L, color = "#6940A5"),
-        SeedAccount("Efectivo", AccountType.EFECTIVO, 150_000L, color = "#448361"),
+        SeedAccount("Bancolombia Ahorros", AccountType.AHORRO, 2_400_000L, color = "#D99A18"),
+        SeedAccount("Nequi", AccountType.DEBITO, 350_000L, color = "#8A5CF6"),
+        SeedAccount("Efectivo", AccountType.EFECTIVO, 150_000L, color = "#2F9E63"),
         SeedAccount(
             name = "Visa Bancolombia",
             type = AccountType.CREDITO,
@@ -120,7 +120,7 @@ object SeedData {
             creditLimit = 6_000_000L,
             cutoffDay = 15,
             dueDay = 5,
-            color = "#2383E2"
+            color = "#4C5FD5"
         )
     )
 
@@ -171,6 +171,15 @@ object SeedData {
         -1 to listOf(
             MonthlyItem(7, "Pago freelance", 600_000L, TransactionType.INGRESO, "Ingresos", 1),
             MonthlyItem(19, "Consulta médica", 90_000L, TransactionType.GASTO, "Salud", 1)
+        ),
+        // Un par de gastos de los primeros días del mes en curso: así la
+        // pantalla de Inicio muestra varias categorías incluso el día 1.
+        0 to listOf(
+            MonthlyItem(1, "Éxito - mercado", 145_600L, TransactionType.GASTO, "Mercado", 1),
+            MonthlyItem(1, "TransMilenio", 6_400L, TransactionType.GASTO, "Transporte", 2),
+            MonthlyItem(2, "Café Juan Valdez", 14_800L, TransactionType.GASTO, "Restaurantes", 2),
+            MonthlyItem(2, "Farmacia Pasteur", 28_900L, TransactionType.GASTO, "Salud", 1),
+            MonthlyItem(2, "Uber", 18_200L, TransactionType.GASTO, "Transporte", 1)
         )
     )
 
@@ -290,7 +299,7 @@ object SeedData {
                 name = "Viaje a Cartagena",
                 targetAmount = 3_500_000L,
                 targetDate = today.plusMonths(7).withDayOfMonth(15),
-                color = "#2383E2"
+                color = "#4C5FD5"
             )
         )
 

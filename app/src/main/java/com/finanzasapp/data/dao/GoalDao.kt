@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Update
 import com.finanzasapp.data.entity.GoalContribution
 import com.finanzasapp.data.entity.SavingsGoal
+import com.finanzasapp.data.model.GoalProgress
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -38,6 +39,27 @@ interface GoalDao {
 
     @Query("SELECT COALESCE(SUM(amount), 0) FROM goal_contributions WHERE goalId = :goalId")
     suspend fun total(goalId: Long): Long
+
+    /**
+     * Avance de todas las metas, calculado sumando aportes.
+     * La meta no guarda un "monto actual": no hay nada que se pueda desfasar.
+     */
+    @Query(
+        """
+        SELECT g.id AS goalId,
+               g.name AS name,
+               g.targetAmount AS targetAmount,
+               g.targetDate AS targetDate,
+               g.color AS color,
+               g.completed AS completed,
+               COALESCE(SUM(c.amount), 0) AS saved
+        FROM savings_goals g
+        LEFT JOIN goal_contributions c ON c.goalId = g.id
+        GROUP BY g.id
+        ORDER BY g.completed ASC, g.targetDate ASC
+        """
+    )
+    fun observeProgress(): Flow<List<GoalProgress>>
 
     @Query("SELECT COUNT(*) FROM savings_goals")
     suspend fun count(): Int
