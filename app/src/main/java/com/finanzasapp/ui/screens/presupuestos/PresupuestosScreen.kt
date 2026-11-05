@@ -1,0 +1,636 @@
+package com.finanzasapp.ui.screens.presupuestos
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.finanzasapp.FinanzasApp
+import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.ColorDot
+import com.finanzasapp.ui.components.EmptyState
+import com.finanzasapp.ui.components.PageScaffold
+import com.finanzasapp.ui.components.SectionHeader
+import com.finanzasapp.ui.components.SoftProgressBar
+import com.finanzasapp.ui.theme.AppPalette
+import com.finanzasapp.ui.theme.Spacing
+import com.finanzasapp.ui.util.Fechas
+import com.finanzasapp.ui.util.Money
+import java.time.YearMonth
+
+@Composable
+fun PresupuestosScreen() {
+    val context = LocalContext.current
+    val database = remember(context) {
+        (context.applicationContext as FinanzasApp).database
+    }
+    val viewModel: PresupuestosViewModel = viewModel(
+        factory = PresupuestosViewModel.factory(database)
+    )
+    val state by viewModel.state.collectAsStateWithLifecycle()
+
+    var editing by remember { mutableStateOf<BudgetRow?>(null) }
+
+    PageScaffold(
+        title = "Presupuestos",
+        subtitle = "Límites claros para no romper el mes."
+    ) {
+        if (state.loading) {
+            Text(
+                text = "Leyendo tus límites…",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            return@PageScaffold
+        }
+
+        MonthSelector(
+            month = state.month,
+            canGoForward = state.canGoForward,
+            onPrevious = viewModel::previousMonth,
+            onNext = viewModel::nextMonth
+        )
+
+        if (state.totalBudget == 0L) {
+            NoLimitsCard()
+        } else {
+            BudgetSummary(state = state)
+        }
+
+        if (state.isCurrentMonth && state.atRisk.isNotEmpty()) {
+            BudgetAlert(rows = state.atRisk)
+        } else if (state.isCurrentMonth && state.totalBudget > 0L) {
+            CalmNote()
+        }
+
+        if (state.budgeted.isNotEmpty()) {
+            Section(title = "Con límite") {
+                BudgetList(
+                    rows = state.budgeted,
+                    onEdit = { editing = it }
+                )
+            }
+        }
+
+        if (state.unbudgeted.isNotEmpty()) {
+            Section(title = "Sin límite") {
+                BudgetList(
+                    rows = state.unbudgeted,
+                    onEdit = { editing = it }
+                )
+                Text(
+                    text = "Toca una categoría para asignarle un límite mensual.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        if (state.budgeted.isEmpty() && state.unbudgeted.isEmpty()) {
+            EmptyState(
+                title = "No hay categorías de gasto",
+                message = "Cuando exista al menos una categoría, aquí podrás asignarle " +
+                    "un límite y seguir su ritmo durante el mes."
+            )
+        }
+    }
+
+    editing?.let { row ->
+        BudgetEditorSheet(
+            row = row,
+            month = state.month,
+            onDismiss = { editing = null },
+            onSave = { amount ->
+                viewModel.setBudget(row, amount)
+                editing = null
+            }
+        )
+    }
+}
+
+// ------------------------------------------------------------------- mes
+
+@Composable
+private fun MonthSelector(
+    month: YearMonth,
+    canGoForward: Boolean,
+    onPrevious: () -> Unit,
+    onNext: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onPrevious) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Mes anterior",
+                tint = AppPalette.InkSoft,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+        Text(
+            text = Fechas.mesDe(month.atDay(1)),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        IconButton(onClick = onNext, enabled = canGoForward) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = "Mes siguiente",
+                tint = if (canGoForward) AppPalette.InkSoft else AppPalette.InkFaint.copy(alpha = 0.4f),
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+// --------------------------------------------------------------- resumen
+
+@Composable
+private fun NoLimitsCard() {
+    AppCard {
+        Text(
+            text = "Aún no hay límites",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = "Asigna un presupuesto a tus categorías para ver cuánto te queda " +
+                "y si el ritmo del mes está en riesgo.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun BudgetSummary(state: PresupuestosUiState) {
+    val over = state.totalSpent > state.totalBudget
+
+    AppCard {
+        Text(
+            text = if (state.isCurrentMonth) {
+                "Este mes"
+            } else {
+                Fechas.mesDe(state.month.atDay(1))
+            },
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(Modifier.height(Spacing.xs))
+        Text(
+            text = if (over) "Excedido" else "Disponible",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = if (over) Money.cop(state.totalSpent - state.totalBudget) else Money.cop(state.remaining),
+            style = MaterialTheme.typography.displaySmall,
+            color = if (over) AppPalette.Coral else MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "de ${Money.cop(state.totalBudget)}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Spacer(Modifier.height(Spacing.md))
+        SoftProgressBar(
+            progress = state.progress,
+            color = if (over) AppPalette.Coral else AppPalette.Indigo
+        )
+        Spacer(Modifier.height(Spacing.sm))
+        Row {
+            Text(
+                text = "${Money.cop(state.totalSpent)} gastado",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                text = "${Money.percent(state.progress)} usado",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        if (state.isCurrentMonth && !over && state.daysLeft > 0) {
+            Spacer(Modifier.height(Spacing.md))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline)
+            Spacer(Modifier.height(Spacing.md))
+            Row {
+                Text(
+                    text = "Quedan ${state.daysLeft} días",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    text = "${Money.cop(state.dailyAllowance)} por día",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BudgetAlert(rows: List<BudgetRow>) {
+    val exceeded = rows.any { it.status == BudgetStatus.EXCEDIDO }
+    val accent = if (exceeded) AppPalette.Coral else AppPalette.Amber
+    val background = if (exceeded) AppPalette.CoralSoft else AppPalette.AmberSoft
+    val count = rows.size
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = background
+    ) {
+        Row(modifier = Modifier.padding(Spacing.lg)) {
+            Icon(
+                imageVector = Icons.Filled.Warning,
+                contentDescription = null,
+                tint = accent,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(Spacing.md))
+            Column {
+                Text(
+                    text = if (exceeded) "Presupuesto excedido" else "Ritmo alto",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = if (exceeded) {
+                        if (count == 1) {
+                            "Hay 1 categoría fuera de su límite o con el ritmo del mes " +
+                                "en riesgo. Revisa el detalle abajo."
+                        } else {
+                            "Hay $count categorías fuera de su límite o con el ritmo del mes " +
+                                "en riesgo. Revisa el detalle abajo."
+                        }
+                    } else {
+                        if (count == 1) {
+                            "1 categoría va a un ritmo que agotará su límite antes de fin de mes."
+                        } else {
+                            "$count categorías van a un ritmo que agotará su límite antes de fin de mes."
+                        }
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalmNote() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        ColorDot(color = AppPalette.Green, size = 7.dp)
+        Spacer(Modifier.width(Spacing.sm))
+        Text(
+            text = "Vas dentro del presupuesto este mes.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+// ---------------------------------------------------------------- lista
+
+@Composable
+private fun Section(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        SectionHeader(title = title)
+        content()
+    }
+}
+
+@Composable
+private fun BudgetList(
+    rows: List<BudgetRow>,
+    onEdit: (BudgetRow) -> Unit
+) {
+    AppCard(contentPadding = PaddingValues(0.dp)) {
+        rows.forEachIndexed { index, row ->
+            if (index > 0) {
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = Spacing.lg),
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+            BudgetRowItem(row = row, onClick = { onEdit(row) })
+        }
+    }
+}
+
+@Composable
+private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = row.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = Money.cop(row.spent),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            if (row.budget > 0L) {
+                Spacer(Modifier.height(Spacing.sm))
+                SoftProgressBar(
+                    progress = row.progress,
+                    color = barColor(row.status),
+                    height = 6.dp
+                )
+                Spacer(Modifier.height(6.dp))
+                Row {
+                    Text(
+                        text = statusText(row),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = statusColor(row.status)
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "${Money.percent(row.progress)} usado",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = AppPalette.InkFaint
+                    )
+                }
+            } else {
+                Spacer(Modifier.height(Spacing.xs))
+                Row {
+                    Text(
+                        text = "Sin límite mensual",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "Asignar",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = AppPalette.Indigo
+                    )
+                }
+            }
+        }
+    }
+}
+
+private fun statusText(row: BudgetRow): String = when (row.status) {
+    BudgetStatus.EXCEDIDO -> "${Money.cop(-row.remaining)} de más"
+    BudgetStatus.RIESGO -> "Ritmo alto"
+    BudgetStatus.COMPLETO -> "Límite completo"
+    BudgetStatus.AL_LIMITE -> "${Money.cop(row.remaining)} disponibles"
+    BudgetStatus.NORMAL -> "${Money.cop(row.remaining)} disponibles"
+    BudgetStatus.SIN_LIMITE -> "Sin límite mensual"
+}
+
+@Composable
+private fun statusColor(status: BudgetStatus): Color = when (status) {
+    BudgetStatus.EXCEDIDO -> AppPalette.Coral
+    BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
+    BudgetStatus.COMPLETO -> MaterialTheme.colorScheme.onSurfaceVariant
+    BudgetStatus.NORMAL, BudgetStatus.SIN_LIMITE -> MaterialTheme.colorScheme.onSurfaceVariant
+}
+
+@Composable
+private fun barColor(status: BudgetStatus): Color = when (status) {
+    BudgetStatus.EXCEDIDO -> AppPalette.Coral
+    BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
+    else -> AppPalette.Indigo
+}
+
+// --------------------------------------------------------------- editor
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun BudgetEditorSheet(
+    row: BudgetRow,
+    month: YearMonth,
+    onDismiss: () -> Unit,
+    onSave: (Long) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var amountText by remember(row) {
+        mutableStateOf(if (row.budget > 0L) row.budget.toString() else "")
+    }
+    val amount = amountText.toLongOrNull() ?: 0L
+    val willExceed = amount > 0L && row.spent > amount
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface,
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(color = AppPalette.Border)
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .imePadding()
+                .padding(horizontal = Spacing.page)
+                .padding(top = Spacing.xs, bottom = Spacing.xxl)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Presupuesto de ${row.name}",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Se aplica a todos los meses.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Surface(
+                    onClick = onDismiss,
+                    shape = CircleShape,
+                    color = AppPalette.SurfaceMuted
+                ) {
+                    Box(
+                        modifier = Modifier.size(36.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Cerrar",
+                            tint = AppPalette.InkSoft,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(Spacing.lg))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Gastado en ${Fechas.mesDe(month.atDay(1))}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = Money.cop(row.spent),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(Modifier.height(Spacing.lg))
+
+            Text(
+                text = "Límite mensual",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(bottom = Spacing.xs)
+            )
+            TextField(
+                value = amountText,
+                onValueChange = { value ->
+                    amountText = value.filter { it.isDigit() }.take(12)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                prefix = {
+                    Text(
+                        text = "\$",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = AppPalette.InkFaint
+                    )
+                },
+                placeholder = {
+                    Text(
+                        text = "0",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = AppPalette.InkFaint
+                    )
+                },
+                textStyle = MaterialTheme.typography.headlineSmall,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                shape = MaterialTheme.shapes.medium,
+                colors = budgetFieldColors()
+            )
+
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = "Escribe 0 para dejar esta categoría sin límite.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            if (willExceed) {
+                Spacer(Modifier.height(Spacing.sm))
+                Text(
+                    text = "El gasto de este mes ya supera este límite.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppPalette.Coral
+                )
+            }
+
+            Spacer(Modifier.height(Spacing.lg))
+
+            Button(
+                onClick = { onSave(amount) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AppPalette.Indigo,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    text = if (amount == 0L) "Quitar límite" else "Guardar límite",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun budgetFieldColors() = TextFieldDefaults.colors(
+    focusedContainerColor = AppPalette.SurfaceMuted,
+    unfocusedContainerColor = AppPalette.SurfaceMuted,
+    disabledContainerColor = AppPalette.SurfaceMuted,
+    focusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+    disabledIndicatorColor = Color.Transparent,
+    cursorColor = AppPalette.Indigo,
+    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
+)

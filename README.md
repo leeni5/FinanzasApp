@@ -9,8 +9,11 @@ no se leen notificaciones bancarias.
 - **Fase 0 completa:** base de datos Room, tema, navegación y datos iniciales.
 - **Fase 1 completa:** movimientos por mes con búsqueda y filtros, alta, edición y
   borrado con confirmación. Cada cambio queda registrado en un historial de auditoría.
-- **Rediseño visual:** tipografía Inter suave, paleta cálida con acentos, inicio
-  con saldo real, gasto por categoría, próximos pagos y avance de metas.
+- **Fase 2 completa:** presupuestos por categoría con navegación mensual, gasto
+  acumulado, disponible, ritmo diario y avisos cuando una categoría se excede o
+  va camino de agotar su límite. Los cambios de límite también se auditan.
+- **Interfaz:** tipografía Inter suave, fondo neutro, tarjetas blancas sin bordes,
+  un solo acento y color reservado para el dinero y las alertas.
 - **Seguridad:** base de datos cifrada con SQLCipher y clave protegida por el
   Android Keystore.
 
@@ -66,8 +69,7 @@ compilación release firmada con tu propia llave.
 
 ## Fases siguientes
 
-1. Presupuestos: límites, ritmo de gasto y avisos.
-2. Metas: aportes y proyección.
-3. Importación CSV/XLSX e importación de PDF.
-4. Pagos programados con notificaciones locales.
-5. Resúmenes con Gemini.
+- **Fase 3:** metas con aportes y proyección.
+- **Fase 4:** importación CSV/XLSX e importación de PDF.
+- **Fase 5:** pagos programados con notificaciones locales.
+- **Fase 7:** resúmenes con Gemini.

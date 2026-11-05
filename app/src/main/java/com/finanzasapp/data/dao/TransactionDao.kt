@@ -90,6 +90,25 @@ interface TransactionDao {
     )
     fun observeCategorySpending(from: LocalDate, to: LocalDate): Flow<List<CategorySpending>>
 
+    /** Todas las categorías activas, incluso sin gasto, para vigilar su límite. */
+    @Query(
+        """
+        SELECT c.id AS categoryId,
+               c.name AS name,
+               c.color AS color,
+               c.monthlyBudget AS budget,
+               COALESCE(SUM(t.amount), 0) AS spent
+        FROM categories c
+        LEFT JOIN transactions t ON t.categoryId = c.id
+            AND t.type = 'GASTO'
+            AND t.date BETWEEN :from AND :to
+        WHERE c.archived = 0
+        GROUP BY c.id
+        ORDER BY c.sortOrder ASC, c.name ASC
+        """
+    )
+    fun observeBudgetProgress(from: LocalDate, to: LocalDate): Flow<List<CategorySpending>>
+
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun count(): Int
 

@@ -7,9 +7,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.finanzasapp.ui.screens.AjustesScreen
 import com.finanzasapp.ui.screens.MetasScreen
-import com.finanzasapp.ui.screens.PresupuestosScreen
 import com.finanzasapp.ui.screens.inicio.InicioScreen
 import com.finanzasapp.ui.screens.movimientos.MovimientosScreen
+import com.finanzasapp.ui.screens.presupuestos.PresupuestosScreen
 
 @Composable
 fun AppNavHost(
