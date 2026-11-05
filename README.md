@@ -12,6 +12,9 @@ no se leen notificaciones bancarias.
 - **Fase 2 completa:** presupuestos por categoría con navegación mensual, gasto
   acumulado, disponible, ritmo diario y avisos cuando una categoría se excede o
   va camino de agotar su límite. Los cambios de límite también se auditan.
+- **Fase 3 completa:** metas con aportes reales, avance calculado, ritmo de los
+  últimos tres meses, proyección de llegada y estados de en ritmo, atrasada,
+  vencida o completada. Los aportes y cambios de meta se auditan.
 - **Interfaz:** tipografía Inter suave, fondo neutro, tarjetas blancas sin bordes,
   un solo acento y color reservado para el dinero y las alertas.
 - **Seguridad:** base de datos cifrada con SQLCipher y clave protegida por el
@@ -69,7 +72,6 @@ compilación release firmada con tu propia llave.
 
 ## Fases siguientes
 
-- **Fase 3:** metas con aportes y proyección.
 - **Fase 4:** importación CSV/XLSX e importación de PDF.
 - **Fase 5:** pagos programados con notificaciones locales.
 - **Fase 7:** resúmenes con Gemini.

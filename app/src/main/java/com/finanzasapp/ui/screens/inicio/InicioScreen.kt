@@ -385,8 +385,8 @@ private fun GoalsCard(goals: List<GoalProgress>) {
     AppCard {
         if (visible.isEmpty()) {
             InlineEmpty(
-                text = "Todavía no hay metas. En la fase 3 podrás crearlas " +
-                    "y ver cómo crece cada aporte."
+                text = "Todavía no hay metas. Crea una en Metas y aquí verás " +
+                    "cómo crece con cada aporte."
             )
             return@AppCard
         }
@@ -417,7 +417,7 @@ private fun GoalRow(goal: GoalProgress) {
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
-            if (goal.completed) {
+            if (goal.completed || goal.saved >= goal.targetAmount) {
                 SoftPill(text = "Completada", color = AppPalette.Green)
             } else {
                 Text(

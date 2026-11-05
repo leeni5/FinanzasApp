@@ -25,6 +25,12 @@ interface GoalDao {
     @Query("SELECT * FROM savings_goals ORDER BY completed ASC, targetDate ASC")
     fun observeGoals(): Flow<List<SavingsGoal>>
 
+    @Query("SELECT * FROM savings_goals WHERE id = :id")
+    suspend fun findGoal(id: Long): SavingsGoal?
+
+    @Query("SELECT * FROM goal_contributions ORDER BY date DESC, id DESC")
+    fun observeAllContributions(): Flow<List<GoalContribution>>
+
     @Insert
     suspend fun insertContribution(contribution: GoalContribution): Long
 
