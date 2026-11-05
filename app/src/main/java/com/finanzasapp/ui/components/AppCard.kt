@@ -1,6 +1,5 @@
 package com.finanzasapp.ui.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import com.finanzasapp.ui.theme.Spacing
 
 /**
- * Contenedor base: superficie blanca, borde de 1 dp y esquinas suaves.
- * La jerarquía se logra con color de fondo, borde y espacio; no con sombras.
+ * Contenedor base: superficie blanca, esquinas suaves y sin borde.
+ * La separación la da el fondo de la página, no una línea alrededor de cada cosa.
  */
 @Composable
 fun AppCard(
@@ -28,15 +27,13 @@ fun AppCard(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = MaterialTheme.shapes.large
-    val border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
 
     if (onClick != null) {
         Surface(
             onClick = onClick,
             modifier = modifier.fillMaxWidth(),
             shape = shape,
-            color = containerColor,
-            border = border
+            color = containerColor
         ) {
             Column(
                 modifier = Modifier.padding(contentPadding),
@@ -47,8 +44,7 @@ fun AppCard(
         Surface(
             modifier = modifier.fillMaxWidth(),
             shape = shape,
-            color = containerColor,
-            border = border
+            color = containerColor
         ) {
             Column(
                 modifier = Modifier.padding(contentPadding),

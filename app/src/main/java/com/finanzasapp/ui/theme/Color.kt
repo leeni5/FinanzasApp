@@ -5,48 +5,49 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 /**
- * Paleta de la app: papel cálido, tinta suave y acentos vivos.
+ * Paleta limpia: papel casi blanco, tinta neutra y un solo acento.
  *
- * La base sigue siendo tranquila (fondo crema, tarjetas blancas, bordes finos),
- * pero cada sección tiene un acento propio. Así la app se siente viva sin
- * convertirse en un arcoíris: el color se usa para señalar, no para decorar.
+ * La base es tranquila (fondo gris cálido muy claro, tarjetas blancas sin borde).
+ * El color se reserva para tres cosas: la marca, el dinero que entra/sale y los
+ * estados de alerta. Todo lo demás se resuelve con espacio y jerarquía.
  *
  * Ningún color se usa directamente en pantallas: siempre a través de
  * MaterialTheme.colorScheme o de [AppPalette].
  */
 object AppPalette {
     // Base
-    val Background = Color(0xFFFAF7F2)
-    val BackgroundTint = Color(0xFFF3ECE3)
+    val Background = Color(0xFFF8F8F6)
+    val BackgroundTint = Color(0xFFF1F1EE)
     val Surface = Color(0xFFFFFFFF)
-    val SurfaceMuted = Color(0xFFF5F0E9)
-    val SurfaceStrong = Color(0xFFEDE5DA)
+    val SurfaceMuted = Color(0xFFF4F4F1)
+    val SurfaceStrong = Color(0xFFE9E9E5)
 
     // Texto
-    val Ink = Color(0xFF2E2A26)
-    val InkSoft = Color(0xFF6D675F)
-    val InkFaint = Color(0xFF9A938A)
-    val Border = Color(0xFFEAE2D8)
+    val Ink = Color(0xFF1B1B1B)
+    val InkSoft = Color(0xFF6F6F6C)
+    val InkFaint = Color(0xFFA1A19D)
+    val Border = Color(0xFFECECE9)
 
-    // Acentos
-    val Indigo = Color(0xFF4C5FD5)
-    val IndigoSoft = Color(0xFFE8EBFB)
-    val IndigoDeep = Color(0xFF2A3694)
+    // Acento principal
+    val Indigo = Color(0xFF4C5BD4)
+    val IndigoSoft = Color(0xFFEDEFFB)
+    val IndigoDeep = Color(0xFF2A3390)
 
-    val Violet = Color(0xFF8A5CF6)
-    val VioletSoft = Color(0xFFF1EAFF)
+    // Acentos secundarios: solo para señales puntuales
+    val Violet = Color(0xFF7C5CE0)
+    val VioletSoft = Color(0xFFF1EDFC)
 
-    val Teal = Color(0xFF0F9D8F)
-    val TealSoft = Color(0xFFDDF5F1)
+    val Teal = Color(0xFF148F84)
+    val TealSoft = Color(0xFFE3F4F1)
 
-    val Green = Color(0xFF2F9E63)
-    val GreenSoft = Color(0xFFE1F4E9)
+    val Green = Color(0xFF1E9E62)
+    val GreenSoft = Color(0xFFE7F5EC)
 
-    val Amber = Color(0xFFD99A18)
-    val AmberSoft = Color(0xFFFCF1D9)
+    val Amber = Color(0xFFC98A12)
+    val AmberSoft = Color(0xFFFAF1DC)
 
-    val Coral = Color(0xFFE06A4E)
-    val CoralSoft = Color(0xFFFCEAE4)
+    val Coral = Color(0xFFDE5A43)
+    val CoralSoft = Color(0xFFFBEBE7)
 
     val Rose = Color(0xFFD9548C)
     val RoseSoft = Color(0xFFFBE7F0)
@@ -56,16 +57,10 @@ object AppPalette {
 
     val Orange = Color(0xFFEE8A4A)
 
-    /**
-     * Degradado del saldo. Es el único degradado de la app: el punto focal
-     * de la pantalla de inicio. Del resto, superficies planas.
-     */
+    /** Tarjeta de saldo: oscura, plana y sin adornos. */
+    val Hero = Color(0xFF1E202C)
     val HeroGradient = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF3947BE),
-            Color(0xFF5B50D6),
-            Color(0xFF8A5CF6)
-        )
+        colors = listOf(Color(0xFF242738), Color(0xFF1A1C26))
     )
 }
 

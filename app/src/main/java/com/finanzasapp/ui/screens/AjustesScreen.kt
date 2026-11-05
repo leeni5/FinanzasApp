@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -28,7 +27,6 @@ import com.finanzasapp.ui.components.AppCard
 import com.finanzasapp.ui.components.IconBubble
 import com.finanzasapp.ui.components.PageScaffold
 import com.finanzasapp.ui.components.SectionHeader
-import com.finanzasapp.ui.components.SoftPill
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 
@@ -39,20 +37,16 @@ fun AjustesScreen() {
 
     PageScaffold(
         title = "Ajustes",
-        subtitle = "Tus datos, tus reglas.",
-        eyebrow = "Preferencias",
-        accent = AppPalette.Teal
+        subtitle = "Tus datos, tus reglas."
     ) {
-        SectionHeader(
-            title = "Privacidad y seguridad",
-            accent = AppPalette.Green
-        )
+        SectionHeader(title = "Privacidad y seguridad")
 
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
                     icon = Icons.Filled.Lock,
-                    tint = AppPalette.Green,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    background = AppPalette.SurfaceMuted,
                     size = 50.dp
                 )
                 Spacer(Modifier.width(Spacing.md))
@@ -100,8 +94,7 @@ fun AjustesScreen() {
                     title = "Capturas permitidas en pruebas",
                     detail = "Esta compilación deja tomar capturas para revisar el diseño. " +
                         "La versión final bloqueará capturas y la vista reciente.",
-                    icon = Icons.Filled.Info,
-                    accent = AppPalette.Amber
+                    icon = Icons.Filled.Info
                 )
             } else {
                 SecurityRow(
@@ -111,15 +104,13 @@ fun AjustesScreen() {
             }
         }
 
-        SectionHeader(
-            title = "Inteligencia artificial",
-            accent = AppPalette.Violet
-        )
+        SectionHeader(title = "Inteligencia artificial")
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
                     icon = Icons.Filled.Info,
-                    tint = AppPalette.Violet,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    background = AppPalette.SurfaceMuted,
                     size = 44.dp
                 )
                 Spacer(Modifier.width(Spacing.md))
@@ -131,25 +122,21 @@ fun AjustesScreen() {
                     )
                     Text(
                         text = "La IA será opcional y gratuita. Tu clave se guardará cifrada " +
-                            "y solo se enviará el texto que elijas analizar.",
+                            "y solo se enviará el texto que elijas analizar. Llega en la fase 7.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(Modifier.width(Spacing.sm))
-                SoftPill(text = "Fase 7", color = AppPalette.Violet)
             }
         }
 
-        SectionHeader(
-            title = "Tus datos",
-            accent = AppPalette.Sky
-        )
+        SectionHeader(title = "Tus datos")
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
                     icon = Icons.Filled.Check,
-                    tint = AppPalette.Sky,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    background = AppPalette.SurfaceMuted,
                     size = 44.dp
                 )
                 Spacer(Modifier.width(Spacing.md))
@@ -165,8 +152,6 @@ fun AjustesScreen() {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Spacer(Modifier.width(Spacing.sm))
-                SoftPill(text = "Fase 4", color = AppPalette.Sky)
             }
         }
 
@@ -186,8 +171,7 @@ fun AjustesScreen() {
 private fun SecurityRow(
     title: String,
     detail: String,
-    icon: ImageVector = Icons.Filled.Check,
-    accent: Color = AppPalette.Green
+    icon: ImageVector = Icons.Filled.Check
 ) {
     Row(
         modifier = Modifier
@@ -197,7 +181,8 @@ private fun SecurityRow(
     ) {
         IconBubble(
             icon = icon,
-            tint = accent,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            background = AppPalette.SurfaceMuted,
             size = 28.dp
         )
         Spacer(Modifier.width(Spacing.md))

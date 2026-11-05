@@ -15,4 +15,7 @@ object Spacing {
     val xl = 24.dp
     val xxl = 32.dp
     val xxxl = 48.dp
+
+    /** Margen lateral de página. Un poco más de aire que [lg]. */
+    val page = 20.dp
 }

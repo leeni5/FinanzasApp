@@ -1,9 +1,7 @@
 package com.finanzasapp.ui
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -36,50 +34,44 @@ fun FinanzasRoot() {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            Column {
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.outline
-                )
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    tonalElevation = 0.dp
-                ) {
-                    Destination.entries.forEach { destination ->
-                        val selected = currentRoute == destination.route
-                        NavigationBarItem(
-                            selected = selected,
-                            onClick = {
-                                if (selected) return@NavigationBarItem
-                                navController.navigate(destination.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 0.dp
+            ) {
+                Destination.entries.forEach { destination ->
+                    val selected = currentRoute == destination.route
+                    NavigationBarItem(
+                        selected = selected,
+                        onClick = {
+                            if (selected) return@NavigationBarItem
+                            navController.navigate(destination.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
                                 }
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = destination.icon,
-                                    contentDescription = null
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = stringResource(destination.labelRes),
-                                    style = MaterialTheme.typography.labelSmall
-                                )
-                            },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = AppPalette.Indigo,
-                                selectedTextColor = AppPalette.Indigo,
-                                indicatorColor = AppPalette.IndigoSoft,
-                                unselectedIconColor = AppPalette.InkFaint,
-                                unselectedTextColor = AppPalette.InkFaint
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = destination.icon,
+                                contentDescription = null
                             )
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(destination.labelRes),
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = AppPalette.Indigo,
+                            selectedTextColor = AppPalette.Indigo,
+                            indicatorColor = AppPalette.IndigoSoft,
+                            unselectedIconColor = AppPalette.InkFaint,
+                            unselectedTextColor = AppPalette.InkFaint
                         )
-                    }
+                    )
                 }
             }
         }

@@ -1,6 +1,5 @@
 package com.finanzasapp.ui.screens.movimientos
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
@@ -42,19 +40,17 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -67,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,7 +81,6 @@ import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.ScreenHeader
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
-import com.finanzasapp.ui.theme.asColor
 import com.finanzasapp.ui.util.Fechas
 import com.finanzasapp.ui.util.Money
 import java.time.Instant
@@ -118,19 +112,17 @@ fun MovimientosScreen() {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = Spacing.lg,
-                end = Spacing.lg,
-                top = Spacing.lg,
-                bottom = 104.dp
+                start = Spacing.page,
+                end = Spacing.page,
+                top = Spacing.xl,
+                bottom = 108.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
+            verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             item {
                 ScreenHeader(
                     title = "Movimientos",
-                    subtitle = "Tus ingresos y gastos, en orden.",
-                    eyebrow = "Tu mes",
-                    accent = AppPalette.Sky
+                    subtitle = "Tus ingresos y gastos, en orden."
                 )
             }
 
@@ -148,17 +140,16 @@ fun MovimientosScreen() {
             }
 
             item {
-                SearchField(
-                    query = state.query,
-                    onQueryChange = viewModel::setQuery
-                )
-            }
-
-            item {
-                FilterRow(
-                    selected = state.filter,
-                    onSelect = viewModel::setFilter
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                    SearchField(
+                        query = state.query,
+                        onQueryChange = viewModel::setQuery
+                    )
+                    FilterTabs(
+                        selected = state.filter,
+                        onSelect = viewModel::setFilter
+                    )
+                }
             }
 
             when {
@@ -170,7 +161,6 @@ fun MovimientosScreen() {
                         message = "Registra tu primer movimiento y aquí verás el detalle " +
                             "del día, la categoría y la cuenta.",
                         icon = Icons.Filled.Add,
-                        accent = AppPalette.Sky,
                         actionLabel = "Registrar el primero",
                         onAction = {
                             editor = newMovement(activeCategories, activeAccounts)
@@ -184,7 +174,6 @@ fun MovimientosScreen() {
                         message = "No encontramos movimientos para “${state.query}”. " +
                             "Prueba con otra palabra o quita el filtro.",
                         icon = Icons.Filled.Search,
-                        accent = AppPalette.Amber,
                         actionLabel = "Limpiar búsqueda",
                         onAction = {
                             viewModel.setQuery("")
@@ -197,7 +186,7 @@ fun MovimientosScreen() {
                     items = state.groups,
                     key = { group -> group.date.toEpochDay() }
                 ) { group ->
-                    DayCard(
+                    DayGroup(
                         group = group,
                         onEdit = { row -> editor = row.toDraft() }
                     )
@@ -205,27 +194,21 @@ fun MovimientosScreen() {
             }
         }
 
-        ExtendedFloatingActionButton(
+        FloatingActionButton(
             onClick = { editor = newMovement(activeCategories, activeAccounts) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = Spacing.lg, bottom = Spacing.lg),
+                .padding(end = Spacing.page, bottom = Spacing.lg),
+            shape = CircleShape,
             containerColor = AppPalette.Indigo,
-            contentColor = Color.White,
-            icon = {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-            },
-            text = {
-                Text(
-                    text = "Registrar",
-                    style = MaterialTheme.typography.labelLarge
-                )
-            }
-        )
+            contentColor = Color.White
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Registrar movimiento",
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 
     editor?.let { draft ->
@@ -261,16 +244,11 @@ private fun MonthCard(
 ) {
     AppCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            FilledTonalIconButton(
-                onClick = onPrevious,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = AppPalette.SurfaceMuted,
-                    contentColor = AppPalette.InkSoft
-                )
-            ) {
+            IconButton(onClick = onPrevious) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Mes anterior",
+                    tint = AppPalette.InkSoft,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -287,30 +265,20 @@ private fun MonthCard(
                 Text(
                     text = if (isCurrentMonth) "Mes actual" else "$monthCount movimientos",
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (isCurrentMonth) AppPalette.Indigo else AppPalette.InkFaint
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
-            FilledTonalIconButton(
-                onClick = onNext,
-                enabled = canGoForward,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = AppPalette.SurfaceMuted,
-                    contentColor = AppPalette.InkSoft,
-                    disabledContainerColor = AppPalette.SurfaceMuted.copy(alpha = 0.45f),
-                    disabledContentColor = AppPalette.InkFaint.copy(alpha = 0.45f)
-                )
-            ) {
+            IconButton(onClick = onNext, enabled = canGoForward) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                     contentDescription = "Mes siguiente",
+                    tint = if (canGoForward) AppPalette.InkSoft else AppPalette.InkFaint.copy(alpha = 0.4f),
                     modifier = Modifier.size(20.dp)
                 )
             }
         }
 
-        Spacer(Modifier.height(Spacing.md))
-        HorizontalDivider(color = MaterialTheme.colorScheme.outline)
         Spacer(Modifier.height(Spacing.md))
 
         Row {
@@ -338,15 +306,11 @@ private fun MonthTotal(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            ColorDot(color = color, size = 8.dp)
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         Spacer(Modifier.height(2.dp))
         Text(
             text = Money.cop(amount),
@@ -363,7 +327,7 @@ private fun SearchField(
     query: String,
     onQueryChange: (String) -> Unit
 ) {
-    OutlinedTextField(
+    TextField(
         value = query,
         onValueChange = onQueryChange,
         modifier = Modifier.fillMaxWidth(),
@@ -387,7 +351,7 @@ private fun SearchField(
                     Icon(
                         imageVector = Icons.Filled.Clear,
                         contentDescription = "Limpiar búsqueda",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
@@ -395,38 +359,40 @@ private fun SearchField(
         singleLine = true,
         shape = MaterialTheme.shapes.medium,
         textStyle = MaterialTheme.typography.bodyMedium,
-        colors = warmFieldColors()
+        colors = filledFieldColors()
     )
 }
 
 @Composable
-private fun FilterRow(
+private fun FilterTabs(
     selected: MovementFilter,
     onSelect: (MovementFilter) -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xl)) {
         MovementFilter.entries.forEach { filter ->
-            val color = when (filter) {
-                MovementFilter.TODOS -> AppPalette.Indigo
-                MovementFilter.GASTOS -> AppPalette.Coral
-                MovementFilter.INGRESOS -> AppPalette.Green
-            }
             val isSelected = filter == selected
 
-            Surface(
-                onClick = { onSelect(filter) },
-                shape = RoundedCornerShape(50),
-                color = if (isSelected) color.copy(alpha = 0.13f) else MaterialTheme.colorScheme.surface,
-                border = BorderStroke(
-                    width = 1.dp,
-                    color = if (isSelected) color.copy(alpha = 0.45f) else MaterialTheme.colorScheme.outline
-                )
+            Column(
+                modifier = Modifier
+                    .clickable { onSelect(filter) }
+                    .padding(top = Spacing.xs, bottom = Spacing.xs)
             ) {
                 Text(
                     text = filter.label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = if (isSelected) color else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isSelected) {
+                        MaterialTheme.colorScheme.onSurface
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+                Spacer(Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .width(20.dp)
+                        .height(2.dp)
+                        .clip(CircleShape)
+                        .background(if (isSelected) AppPalette.Indigo else Color.Transparent)
                 )
             }
         }
@@ -436,21 +402,21 @@ private fun FilterRow(
 // ---------------------------------------------------------------- lista
 
 @Composable
-private fun DayCard(
+private fun DayGroup(
     group: MovementGroup,
     onEdit: (MovementRow) -> Unit
 ) {
-    AppCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = 0.dp)) {
+    Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.md, bottom = Spacing.xs),
+                .padding(top = Spacing.xs, bottom = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = dayLabel(group.date),
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.weight(1f))
             Text(
@@ -478,13 +444,11 @@ private fun MovementRowItem(
     onClick: () -> Unit
 ) {
     val transaction = row.transaction
-    val isIncome = transaction.type == TransactionType.INGRESO
-    val fallback = when (transaction.type) {
+    val dotColor = when (transaction.type) {
         TransactionType.INGRESO -> AppPalette.Green
-        TransactionType.GASTO -> AppPalette.Indigo
+        TransactionType.GASTO -> AppPalette.InkFaint
         TransactionType.TRANSFERENCIA -> AppPalette.Sky
     }
-    val accent = row.category?.color?.asColor(fallback) ?: fallback
 
     Row(
         modifier = Modifier
@@ -493,10 +457,7 @@ private fun MovementRowItem(
             .padding(vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CategoryLetter(
-            category = row.category,
-            color = accent
-        )
+        ColorDot(color = dotColor, size = 8.dp)
         Spacer(Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {
@@ -530,29 +491,8 @@ private fun MovementRowItem(
             color = when (transaction.type) {
                 TransactionType.INGRESO -> AppPalette.Green
                 TransactionType.GASTO -> MaterialTheme.colorScheme.onSurface
-                TransactionType.TRANSFERENCIA -> AppPalette.Sky
+                TransactionType.TRANSFERENCIA -> MaterialTheme.colorScheme.onSurfaceVariant
             }
-        )
-    }
-}
-
-@Composable
-private fun CategoryLetter(
-    category: Category?,
-    color: Color
-) {
-    val letter = category?.name?.firstOrNull()?.uppercaseChar()?.toString() ?: "•"
-    Box(
-        modifier = Modifier
-            .size(42.dp)
-            .clip(RoundedCornerShape(14.dp))
-            .background(color.copy(alpha = 0.13f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = letter,
-            style = MaterialTheme.typography.titleMedium,
-            color = color
         )
     }
 }
@@ -645,7 +585,7 @@ private fun MovementEditorSheet(
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
                 .imePadding()
-                .padding(horizontal = Spacing.lg)
+                .padding(horizontal = Spacing.page)
                 .padding(top = Spacing.xs, bottom = Spacing.xxl)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -680,41 +620,28 @@ private fun MovementEditorSheet(
                 }
             }
 
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.xl))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                TypeOption(
-                    label = "Gasto",
-                    accent = AppPalette.Coral,
-                    soft = AppPalette.CoralSoft,
-                    selected = type == TransactionType.GASTO,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        type = TransactionType.GASTO
-                        if (categoryId == incomeCategoryId) {
-                            categoryId = expenseCategoryId
-                        }
+            TypeSelector(
+                type = type,
+                onGasto = {
+                    type = TransactionType.GASTO
+                    if (categoryId == incomeCategoryId) {
+                        categoryId = expenseCategoryId
                     }
-                )
-                TypeOption(
-                    label = "Ingreso",
-                    accent = AppPalette.Green,
-                    soft = AppPalette.GreenSoft,
-                    selected = type == TransactionType.INGRESO,
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        type = TransactionType.INGRESO
-                        if (incomeCategoryId != null) {
-                            categoryId = incomeCategoryId
-                        }
+                },
+                onIngreso = {
+                    type = TransactionType.INGRESO
+                    if (incomeCategoryId != null) {
+                        categoryId = incomeCategoryId
                     }
-                )
-            }
+                }
+            )
 
             Spacer(Modifier.height(Spacing.lg))
 
             FieldLabel("Monto")
-            OutlinedTextField(
+            TextField(
                 value = amountText,
                 onValueChange = { value ->
                     amountText = value.filter { it.isDigit() }.take(12)
@@ -738,13 +665,13 @@ private fun MovementEditorSheet(
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 shape = MaterialTheme.shapes.medium,
-                colors = warmFieldColors()
+                colors = filledFieldColors()
             )
 
             Spacer(Modifier.height(Spacing.md))
 
             FieldLabel("Descripción")
-            OutlinedTextField(
+            TextField(
                 value = description,
                 onValueChange = { description = it.take(80) },
                 modifier = Modifier.fillMaxWidth(),
@@ -757,7 +684,7 @@ private fun MovementEditorSheet(
                 singleLine = true,
                 shape = MaterialTheme.shapes.medium,
                 textStyle = MaterialTheme.typography.bodyMedium,
-                colors = warmFieldColors()
+                colors = filledFieldColors()
             )
 
             Spacer(Modifier.height(Spacing.md))
@@ -772,9 +699,8 @@ private fun MovementEditorSheet(
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     items(categories, key = { it.id }) { category ->
-                        ChoicePill(
+                        ChoiceChip(
                             label = category.name,
-                            color = category.color.asColor(),
                             selected = category.id == categoryId,
                             onClick = { categoryId = category.id }
                         )
@@ -794,9 +720,8 @@ private fun MovementEditorSheet(
             } else {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                     items(accounts, key = { it.id }) { account ->
-                        ChoicePill(
+                        ChoiceChip(
                             label = account.name,
-                            color = account.color.asColor(),
                             selected = account.id == accountId,
                             onClick = { accountId = account.id }
                         )
@@ -820,7 +745,7 @@ private fun MovementEditorSheet(
                     Icon(
                         imageVector = Icons.Filled.DateRange,
                         contentDescription = null,
-                        tint = AppPalette.Sky,
+                        tint = AppPalette.InkSoft,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(Modifier.width(Spacing.md))
@@ -961,78 +886,82 @@ private fun MovementEditorSheet(
 }
 
 @Composable
-private fun TypeOption(
-    label: String,
-    accent: Color,
-    soft: Color,
-    selected: Boolean,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+private fun TypeSelector(
+    type: TransactionType,
+    onGasto: () -> Unit,
+    onIngreso: () -> Unit
 ) {
     Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        color = if (selected) soft else AppPalette.SurfaceMuted,
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (selected) accent.copy(alpha = 0.42f) else Color.Transparent
-        )
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = AppPalette.SurfaceMuted
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.md, vertical = Spacing.md),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ColorDot(color = accent, size = 9.dp)
-            Spacer(Modifier.width(Spacing.sm))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.titleSmall,
-                color = if (selected) MaterialTheme.colorScheme.onSurface else AppPalette.InkSoft,
+        Row(modifier = Modifier.padding(4.dp)) {
+            TypeSegment(
+                label = "Gasto",
+                selected = type == TransactionType.GASTO,
+                onClick = onGasto,
                 modifier = Modifier.weight(1f)
             )
-            if (selected) {
-                Icon(
-                    imageVector = Icons.Filled.Check,
-                    contentDescription = null,
-                    tint = accent,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            TypeSegment(
+                label = "Ingreso",
+                selected = type == TransactionType.INGRESO,
+                onClick = onIngreso,
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }
 
 @Composable
-private fun ChoicePill(
+private fun TypeSegment(
     label: String,
-    color: Color,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(10.dp),
+        color = if (selected) MaterialTheme.colorScheme.surface else Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (selected) {
+                    MaterialTheme.colorScheme.onSurface
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun ChoiceChip(
+    label: String,
     selected: Boolean,
     onClick: () -> Unit
 ) {
     Surface(
         onClick = onClick,
         shape = RoundedCornerShape(50),
-        color = if (selected) color.copy(alpha = 0.13f) else MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (selected) color.copy(alpha = 0.45f) else MaterialTheme.colorScheme.outline
-        )
+        color = if (selected) AppPalette.Ink else AppPalette.SurfaceMuted
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ColorDot(color = color, size = 8.dp)
-            Spacer(Modifier.width(6.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelMedium,
-                color = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (selected) Color.White else AppPalette.InkSoft,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+        )
     }
 }
 
@@ -1047,14 +976,16 @@ private fun FieldLabel(text: String) {
 }
 
 @Composable
-private fun warmFieldColors() = OutlinedTextFieldDefaults.colors(
-    focusedBorderColor = AppPalette.Indigo,
-    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-    focusedContainerColor = MaterialTheme.colorScheme.surface,
-    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+private fun filledFieldColors() = TextFieldDefaults.colors(
+    focusedContainerColor = AppPalette.SurfaceMuted,
+    unfocusedContainerColor = AppPalette.SurfaceMuted,
+    disabledContainerColor = AppPalette.SurfaceMuted,
+    focusedIndicatorColor = Color.Transparent,
+    unfocusedIndicatorColor = Color.Transparent,
+    disabledIndicatorColor = Color.Transparent,
     cursorColor = AppPalette.Indigo,
-    focusedLabelColor = AppPalette.Indigo,
-    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant
+    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
 )
 
 // --------------------------------------------------------------- helpers
