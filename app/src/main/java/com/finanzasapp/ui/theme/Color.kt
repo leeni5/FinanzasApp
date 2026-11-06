@@ -1,7 +1,6 @@
 package com.finanzasapp.ui.theme
 
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -57,11 +56,18 @@ object AppPalette {
 
     val Orange = Color(0xFFEE8A4A)
 
-    /** Tarjeta de saldo: oscura, plana y sin adornos. */
-    val Hero = Color(0xFF1E202C)
-    val HeroGradient = Brush.linearGradient(
-        colors = listOf(Color(0xFF242738), Color(0xFF1A1C26))
-    )
+    /**
+     * Tarjeta de saldo: índigo profundo, plana, sin degradado ni transparencias.
+     * Sus textos usan tonos sólidos derivados del mismo índigo.
+     */
+    val Hero = Color(0xFF2A3390)
+    val HeroInk = Color(0xFFFFFFFF)
+    val HeroInkSoft = Color(0xFFC3C8F0)
+    val HeroInkFaint = Color(0xFF8F96D8)
+    val HeroLine = Color(0xFF3F48A3)
+    val HeroChip = Color(0xFF3A43A0)
+    val HeroDebt = Color(0xFFFFB4A3)
+    val HeroOk = Color(0xFF9BE3B8)
 }
 
 val AppColorScheme = lightColorScheme(

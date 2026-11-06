@@ -5,13 +5,14 @@ import androidx.compose.material3.Shapes
 import androidx.compose.ui.unit.dp
 
 /**
- * Esquinas amables: redondeadas sin llegar a burbuja.
- * Las tarjetas grandes usan [Shapes.large]; los chips y barras, [Shapes.small].
+ * Esquinas contenidas: lo justo para que se sienta app móvil, sin burbujas.
+ * Las tarjetas usan [Shapes.large]; campos y botones, [Shapes.medium];
+ * chips y barras, [Shapes.small].
  */
 val AppShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(28.dp)
+    extraSmall = RoundedCornerShape(4.dp),
+    small = RoundedCornerShape(8.dp),
+    medium = RoundedCornerShape(12.dp),
+    large = RoundedCornerShape(16.dp),
+    extraLarge = RoundedCornerShape(20.dp)
 )

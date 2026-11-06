@@ -1,5 +1,20 @@
 package com.finanzasapp.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -24,6 +39,58 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
+
+/**
+ * true cuando la lista está quieta arriba o el usuario sube.
+ * Sirve para esconder el botón flotante mientras se baja: así nunca tapa
+ * el monto de una fila que se está leyendo.
+ */
+@Composable
+fun LazyListState.isScrollingUp(): Boolean {
+    var previousIndex by remember(this) { mutableIntStateOf(firstVisibleItemIndex) }
+    var previousOffset by remember(this) { mutableIntStateOf(firstVisibleItemScrollOffset) }
+    return remember(this) {
+        derivedStateOf {
+            if (previousIndex != firstVisibleItemIndex) {
+                previousIndex > firstVisibleItemIndex
+            } else {
+                previousOffset >= firstVisibleItemScrollOffset
+            }.also {
+                previousIndex = firstVisibleItemIndex
+                previousOffset = firstVisibleItemScrollOffset
+            }
+        }
+    }.value
+}
+
+/** Botón flotante de alta que entra y sale con el scroll. */
+@Composable
+fun ScrollAwareFab(
+    visible: Boolean,
+    description: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = visible,
+        modifier = modifier,
+        enter = fadeIn() + scaleIn(),
+        exit = fadeOut() + scaleOut()
+    ) {
+        FloatingActionButton(
+            onClick = onClick,
+            shape = MaterialTheme.shapes.large,
+            containerColor = AppPalette.Indigo,
+            contentColor = AppPalette.HeroInk
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = description,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+    }
+}
 
 /**
  * Encabezado común: título y, si hace falta, una línea de contexto.

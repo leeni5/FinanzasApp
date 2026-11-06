@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.HorizontalDivider
@@ -38,7 +37,11 @@ import com.finanzasapp.data.entity.ScheduledPayment
 import com.finanzasapp.data.model.CategorySpending
 import com.finanzasapp.data.model.GoalProgress
 import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.CategoryBadge
 import com.finanzasapp.ui.components.ColorDot
+import com.finanzasapp.ui.components.TintedCard
+import com.finanzasapp.ui.theme.asColor
+import com.finanzasapp.ui.theme.soft
 import com.finanzasapp.ui.components.PageScaffold
 import com.finanzasapp.ui.components.SectionHeader
 import com.finanzasapp.ui.components.SoftPill
@@ -110,75 +113,68 @@ private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
+            .clip(MaterialTheme.shapes.extraLarge)
             .background(AppPalette.Hero)
     ) {
         Column(modifier = Modifier.padding(Spacing.xl)) {
             Text(
                 text = "Saldo disponible",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.64f)
+                color = AppPalette.HeroInkSoft
             )
             Spacer(Modifier.height(Spacing.sm))
             Text(
                 text = Money.cop(balance),
                 style = MaterialTheme.typography.displaySmall,
-                color = Color.White
+                color = AppPalette.HeroInk
             )
             Spacer(Modifier.height(Spacing.xs))
             Text(
                 text = "Ahorro, débito y efectivo",
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.48f)
+                color = AppPalette.HeroInkFaint
             )
 
             Spacer(Modifier.height(Spacing.lg))
-            HorizontalDivider(color = Color.White.copy(alpha = 0.12f))
+            HorizontalDivider(color = AppPalette.HeroLine)
             Spacer(Modifier.height(Spacing.md))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "Deuda en tarjetas",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.58f)
+                    color = AppPalette.HeroInkSoft
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = if (cardDebt > 0L) Money.cop(cardDebt) else "Sin deuda",
                     style = MaterialTheme.typography.labelLarge,
-                    color = if (cardDebt > 0L) Color(0xFFFFB4A3) else Color(0xFF9BE3B8)
+                    color = if (cardDebt > 0L) AppPalette.HeroDebt else AppPalette.HeroOk
                 )
             }
         }
     }
 }
 
+/** Ingresos y gastos del mes, cada uno en su color: verde entra, coral sale. */
 @Composable
 private fun MonthSummary(income: Long, expenses: Long) {
-    AppCard {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text(
             text = "Este mes · ${Fechas.mesActual()}",
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        Spacer(Modifier.height(Spacing.md))
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            SummaryColumn(
+        Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+            SummaryTile(
                 label = "Ingresos",
                 amount = income,
-                dot = AppPalette.Green,
+                color = AppPalette.Green,
                 modifier = Modifier.weight(1f)
             )
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(34.dp)
-                    .background(MaterialTheme.colorScheme.outline)
-            )
-            Spacer(Modifier.width(Spacing.lg))
-            SummaryColumn(
+            SummaryTile(
                 label = "Gastos",
                 amount = expenses,
-                dot = AppPalette.Coral,
+                color = AppPalette.Coral,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -186,15 +182,19 @@ private fun MonthSummary(income: Long, expenses: Long) {
 }
 
 @Composable
-private fun SummaryColumn(
+private fun SummaryTile(
     label: String,
     amount: Long,
-    dot: Color,
+    color: Color,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
+    TintedCard(
+        modifier = modifier,
+        color = color.soft(0.10f),
+        contentPadding = PaddingValues(Spacing.lg)
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ColorDot(color = dot, size = 7.dp)
+            ColorDot(color = color, size = 8.dp)
             Spacer(Modifier.width(Spacing.sm))
             Text(
                 text = label,
@@ -206,7 +206,8 @@ private fun SummaryColumn(
         Text(
             text = Money.cop(amount),
             style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
+            color = color,
+            maxLines = 1
         )
     }
 }
@@ -265,10 +266,24 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
         item.spent.toFloat() / maxSpent
     }
     val overBudget = item.budget > 0L && item.spent > item.budget
-    val barColor = if (overBudget) AppPalette.Coral else AppPalette.Indigo
+    val atLimit = item.budget > 0L && item.spent == item.budget
+    val categoryColor = item.color.asColor()
+    // El color de la categoría le da identidad a cada barra; solo cambia
+    // cuando hay algo que vigilar: naranja al llegar al límite, coral al pasarlo.
+    val barColor = when {
+        overBudget -> AppPalette.Coral
+        atLimit -> AppPalette.Orange
+        else -> categoryColor
+    }
 
     Column {
         Row(verticalAlignment = Alignment.CenterVertically) {
+            CategoryBadge(
+                categoryName = item.name,
+                color = categoryColor,
+                size = 32.dp
+            )
+            Spacer(Modifier.width(Spacing.md))
             Text(
                 text = item.name,
                 style = MaterialTheme.typography.titleSmall,
@@ -297,13 +312,17 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
             Spacer(Modifier.weight(1f))
             if (item.budget > 0L) {
                 Text(
-                    text = if (overBudget) {
-                        "${Money.cop(item.spent - item.budget)} de más"
-                    } else {
-                        "${Money.cop(item.budget - item.spent)} disponibles"
+                    text = when {
+                        overBudget -> "${Money.cop(item.spent - item.budget)} de más"
+                        atLimit -> "Límite alcanzado"
+                        else -> "${Money.cop(item.budget - item.spent)} disponibles"
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (overBudget) AppPalette.Coral else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = when {
+                        overBudget -> AppPalette.Coral
+                        atLimit -> AppPalette.Orange
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
+                    }
                 )
             }
         }
@@ -342,17 +361,27 @@ private fun PaymentsCard(payments: List<ScheduledPayment>) {
 private fun PaymentRow(payment: ScheduledPayment) {
     val overdue = payment.nextDueDate.isBefore(Fechas.hoy())
 
+    val dateColor = if (overdue) AppPalette.Coral else AppPalette.Indigo
+
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Column(modifier = Modifier.width(44.dp)) {
+        // Fecha en un bloque de color: se lee de un vistazo cuál va primero.
+        Column(
+            modifier = Modifier
+                .size(44.dp)
+                .clip(MaterialTheme.shapes.medium)
+                .background(dateColor.soft()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = payment.nextDueDate.dayOfMonth.toString(),
                 style = MaterialTheme.typography.titleMedium,
-                color = if (overdue) AppPalette.Coral else MaterialTheme.colorScheme.onSurface
+                color = dateColor
             )
             Text(
                 text = Fechas.mesCorto(payment.nextDueDate),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = dateColor
             )
         }
         Spacer(Modifier.width(Spacing.md))
@@ -430,7 +459,7 @@ private fun GoalRow(goal: GoalProgress) {
         Spacer(Modifier.height(Spacing.sm))
         SoftProgressBar(
             progress = progress,
-            color = if (goal.completed) AppPalette.Green else AppPalette.Indigo
+            color = if (goal.completed) AppPalette.Green else goal.color.asColor()
         )
         Spacer(Modifier.height(6.dp))
         Row {

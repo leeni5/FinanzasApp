@@ -75,11 +75,17 @@ import com.finanzasapp.data.entity.Category
 import com.finanzasapp.data.entity.Transaction
 import com.finanzasapp.data.entity.TransactionType
 import com.finanzasapp.data.model.displayName
+import androidx.compose.foundation.lazy.rememberLazyListState
 import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.CategoryBadge
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.ScreenHeader
+import com.finanzasapp.ui.components.ScrollAwareFab
 import com.finanzasapp.ui.components.SoftPill
+import com.finanzasapp.ui.components.TintedCard
+import com.finanzasapp.ui.components.isScrollingUp
+import com.finanzasapp.ui.theme.soft
 import com.finanzasapp.ui.screens.importar.ImportSheet
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
@@ -112,8 +118,12 @@ fun MovimientosScreen() {
     var editor by remember { mutableStateOf<MovementDraft?>(null) }
     var showImport by remember { mutableStateOf(false) }
 
+    val listState = rememberLazyListState()
+    val fabVisible = listState.isScrollingUp()
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = Spacing.page,
@@ -133,13 +143,13 @@ fun MovimientosScreen() {
                     Spacer(Modifier.width(Spacing.sm))
                     Surface(
                         onClick = { showImport = true },
-                        shape = CircleShape,
-                        color = AppPalette.SurfaceMuted
+                        shape = MaterialTheme.shapes.medium,
+                        color = AppPalette.IndigoSoft
                     ) {
                         Text(
                             text = "Importar",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = AppPalette.InkSoft,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = AppPalette.Indigo,
                             modifier = Modifier.padding(
                                 horizontal = 14.dp,
                                 vertical = 9.dp
@@ -233,21 +243,14 @@ fun MovimientosScreen() {
             }
         }
 
-        FloatingActionButton(
+        ScrollAwareFab(
+            visible = fabVisible,
+            description = "Registrar movimiento",
             onClick = { editor = newMovement(activeCategories, activeAccounts) },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = Spacing.page, bottom = Spacing.lg),
-            shape = CircleShape,
-            containerColor = AppPalette.Indigo,
-            contentColor = Color.White
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = "Registrar movimiento",
-                modifier = Modifier.size(24.dp)
-            )
-        }
+                .padding(end = Spacing.page, bottom = Spacing.lg)
+        )
     }
 
     editor?.let { draft ->
@@ -297,7 +300,7 @@ private fun BalanceHero(
         modifier = Modifier
             .fillMaxWidth()
             .clip(MaterialTheme.shapes.extraLarge)
-            .background(AppPalette.HeroGradient)
+            .background(AppPalette.Hero)
             .padding(horizontal = Spacing.lg, vertical = Spacing.lg)
     ) {
         Column {
@@ -328,7 +331,7 @@ private fun BalanceHero(
             Text(
                 text = "Saldo del mes",
                 style = MaterialTheme.typography.labelMedium,
-                color = Color.White.copy(alpha = 0.62f)
+                color = AppPalette.HeroInkSoft
             )
             Spacer(Modifier.height(Spacing.xxs))
             Text(
@@ -343,8 +346,8 @@ private fun BalanceHero(
 
             SoftPill(
                 text = if (isCurrentMonth) "Mes actual" else "Mes cerrado",
-                color = Color.White,
-                background = Color.White.copy(alpha = 0.12f)
+                color = AppPalette.HeroInk,
+                background = AppPalette.HeroChip
             )
         }
     }
@@ -361,7 +364,7 @@ private fun MonthArrow(
         Icon(
             imageVector = icon,
             contentDescription = description,
-            tint = if (enabled) Color.White.copy(alpha = 0.78f) else Color.White.copy(alpha = 0.24f),
+            tint = if (enabled) AppPalette.HeroInkSoft else AppPalette.HeroLine,
             modifier = Modifier.size(20.dp)
         )
     }
@@ -374,8 +377,9 @@ private fun SummaryCard(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    AppCard(
+    TintedCard(
         modifier = modifier,
+        color = color.soft(0.10f),
         contentPadding = PaddingValues(Spacing.lg)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -452,8 +456,8 @@ private fun FilterPills(
 
             Surface(
                 onClick = { onSelect(filter) },
-                shape = CircleShape,
-                color = if (isSelected) AppPalette.Ink else AppPalette.SurfaceMuted
+                shape = MaterialTheme.shapes.small,
+                color = if (isSelected) AppPalette.Indigo else AppPalette.SurfaceMuted
             ) {
                 Text(
                     text = filter.label,
@@ -532,12 +536,6 @@ private fun MovementRowItem(
         TransactionType.GASTO -> row.category?.color?.asColor() ?: AppPalette.Indigo
         TransactionType.TRANSFERENCIA -> AppPalette.Sky
     }
-    val initial = (row.category?.name ?: transaction.displayName())
-        .trim()
-        .firstOrNull()
-        ?.uppercase()
-        ?: "•"
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -545,19 +543,12 @@ private fun MovementRowItem(
             .padding(vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(38.dp)
-                .clip(CircleShape)
-                .background(accent.copy(alpha = 0.14f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = initial,
-                style = MaterialTheme.typography.labelLarge,
-                color = accent
-            )
-        }
+        CategoryBadge(
+            categoryName = row.category?.name,
+            color = accent,
+            income = transaction.type == TransactionType.INGRESO,
+            size = 40.dp
+        )
         Spacer(Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {

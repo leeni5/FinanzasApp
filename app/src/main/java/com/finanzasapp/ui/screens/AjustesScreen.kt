@@ -14,6 +14,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -64,8 +67,7 @@ fun AjustesScreen() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
                     icon = Icons.Filled.Lock,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    background = AppPalette.SurfaceMuted,
+                    tint = AppPalette.Teal,
                     size = 50.dp
                 )
                 Spacer(Modifier.width(Spacing.md))
@@ -128,8 +130,7 @@ fun AjustesScreen() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
                     icon = Icons.Filled.Info,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    background = AppPalette.SurfaceMuted,
+                    tint = AppPalette.Violet,
                     size = 44.dp
                 )
                 Spacer(Modifier.width(Spacing.md))
@@ -154,8 +155,7 @@ fun AjustesScreen() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
                     icon = Icons.Filled.DateRange,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    background = AppPalette.SurfaceMuted,
+                    tint = AppPalette.Sky,
                     size = 44.dp
                 )
                 Spacer(Modifier.width(Spacing.md))
@@ -176,31 +176,22 @@ fun AjustesScreen() {
 
             Spacer(Modifier.height(Spacing.md))
 
-            Surface(
+            // Un solo botón, lleno y con un verbo: elegir el archivo es el
+            // único paso aquí; la confirmación llega después, en la vista previa.
+            Button(
                 onClick = { showImport = true },
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
-                color = AppPalette.SurfaceMuted
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AppPalette.Indigo,
+                    contentColor = AppPalette.HeroInk
+                ),
+                contentPadding = PaddingValues(vertical = Spacing.md)
             ) {
-                Row(
-                    modifier = Modifier.padding(
-                        horizontal = Spacing.md,
-                        vertical = Spacing.md
-                    ),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Elegir archivo",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = AppPalette.Indigo,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        text = "Importar",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = AppPalette.InkSoft
-                    )
-                }
+                Text(
+                    text = "Elegir archivo para importar",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
 
@@ -299,8 +290,7 @@ private fun SecurityRow(
     ) {
         IconBubble(
             icon = icon,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            background = AppPalette.SurfaceMuted,
+            tint = if (icon == Icons.Filled.Check) AppPalette.Green else AppPalette.Amber,
             size = 28.dp
         )
         Spacer(Modifier.width(Spacing.md))

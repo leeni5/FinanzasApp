@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -61,7 +62,13 @@ fun FinanzasRoot() {
                         label = {
                             Text(
                                 text = stringResource(destination.labelRes),
-                                style = MaterialTheme.typography.labelSmall
+                                // Cinco pestañas en un teléfono angosto: sin
+                                // espaciado extra y en una sola línea.
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    letterSpacing = 0.sp
+                                ),
+                                maxLines = 1,
+                                softWrap = false
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(

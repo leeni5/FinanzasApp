@@ -73,6 +73,9 @@ import com.finanzasapp.ui.components.SectionHeader
 import com.finanzasapp.ui.components.SoftPill
 import com.finanzasapp.ui.components.SoftProgressBar
 import com.finanzasapp.ui.components.TintedCard
+import com.finanzasapp.ui.components.ScrollAwareFab
+import com.finanzasapp.ui.components.isScrollingUp
+import androidx.compose.foundation.lazy.rememberLazyListState
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 import com.finanzasapp.ui.theme.asColor
@@ -109,8 +112,12 @@ fun MetasScreen() {
     val detailGoal = state.goals.firstOrNull { it.goalId == detailGoalId }
     val contributionGoal = state.goals.firstOrNull { it.goalId == contributionGoalId }
 
+    val listState = rememberLazyListState()
+    val fabVisible = listState.isScrollingUp()
+
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
+            state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
                 start = Spacing.page,
@@ -178,21 +185,14 @@ fun MetasScreen() {
             }
         }
 
-        FloatingActionButton(
+        ScrollAwareFab(
+            visible = fabVisible,
+            description = "Nueva meta",
             onClick = { editor = GoalDraft() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(end = Spacing.page, bottom = Spacing.lg),
-            shape = CircleShape,
-            containerColor = AppPalette.Indigo,
-            contentColor = Color.White
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = "Nueva meta",
-                modifier = Modifier.size(24.dp)
-            )
-        }
+                .padding(end = Spacing.page, bottom = Spacing.lg)
+        )
     }
 
     detailGoal?.let { goal ->
@@ -363,11 +363,13 @@ private fun GoalCard(goal: GoalRow, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.weight(1f))
-            Text(
-                text = statusHint(goal.status),
-                style = MaterialTheme.typography.bodySmall,
-                color = statusColor(goal.status)
-            )
+            goalHint(goal)?.let { hint ->
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }
@@ -389,12 +391,16 @@ private fun statusLabel(status: GoalStatus): String = when (status) {
     GoalStatus.SIN_RITMO -> "Sin ritmo"
 }
 
-private fun statusHint(status: GoalStatus): String = when (status) {
-    GoalStatus.COMPLETADA -> "Cumplida"
-    GoalStatus.EN_RITMO -> "Llegas a tiempo"
-    GoalStatus.ATRASADA -> "Ritmo corto"
-    GoalStatus.VENCIDA -> "Fecha vencida"
-    GoalStatus.SIN_RITMO -> "Sin aportes recientes"
+/**
+ * El estado ya lo dice la etiqueta de arriba; esta línea dice qué hacer.
+ * Así la tarjeta no repite «Atrasada» con otras palabras.
+ */
+private fun goalHint(goal: GoalRow): String? = when (goal.status) {
+    GoalStatus.COMPLETADA -> null
+    GoalStatus.EN_RITMO -> goal.projectedDate?.let { "Llegas el ${Fechas.corta(it)}" }
+    GoalStatus.ATRASADA, GoalStatus.SIN_RITMO ->
+        if (goal.requiredMonthly > 0L) "Ahorra ${Money.cop(goal.requiredMonthly)}/mes" else null
+    GoalStatus.VENCIDA -> "Ajusta la fecha"
 }
 
 private fun statusColor(status: GoalStatus): Color = when (status) {
@@ -411,10 +417,9 @@ private fun statusBackground(status: GoalStatus): Color = when (status) {
     GoalStatus.SIN_RITMO -> AppPalette.SurfaceMuted
 }
 
+/** La barra conserva el color de la meta; el estado lo comunica la etiqueta. */
 private fun goalAccent(goal: GoalRow): Color = when (goal.status) {
     GoalStatus.COMPLETADA -> AppPalette.Green
-    GoalStatus.VENCIDA -> AppPalette.Coral
-    GoalStatus.ATRASADA -> AppPalette.Amber
     else -> goal.color.asColor()
 }
 

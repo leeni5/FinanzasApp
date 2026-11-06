@@ -52,6 +52,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.finanzasapp.FinanzasApp
 import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.CategoryBadge
+import com.finanzasapp.ui.theme.asColor
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.PageScaffold
@@ -185,7 +187,7 @@ private fun MonthSelector(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = "Mes siguiente",
-                tint = if (canGoForward) AppPalette.InkSoft else AppPalette.InkFaint.copy(alpha = 0.4f),
+                tint = if (canGoForward) AppPalette.InkSoft else AppPalette.SurfaceStrong,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -388,6 +390,12 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
             .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        CategoryBadge(
+            categoryName = row.name,
+            color = row.color.asColor(),
+            size = 36.dp
+        )
+        Spacer(Modifier.width(Spacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -407,7 +415,7 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
                 Spacer(Modifier.height(Spacing.sm))
                 SoftProgressBar(
                     progress = row.progress,
-                    color = barColor(row.status),
+                    color = barColor(row),
                     height = 6.dp
                 )
                 Spacer(Modifier.height(6.dp))
@@ -447,25 +455,30 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
 private fun statusText(row: BudgetRow): String = when (row.status) {
     BudgetStatus.EXCEDIDO -> "${Money.cop(-row.remaining)} de más"
     BudgetStatus.RIESGO -> "Ritmo alto"
-    BudgetStatus.COMPLETO -> "Límite completo"
+    BudgetStatus.COMPLETO -> "Límite alcanzado"
     BudgetStatus.AL_LIMITE -> "${Money.cop(row.remaining)} disponibles"
     BudgetStatus.NORMAL -> "${Money.cop(row.remaining)} disponibles"
     BudgetStatus.SIN_LIMITE -> "Sin límite mensual"
 }
 
+/**
+ * Escala de atención, de menos a más: color de la categoría (todo bien),
+ * ámbar (ritmo alto o cerca del límite), naranja (límite alcanzado) y
+ * coral (excedido). Así un 100 % nunca pesa menos que un 19 % en riesgo.
+ */
 @Composable
 private fun statusColor(status: BudgetStatus): Color = when (status) {
     BudgetStatus.EXCEDIDO -> AppPalette.Coral
+    BudgetStatus.COMPLETO -> AppPalette.Orange
     BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
-    BudgetStatus.COMPLETO -> MaterialTheme.colorScheme.onSurfaceVariant
     BudgetStatus.NORMAL, BudgetStatus.SIN_LIMITE -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
-@Composable
-private fun barColor(status: BudgetStatus): Color = when (status) {
+private fun barColor(row: BudgetRow): Color = when (row.status) {
     BudgetStatus.EXCEDIDO -> AppPalette.Coral
+    BudgetStatus.COMPLETO -> AppPalette.Orange
     BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
-    else -> AppPalette.Indigo
+    else -> row.color.asColor()
 }
 
 // --------------------------------------------------------------- editor

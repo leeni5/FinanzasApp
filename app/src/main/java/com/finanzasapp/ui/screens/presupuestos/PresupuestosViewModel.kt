@@ -40,7 +40,9 @@ data class BudgetRow(
     val spent: Long,
     val remaining: Long,
     val progress: Float,
-    val status: BudgetStatus
+    val status: BudgetStatus,
+    /** Color guardado de la categoría (#RRGGBB), para el icono y la barra. */
+    val color: String
 )
 
 data class PresupuestosUiState(
@@ -146,7 +148,8 @@ class PresupuestosViewModel(private val database: AppDatabase) : ViewModel() {
                     } else {
                         0f
                     },
-                    status = statusFor(item.spent, item.budget, isCurrent, elapsed)
+                    status = statusFor(item.spent, item.budget, isCurrent, elapsed),
+                    color = item.color
                 )
             }
 

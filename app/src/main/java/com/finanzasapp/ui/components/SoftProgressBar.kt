@@ -15,10 +15,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.finanzasapp.ui.theme.soft
 
 /**
  * Barra de progreso redondeada y animada.
- * El fondo es el mismo color del acento con poca opacidad: así cada barra
+ * El fondo es una versión suave y opaca del mismo acento: así cada barra
  * se relaciona con su categoría incluso antes de mirar la etiqueta.
  */
 @Composable
@@ -27,7 +28,7 @@ fun SoftProgressBar(
     color: Color,
     modifier: Modifier = Modifier,
     height: Dp = 8.dp,
-    trackColor: Color = color.copy(alpha = 0.14f)
+    trackColor: Color = color.soft()
 ) {
     val animated by animateFloatAsState(
         targetValue = progress.coerceIn(0f, 1f),
