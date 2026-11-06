@@ -80,6 +80,8 @@ interface TransactionDao {
         SELECT c.id AS categoryId,
                c.name AS name,
                c.color AS color,
+               c.icon AS icon,
+               c.iconColor AS iconColor,
                c.monthlyBudget AS budget,
                COALESCE(SUM(t.amount), 0) AS spent
         FROM categories c
@@ -100,6 +102,8 @@ interface TransactionDao {
         SELECT c.id AS categoryId,
                c.name AS name,
                c.color AS color,
+               c.icon AS icon,
+               c.iconColor AS iconColor,
                c.monthlyBudget AS budget,
                COALESCE(SUM(t.amount), 0) AS spent
         FROM categories c

@@ -276,7 +276,7 @@ private fun GoalsSummary(state: MetasUiState) {
         }
 
         Spacer(Modifier.height(Spacing.md))
-        SoftProgressBar(progress = state.progress, color = AppPalette.Indigo)
+        SoftProgressBar(progress = state.progress, color = AppPalette.Accent)
         Spacer(Modifier.height(Spacing.sm))
         Row {
             Text(
@@ -401,6 +401,7 @@ private fun goalHint(goal: GoalRow): String? = when (goal.status) {
     GoalStatus.VENCIDA -> "Ajusta la fecha"
 }
 
+@Composable
 private fun statusColor(status: GoalStatus): Color = when (status) {
     GoalStatus.COMPLETADA, GoalStatus.EN_RITMO -> AppPalette.Green
     GoalStatus.ATRASADA -> AppPalette.Amber
@@ -408,6 +409,7 @@ private fun statusColor(status: GoalStatus): Color = when (status) {
     GoalStatus.SIN_RITMO -> AppPalette.InkSoft
 }
 
+@Composable
 private fun statusBackground(status: GoalStatus): Color = when (status) {
     GoalStatus.COMPLETADA, GoalStatus.EN_RITMO -> AppPalette.GreenSoft
     GoalStatus.ATRASADA -> AppPalette.AmberSoft
@@ -416,6 +418,7 @@ private fun statusBackground(status: GoalStatus): Color = when (status) {
 }
 
 /** La barra conserva el color de la meta; el estado lo comunica la etiqueta. */
+@Composable
 private fun goalAccent(goal: GoalRow): Color = when (goal.status) {
     GoalStatus.COMPLETADA -> AppPalette.Green
     else -> identityColor(goal.color, goal.name)
@@ -578,8 +581,8 @@ private fun GoalDetailSheet(
                         .height(52.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = AppPalette.Indigo,
-                        contentColor = Color.White
+                        containerColor = AppPalette.Accent,
+                        contentColor = AppPalette.OnAccent
                     )
                 ) {
                     Icon(
@@ -602,14 +605,14 @@ private fun GoalDetailSheet(
                 Icon(
                     imageVector = Icons.Filled.Edit,
                     contentDescription = null,
-                    tint = AppPalette.Indigo,
+                    tint = AppPalette.Accent,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(Modifier.width(Spacing.xs))
                 Text(
                     text = "Editar meta",
                     style = MaterialTheme.typography.labelLarge,
-                    color = AppPalette.Indigo
+                    color = AppPalette.Accent
                 )
             }
 
@@ -951,8 +954,8 @@ private fun GoalEditorSheet(
                 enabled = canSave,
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPalette.Indigo,
-                    contentColor = Color.White,
+                    containerColor = AppPalette.Accent,
+                    contentColor = AppPalette.OnAccent,
                     disabledContainerColor = AppPalette.SurfaceStrong,
                     disabledContentColor = AppPalette.InkFaint
                 )
@@ -1099,8 +1102,8 @@ private fun ContributionSheet(
                 enabled = canSave,
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPalette.Indigo,
-                    contentColor = Color.White,
+                    containerColor = AppPalette.Accent,
+                    contentColor = AppPalette.OnAccent,
                     disabledContainerColor = AppPalette.SurfaceStrong,
                     disabledContentColor = AppPalette.InkFaint
                 )
@@ -1155,7 +1158,7 @@ private fun DateField(date: LocalDate, onClick: () -> Unit) {
             Text(
                 text = "Cambiar",
                 style = MaterialTheme.typography.labelMedium,
-                color = AppPalette.Indigo
+                color = AppPalette.Accent
             )
         }
     }
@@ -1246,7 +1249,7 @@ private fun metaFieldColors() = TextFieldDefaults.colors(
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
-    cursorColor = AppPalette.Indigo,
+    cursorColor = AppPalette.Accent,
     focusedTextColor = MaterialTheme.colorScheme.onSurface,
     unfocusedTextColor = MaterialTheme.colorScheme.onSurface
 )

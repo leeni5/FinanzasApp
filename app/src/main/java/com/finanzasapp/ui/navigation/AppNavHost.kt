@@ -12,6 +12,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.finanzasapp.ui.screens.AjustesScreen
+import com.finanzasapp.ui.screens.categorias.CategoriasScreen
+import com.finanzasapp.ui.screens.pagos.PagosScreen
 import com.finanzasapp.ui.screens.inicio.InicioScreen
 import com.finanzasapp.ui.screens.metas.MetasScreen
 import com.finanzasapp.ui.screens.movimientos.MovimientosScreen
@@ -45,10 +47,29 @@ fun AppNavHost(
         },
         popExitTransition = { fadeOut(tween(EXIT_MS, easing = LinearEasing)) }
     ) {
-        composable(Destination.INICIO.route) { InicioScreen() }
+        composable(Destination.INICIO.route) {
+            InicioScreen(onOpenPayments = { navController.navigate(Routes.PAGOS) })
+        }
         composable(Destination.MOVIMIENTOS.route) { MovimientosScreen() }
         composable(Destination.PRESUPUESTOS.route) { PresupuestosScreen() }
         composable(Destination.METAS.route) { MetasScreen() }
-        composable(Destination.AJUSTES.route) { AjustesScreen() }
+        composable(Destination.AJUSTES.route) {
+            AjustesScreen(
+                onOpenCategories = { navController.navigate(Routes.CATEGORIAS) },
+                onOpenPayments = { navController.navigate(Routes.PAGOS) }
+            )
+        }
+        composable(Routes.CATEGORIAS) {
+            CategoriasScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.PAGOS) {
+            PagosScreen(onBack = { navController.popBackStack() })
+        }
     }
+}
+
+/** Pantallas que no son pestaña: se abren encima y esconden la barra. */
+object Routes {
+    const val CATEGORIAS = "categorias"
+    const val PAGOS = "pagos"
 }

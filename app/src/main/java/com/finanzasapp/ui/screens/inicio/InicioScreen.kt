@@ -55,7 +55,7 @@ import com.finanzasapp.ui.util.Fechas
 import com.finanzasapp.ui.util.Money
 
 @Composable
-fun InicioScreen() {
+fun InicioScreen(onOpenPayments: () -> Unit = {}) {
     val context = LocalContext.current
     val database = remember(context) {
         (context.applicationContext as FinanzasApp).database
@@ -95,8 +95,8 @@ fun InicioScreen() {
             SpendingCard(categories = state.categories)
         }
 
-        Section(title = "Próximos pagos") {
-            PaymentsCard(payments = state.payments)
+        Section(title = "Próximos pagos", trailing = "Ver todos", onTrailing = onOpenPayments) {
+            PaymentsCard(payments = state.payments, onClick = onOpenPayments)
         }
 
         Section(title = "Metas") {
@@ -207,10 +207,11 @@ private fun SummaryTile(
 private fun Section(
     title: String,
     trailing: String? = null,
+    onTrailing: (() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-        SectionHeader(title = title, trailing = trailing)
+        SectionHeader(title = title, trailing = trailing, onTrailing = onTrailing)
         content()
     }
 }
@@ -261,7 +262,7 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
     // cuando hay algo que vigilar: naranja al llegar al límite, coral al pasarlo.
     val barColor = when {
         overBudget -> AppPalette.Coral
-        atLimit -> AppPalette.Orange
+        atLimit -> AppPalette.Limit
         else -> categoryColor
     }
 
@@ -270,7 +271,9 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
             CategoryBadge(
                 categoryName = item.name,
                 color = categoryColor,
-                size = 32.dp
+                iconKey = item.icon,
+                iconColor = item.iconColor.takeIf { it.isNotBlank() }?.asColor(),
+                size = 36.dp
             )
             Spacer(Modifier.width(Spacing.md))
             Text(
@@ -309,7 +312,7 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
                     style = MaterialTheme.typography.bodySmall,
                     color = when {
                         overBudget -> AppPalette.Coral
-                        atLimit -> AppPalette.Orange
+                        atLimit -> AppPalette.Limit
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                     }
                 )
@@ -321,10 +324,10 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
 // ------------------------------------------------------------------ pagos
 
 @Composable
-private fun PaymentsCard(payments: List<ScheduledPayment>) {
+private fun PaymentsCard(payments: List<ScheduledPayment>, onClick: () -> Unit) {
     val next = payments.take(3)
 
-    AppCard {
+    AppCard(onClick = onClick) {
         if (next.isEmpty()) {
             InlineEmpty(
                 text = "No tienes pagos programados. Cuando agregues uno, " +
@@ -350,7 +353,7 @@ private fun PaymentsCard(payments: List<ScheduledPayment>) {
 private fun PaymentRow(payment: ScheduledPayment) {
     val overdue = payment.nextDueDate.isBefore(Fechas.hoy())
 
-    val dateColor = if (overdue) AppPalette.Coral else AppPalette.Indigo
+    val dateColor = if (overdue) AppPalette.Coral else AppPalette.Accent
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         // Fecha en un bloque de color: se lee de un vistazo cuál va primero.

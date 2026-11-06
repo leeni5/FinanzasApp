@@ -249,7 +249,7 @@ private fun BudgetSummary(state: PresupuestosUiState) {
         Spacer(Modifier.height(Spacing.md))
         SoftProgressBar(
             progress = state.progress,
-            color = if (over) AppPalette.Coral else AppPalette.Indigo
+            color = if (over) AppPalette.Coral else AppPalette.Accent
         )
         Spacer(Modifier.height(Spacing.sm))
         Row {
@@ -394,6 +394,8 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
         CategoryBadge(
             categoryName = row.name,
             color = identityColor(row.color, row.name),
+            iconKey = row.icon,
+            iconColor = row.iconColor.takeIf { it.isNotBlank() }?.asColor(),
             size = 36.dp
         )
         Spacer(Modifier.width(Spacing.md))
@@ -445,7 +447,7 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
                     Text(
                         text = "Asignar",
                         style = MaterialTheme.typography.labelMedium,
-                        color = AppPalette.Indigo
+                        color = AppPalette.Accent
                     )
                 }
             }
@@ -470,14 +472,15 @@ private fun statusText(row: BudgetRow): String = when (row.status) {
 @Composable
 private fun statusColor(status: BudgetStatus): Color = when (status) {
     BudgetStatus.EXCEDIDO -> AppPalette.Coral
-    BudgetStatus.COMPLETO -> AppPalette.Orange
+    BudgetStatus.COMPLETO -> AppPalette.Limit
     BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
     BudgetStatus.NORMAL, BudgetStatus.SIN_LIMITE -> MaterialTheme.colorScheme.onSurfaceVariant
 }
 
+@Composable
 private fun barColor(row: BudgetRow): Color = when (row.status) {
     BudgetStatus.EXCEDIDO -> AppPalette.Coral
-    BudgetStatus.COMPLETO -> AppPalette.Orange
+    BudgetStatus.COMPLETO -> AppPalette.Limit
     BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
     else -> identityColor(row.color, row.name)
 }
@@ -623,8 +626,8 @@ private fun BudgetEditorSheet(
                     .height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPalette.Indigo,
-                    contentColor = Color.White
+                    containerColor = AppPalette.Accent,
+                    contentColor = AppPalette.OnAccent
                 )
             ) {
                 Text(
@@ -644,7 +647,7 @@ private fun budgetFieldColors() = TextFieldDefaults.colors(
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
-    cursorColor = AppPalette.Indigo,
+    cursorColor = AppPalette.Accent,
     focusedTextColor = MaterialTheme.colorScheme.onSurface,
     unfocusedTextColor = MaterialTheme.colorScheme.onSurface
 )

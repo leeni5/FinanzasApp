@@ -30,6 +30,8 @@ data class CategorySpending(
     val categoryId: Long,
     val name: String,
     val color: String,
+    val icon: String,
+    val iconColor: String,
     val budget: Long,
     val spent: Long
 )

@@ -80,7 +80,7 @@ fun ScrollAwareFab(
         FloatingActionButton(
             onClick = onClick,
             shape = MaterialTheme.shapes.large,
-            containerColor = AppPalette.Indigo,
+            containerColor = AppPalette.Accent,
             contentColor = AppPalette.HeroInk
         ) {
             Icon(
@@ -152,7 +152,7 @@ fun EmptyState(
     message: String,
     modifier: Modifier = Modifier,
     icon: ImageVector = Icons.Filled.Info,
-    accent: Color = AppPalette.Indigo,
+    accent: Color = AppPalette.Accent,
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {

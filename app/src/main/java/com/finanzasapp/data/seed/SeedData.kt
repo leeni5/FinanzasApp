@@ -229,7 +229,7 @@ object SeedData {
 
         database.transactionDao().insertAll(rows)
 
-        insertScheduledPayments(database, accountIds, today)
+        insertScheduledPayments(database, accountIds, categoryIds, today)
         insertGoal(database, today)
 
         database.systemDao().insertAudit(
@@ -249,6 +249,7 @@ object SeedData {
     private suspend fun insertScheduledPayments(
         database: AppDatabase,
         accountIds: List<Long>,
+        categoryIds: Map<String, Long>,
         today: LocalDate
     ) {
         val scheduled = listOf(
@@ -257,7 +258,8 @@ object SeedData {
                 amount = 1_150_000L,
                 frequency = PaymentFrequency.MENSUAL,
                 nextDueDate = nextDayOfMonth(today, 2),
-                accountId = accountIds[0]
+                accountId = accountIds[0],
+                categoryId = categoryIds["Arriendo"]
             ),
             ScheduledPayment(
                 name = "Tarjeta Visa",
@@ -271,7 +273,8 @@ object SeedData {
                 amount = 24_900L,
                 frequency = PaymentFrequency.MENSUAL,
                 nextDueDate = nextDayOfMonth(today, 15),
-                accountId = accountIds[3]
+                accountId = accountIds[3],
+                categoryId = categoryIds["Ocio"]
             ),
             ScheduledPayment(
                 name = "Seguro todo riesgo",
@@ -281,7 +284,7 @@ object SeedData {
                 accountId = accountIds[0]
             )
         )
-        scheduled.forEach { database.paymentDao().insert(it) }
+        scheduled.forEach { database.paymentDao().insert(it.copy(anchorDay = it.nextDueDate.dayOfMonth)) }
     }
 
     /** Próxima fecha con ese día del mes, hoy incluido, respetando meses cortos. */

@@ -70,6 +70,11 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material.icons.core)
+    // Catálogo de iconos para que cada categoría tenga el suyo. En release,
+    // R8 elimina los que no se usan.
+    implementation(libs.androidx.compose.material.icons.extended)
+    // Recordatorios locales de pagos programados (fase 5).
+    implementation(libs.androidx.work.runtime.ktx)
 
     implementation(libs.androidx.navigation.compose)
 

@@ -5,21 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.ShoppingCart
-import com.finanzasapp.ui.theme.soft
-import java.text.Normalizer
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,6 +17,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.finanzasapp.data.entity.Category
+import com.finanzasapp.ui.theme.asColor
+import com.finanzasapp.ui.theme.readableInk
+import com.finanzasapp.ui.theme.soft
 
 /** Etiqueta pequeña de color: "Hoy", "42%", "COP". */
 @Composable
@@ -54,7 +44,7 @@ fun SoftPill(
     }
 }
 
-/** Icono dentro de un círculo tintado. Da color sin recargar la pantalla. */
+/** Icono dentro de un círculo tintado (bloques de Ajustes). */
 @Composable
 fun IconBubble(
     icon: ImageVector,
@@ -80,50 +70,45 @@ fun IconBubble(
 }
 
 /**
- * Icono de la categoría dentro de un círculo de su color.
- * Reemplaza a la inicial: una letra no dice si es la categoría o el comercio.
+ * Ficha de categoría: cuadro redondeado lleno con el color de la categoría y
+ * su icono encima, en el color de icono elegido (o blanco/negro automático).
  */
 @Composable
 fun CategoryBadge(
     categoryName: String?,
     color: Color,
     modifier: Modifier = Modifier,
-    income: Boolean = false,
+    iconKey: String? = null,
+    iconColor: Color? = null,
     size: Dp = 40.dp
 ) {
-    IconBubble(
-        icon = if (income) Icons.Filled.KeyboardArrowDown else categoryIcon(categoryName),
-        tint = color,
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(RoundedCornerShape(size * 0.32f))
+            .background(color),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = IconCatalog.forCategory(categoryName, iconKey),
+            contentDescription = null,
+            tint = iconColor ?: color.readableInk(),
+            modifier = Modifier.size(size * 0.55f)
+        )
+    }
+}
+
+/** Ficha de una categoría guardada, con su color e icono. */
+@Composable
+fun CategoryBadge(category: Category, modifier: Modifier = Modifier, size: Dp = 40.dp) {
+    CategoryBadge(
+        categoryName = category.name,
+        color = category.color.asColor(),
+        iconKey = category.icon,
+        iconColor = category.iconColor.takeIf { it.isNotBlank() }?.asColor(),
         modifier = modifier,
         size = size
     )
-}
-
-/**
- * Elige un icono por palabras clave del nombre, sin acentos ni mayúsculas.
- * La tabla `categories` tiene columna `icon`, pero hoy siempre llega vacía
- * (semilla e importación no la llenan), así que se deduce del nombre.
- */
-fun categoryIcon(name: String?): ImageVector {
-    val key = Normalizer.normalize(name.orEmpty(), Normalizer.Form.NFD)
-        .replace(Regex("\\p{Mn}+"), "")
-        .lowercase()
-    fun has(vararg words: String) = words.any { key.contains(it) }
-    return when {
-        key.isBlank() -> Icons.Filled.List
-        has("arriendo", "alquiler", "vivienda", "hogar", "casa") -> Icons.Filled.Home
-        has("mercado", "super", "compra") -> Icons.Filled.ShoppingCart
-        has("celular", "telefon", "plan movil") -> Icons.Filled.Phone
-        has("servicio", "luz", "agua", "gas", "internet", "energia") -> Icons.Filled.Build
-        has("transporte", "uber", "taxi", "gasolina", "bus", "carro", "moto") -> Icons.Filled.LocationOn
-        has("restaurante", "comida", "cafe", "domicilio") -> Icons.Filled.Favorite
-        has("salud", "farmacia", "medic", "eps", "droguer") -> Icons.Filled.AddCircle
-        has("ocio", "entreten", "cine", "streaming", "suscrip") -> Icons.Filled.PlayArrow
-        has("educa", "curso", "estudio", "colegio", "universidad") -> Icons.Filled.Edit
-        has("tarjeta", "credito", "deuda", "banco", "prestamo") -> Icons.Filled.AccountBox
-        has("ingreso", "salario", "sueldo", "nomina", "honorario") -> Icons.Filled.KeyboardArrowDown
-        else -> Icons.Filled.List
-    }
 }
 
 /** Punto de color para listas de categorías. */

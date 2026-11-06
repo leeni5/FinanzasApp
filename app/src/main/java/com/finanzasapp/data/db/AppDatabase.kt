@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.finanzasapp.data.dao.AccountDao
 import com.finanzasapp.data.dao.CategoryDao
 import com.finanzasapp.data.dao.GoalDao
@@ -35,7 +37,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ImportJob::class,
         AuditLog::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -72,7 +74,29 @@ abstract class AppDatabase : RoomDatabase() {
                 DB_NAME
             )
                 .openHelperFactory(SupportOpenHelperFactory(passphrase))
+                .addMigrations(MIGRATION_1_2)
                 .build()
+        }
+
+        /**
+         * v1 → v2:
+         * - categories.iconColor: color del icono elegido por el usuario.
+         * - scheduled_payments.lastPaidDueDate: ciclo ya pagado (idempotencia).
+         * - scheduled_payments.anchorDay: día de vencimiento original, tomado
+         *   del nextDueDate actual (guardado como epochDay).
+         * - scheduled_payments.categoryId: categoría del gasto al pagar.
+         */
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE categories ADD COLUMN iconColor TEXT NOT NULL DEFAULT ''")
+                db.execSQL("ALTER TABLE scheduled_payments ADD COLUMN lastPaidDueDate INTEGER")
+                db.execSQL("ALTER TABLE scheduled_payments ADD COLUMN anchorDay INTEGER")
+                db.execSQL("ALTER TABLE scheduled_payments ADD COLUMN categoryId INTEGER")
+                db.execSQL(
+                    "UPDATE scheduled_payments SET anchorDay = " +
+                        "CAST(strftime('%d', nextDueDate * 86400, 'unixepoch') AS INTEGER)"
+                )
+            }
         }
     }
 }

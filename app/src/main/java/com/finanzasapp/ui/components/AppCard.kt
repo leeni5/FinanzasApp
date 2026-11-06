@@ -32,16 +32,20 @@ import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 
 /**
- * Sombra de las tarjetas: baja, difusa y teñida de índigo en vez de gris,
- * para que la tarjeta se despegue del fondo sin verse "pegada con borde".
+ * Sombra de las tarjetas: baja y difusa. En claro va teñida del acento; en
+ * oscuro es negra, porque una sombra de color sobre fondo negro no se ve.
  */
-fun Modifier.cardShadow(shape: Shape = RoundedCornerShape(16.dp)): Modifier = shadow(
-    elevation = 6.dp,
-    shape = shape,
-    clip = false,
-    ambientColor = AppPalette.IndigoDeep,
-    spotColor = AppPalette.IndigoDeep
-)
+@Composable
+fun Modifier.cardShadow(shape: Shape = RoundedCornerShape(16.dp)): Modifier {
+    val tint = if (AppPalette.IsDark) Color.Black else AppPalette.AccentDeep
+    return shadow(
+        elevation = 6.dp,
+        shape = shape,
+        clip = false,
+        ambientColor = tint,
+        spotColor = tint
+    )
+}
 
 /**
  * Escala al presionar: la tarjeta cede un poco y vuelve con un resorte.
@@ -131,6 +135,8 @@ fun HeroSurface(
     content: @Composable ColumnScope.() -> Unit
 ) {
     val shape = MaterialTheme.shapes.extraLarge
+    val decorFar = AppPalette.HeroDecorFar
+    val decorNear = AppPalette.HeroDecorNear
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -139,12 +145,12 @@ fun HeroSurface(
             .background(AppPalette.Hero)
             .drawBehind {
                 drawCircle(
-                    color = AppPalette.HeroDecorFar,
+                    color = decorFar,
                     radius = size.width * 0.42f,
                     center = Offset(size.width * 0.98f, -size.height * 0.10f)
                 )
                 drawCircle(
-                    color = AppPalette.HeroDecorNear,
+                    color = decorNear,
                     radius = size.width * 0.20f,
                     center = Offset(size.width * 0.92f, size.height * 1.02f)
                 )

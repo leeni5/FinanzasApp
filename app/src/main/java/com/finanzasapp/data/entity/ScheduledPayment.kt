@@ -31,5 +31,21 @@ data class ScheduledPayment(
     val accountId: Long? = null,
     val active: Boolean = true,
     /** Último aviso enviado: 7, 2 o 0. Null si nunca se avisó de este ciclo. */
-    val lastNotifiedDaysBefore: Int? = null
+    val lastNotifiedDaysBefore: Int? = null,
+    /**
+     * Vencimiento del último ciclo pagado (desde la v2). Si coincide con
+     * [nextDueDate] ese ciclo ya se pagó: un doble toque no crea dos gastos.
+     */
+    val lastPaidDueDate: LocalDate? = null,
+    /**
+     * Día del mes en que vence (1–31), desde la v2. Permite que un pago del 31
+     * pase al 28/29 en febrero y vuelva al 31 en marzo.
+     */
+    val anchorDay: Int? = null,
+    /**
+     * Categoría del gasto que se crea al pagar (desde la v2). Sin llave
+     * foránea: las categorías se archivan, no se borran; si falta, el gasto
+     * queda sin categoría.
+     */
+    val categoryId: Long? = null
 )

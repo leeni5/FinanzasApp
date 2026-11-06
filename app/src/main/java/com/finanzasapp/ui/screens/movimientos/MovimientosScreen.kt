@@ -78,7 +78,31 @@ import com.finanzasapp.data.model.displayName
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.finanzasapp.ui.components.AppCard
 import com.finanzasapp.ui.components.AnimatedMoney
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.offset
+import androidx.compose.runtime.rememberCoroutineScope
+import com.finanzasapp.ui.screens.categorias.CategoryActions
+import com.finanzasapp.ui.screens.categorias.CategoryEditorSheet
+import com.finanzasapp.ui.theme.soft
+import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material.icons.automirrored.rounded.TrendingDown
+import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import com.finanzasapp.ui.components.SpeedDialAction
+import com.finanzasapp.ui.components.SpeedDialFab
 import com.finanzasapp.ui.components.CategoryBadge
+import com.finanzasapp.ui.components.IconCatalog
+import com.finanzasapp.ui.components.pressScale
+import com.finanzasapp.ui.theme.readableInk
+import com.finanzasapp.ui.theme.readableInkSoft
 import com.finanzasapp.ui.components.HeroSurface
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
@@ -119,6 +143,8 @@ fun MovimientosScreen() {
     }
 
     var editor by remember { mutableStateOf<MovementDraft?>(null) }
+    var dialOpen by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     var showImport by remember { mutableStateOf(false) }
 
     val listState = rememberLazyListState()
@@ -147,12 +173,12 @@ fun MovimientosScreen() {
                     Surface(
                         onClick = { showImport = true },
                         shape = MaterialTheme.shapes.medium,
-                        color = AppPalette.IndigoSoft
+                        color = AppPalette.AccentSoft
                     ) {
                         Text(
                             text = "Importar",
                             style = MaterialTheme.typography.labelLarge,
-                            color = AppPalette.Indigo,
+                            color = AppPalette.Accent,
                             modifier = Modifier.padding(
                                 horizontal = 14.dp,
                                 vertical = 9.dp
@@ -215,7 +241,7 @@ fun MovimientosScreen() {
                         icon = Icons.Filled.Add,
                         actionLabel = "Registrar el primero",
                         onAction = {
-                            editor = newMovement(activeCategories, activeAccounts)
+                            dialOpen = true
                         }
                     )
                 }
@@ -246,13 +272,22 @@ fun MovimientosScreen() {
             }
         }
 
-        ScrollAwareFab(
+        // «+» despliega Gasto e Ingreso: el tipo se decide antes de abrir el
+        // formulario, que así queda enfocado en una sola cosa.
+        val expenseColor = AppPalette.Coral
+        val incomeColor = AppPalette.Green
+        SpeedDialFab(
+            expanded = dialOpen,
+            onExpandedChange = { dialOpen = it },
             visible = fabVisible,
-            description = "Registrar movimiento",
-            onClick = { editor = newMovement(activeCategories, activeAccounts) },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = Spacing.page, bottom = Spacing.lg)
+            actions = listOf(
+                SpeedDialAction("Ingreso", Icons.AutoMirrored.Rounded.TrendingUp, incomeColor) {
+                    editor = newMovement(activeCategories, activeAccounts, TransactionType.INGRESO)
+                },
+                SpeedDialAction("Gasto", Icons.AutoMirrored.Rounded.TrendingDown, expenseColor) {
+                    editor = newMovement(activeCategories, activeAccounts, TransactionType.GASTO)
+                }
+            )
         )
     }
 
@@ -269,6 +304,9 @@ fun MovimientosScreen() {
             onDelete = { id ->
                 viewModel.delete(id)
                 editor = null
+            },
+            onCreateCategory = { category, onCreated ->
+                scope.launch { onCreated(CategoryActions.save(database, category)) }
             }
         )
     }
@@ -311,7 +349,7 @@ private fun BalanceHero(
                 Text(
                     text = Fechas.mesDe(month.atDay(1)),
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    color = AppPalette.HeroInk,
                     textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
@@ -331,7 +369,7 @@ private fun BalanceHero(
                 color = AppPalette.HeroInkSoft
             )
             Spacer(Modifier.height(Spacing.xxs))
-            AnimatedMoney(amount = balance, style = MaterialTheme.typography.displaySmall, color = Color.White)
+            AnimatedMoney(amount = balance, style = MaterialTheme.typography.displaySmall, color = AppPalette.HeroInk)
 
             Spacer(Modifier.height(Spacing.md))
 
@@ -442,12 +480,12 @@ private fun FilterPills(
             Surface(
                 onClick = { onSelect(filter) },
                 shape = MaterialTheme.shapes.small,
-                color = if (isSelected) AppPalette.Indigo else AppPalette.SurfaceMuted
+                color = if (isSelected) AppPalette.Accent else AppPalette.SurfaceMuted
             ) {
                 Text(
                     text = filter.label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = if (isSelected) Color.White else AppPalette.InkSoft,
+                    color = if (isSelected) AppPalette.OnAccent else AppPalette.InkSoft,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
@@ -470,28 +508,26 @@ private fun DayGroup(
         }
     }
 
-    AppCard(
-        elevated = false,
-        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
-    ) {
+    Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+        // Encabezado del día, fuera de las tarjetas.
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.md, bottom = Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(top = Spacing.sm, bottom = Spacing.xxs),
+            verticalAlignment = Alignment.Bottom
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = dayLabel(group.date),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = Fechas.diaSemana(group.date),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                text = dayLabel(group.date),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.width(Spacing.sm))
+            Text(
+                text = Fechas.diaSemana(group.date),
+                style = MaterialTheme.typography.bodySmall,
+                color = AppPalette.InkFaint,
+                modifier = Modifier.weight(1f)
+            )
             Text(
                 text = amountForTotal(total),
                 style = MaterialTheme.typography.labelMedium,
@@ -499,65 +535,63 @@ private fun DayGroup(
             )
         }
 
-        group.rows.forEachIndexed { index, row ->
-            if (index > 0) {
-                HorizontalDivider(color = MaterialTheme.colorScheme.outline)
-            }
+        group.rows.forEach { row ->
             MovementRowItem(
                 row = row,
                 onClick = { onEdit(row) }
             )
         }
-
-        Spacer(Modifier.height(Spacing.xs))
     }
 }
 
+/**
+ * Un movimiento: tarjeta llena del color de su categoría, con su icono, el
+ * nombre, la cuenta y el monto. El texto se vuelve claro u oscuro según lo
+ * claro que sea el color, para que siempre se lea.
+ */
 @Composable
 private fun MovementRowItem(
     row: MovementRow,
     onClick: () -> Unit
 ) {
     val transaction = row.transaction
-    val accent = when (transaction.type) {
-        TransactionType.INGRESO -> AppPalette.Green
-        TransactionType.GASTO -> row.category?.let { identityColor(it.color, it.name) } ?: AppPalette.Indigo
-        TransactionType.TRANSFERENCIA -> AppPalette.Sky
-    }
+    val category = row.category
+    val background = category?.color?.asColor() ?: AppPalette.SurfaceMuted
+    val ink = if (category != null) background.readableInk() else AppPalette.Ink
+    val inkSoft = if (category != null) background.readableInkSoft() else AppPalette.InkSoft
+    val iconTint = category?.iconColor?.takeIf { it.isNotBlank() }?.asColor() ?: ink
+    val interaction = remember { MutableInteractionSource() }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = Spacing.md),
+            .pressScale(interaction)
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(background)
+            .clickable(interactionSource = interaction, indication = null, onClick = onClick)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CategoryBadge(
-            categoryName = row.category?.name,
-            color = accent,
-            income = transaction.type == TransactionType.INGRESO,
-            size = 40.dp
+        Icon(
+            imageVector = IconCatalog.forCategory(category?.name, category?.icon),
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(30.dp)
         )
-        Spacer(Modifier.width(Spacing.md))
+        Spacer(Modifier.width(Spacing.lg))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = transaction.displayName(),
                 style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = ink,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(2.dp))
             Text(
-                text = buildString {
-                    append(row.category?.name ?: "Sin categoría")
-                    row.account?.let {
-                        append("  ·  ")
-                        append(it.name)
-                    }
-                },
+                text = row.account?.name ?: (category?.name ?: "Sin categoría"),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = inkSoft,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -566,12 +600,8 @@ private fun MovementRowItem(
         Spacer(Modifier.width(Spacing.sm))
         Text(
             text = amountLabel(transaction),
-            style = MaterialTheme.typography.labelLarge,
-            color = when (transaction.type) {
-                TransactionType.INGRESO -> AppPalette.Green
-                TransactionType.GASTO -> MaterialTheme.colorScheme.onSurface
-                TransactionType.TRANSFERENCIA -> MaterialTheme.colorScheme.onSurfaceVariant
-            }
+            style = MaterialTheme.typography.titleSmall,
+            color = ink
         )
     }
 }
@@ -591,7 +621,7 @@ private fun LoadingRow() {
         CircularProgressIndicator(
             modifier = Modifier.size(18.dp),
             strokeWidth = 2.dp,
-            color = AppPalette.Indigo
+            color = AppPalette.Accent
         )
         Spacer(Modifier.width(Spacing.sm))
         Text(
@@ -604,7 +634,7 @@ private fun LoadingRow() {
 
 // -------------------------------------------------------------- editor
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun MovementEditorSheet(
     initial: MovementDraft,
@@ -612,11 +642,12 @@ private fun MovementEditorSheet(
     accounts: List<Account>,
     onDismiss: () -> Unit,
     onSave: (MovementDraft) -> Unit,
-    onDelete: (Long) -> Unit
+    onDelete: (Long) -> Unit,
+    onCreateCategory: (Category, (Long) -> Unit) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    var type by remember(initial) { mutableStateOf(initial.type) }
+    val type = initial.type
     var amountText by remember(initial) {
         mutableStateOf(if (initial.amount > 0L) initial.amount.toString() else "")
     }
@@ -648,6 +679,10 @@ private fun MovementEditorSheet(
 
     var showDatePicker by remember { mutableStateOf(false) }
     var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showNewCategory by remember { mutableStateOf(false) }
+    // El tipo llega decidido desde el botón «+» (o desde el movimiento editado).
+    val isIncome = type == TransactionType.INGRESO
+    val typeColor = if (isIncome) AppPalette.Green else AppPalette.Coral
 
     val amount = amountText.toLongOrNull() ?: 0L
     val canSave = amount > 0L &&
@@ -670,10 +705,31 @@ private fun MovementEditorSheet(
                 .padding(horizontal = Spacing.page)
                 .padding(top = Spacing.xs, bottom = Spacing.xxl)
         ) {
+            // 1. Encabezado: qué se está registrando, con el color del tipo.
             Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(typeColor.soft()),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isIncome) Icons.AutoMirrored.Rounded.TrendingUp else Icons.AutoMirrored.Rounded.TrendingDown,
+                        contentDescription = null,
+                        tint = typeColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(Modifier.width(Spacing.md))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (initial.id == null) "Nuevo movimiento" else "Editar movimiento",
+                        text = when {
+                            initial.id != null && isIncome -> "Editar ingreso"
+                            initial.id != null -> "Editar gasto"
+                            isIncome -> "Nuevo ingreso"
+                            else -> "Nuevo gasto"
+                        },
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -683,15 +739,8 @@ private fun MovementEditorSheet(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Surface(
-                    onClick = onDismiss,
-                    shape = CircleShape,
-                    color = AppPalette.SurfaceMuted
-                ) {
-                    Box(
-                        modifier = Modifier.size(36.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                Surface(onClick = onDismiss, shape = CircleShape, color = AppPalette.SurfaceMuted) {
+                    Box(modifier = Modifier.size(36.dp), contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Filled.Close,
                             contentDescription = "Cerrar",
@@ -704,62 +753,68 @@ private fun MovementEditorSheet(
 
             Spacer(Modifier.height(Spacing.xl))
 
-            TypeSelector(
-                type = type,
-                onGasto = {
-                    type = TransactionType.GASTO
-                    if (categoryId == incomeCategoryId) {
-                        categoryId = expenseCategoryId
-                    }
-                },
-                onIngreso = {
-                    type = TransactionType.INGRESO
-                    if (incomeCategoryId != null) {
-                        categoryId = incomeCategoryId
-                    }
+            // 2. El monto, protagonista: grande, centrado y del color del tipo.
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .background(typeColor.soft(0.10f))
+                    .padding(vertical = Spacing.lg, horizontal = Spacing.lg),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Monto",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = AppPalette.InkSoft
+                )
+                TextField(
+                    value = amountText,
+                    onValueChange = { value -> amountText = value.filter { it.isDigit() }.take(12) },
+                    modifier = Modifier.fillMaxWidth(),
+                    prefix = {
+                        Text("\$ ", style = MaterialTheme.typography.displaySmall, color = typeColor)
+                    },
+                    placeholder = {
+                        Text(
+                            "0",
+                            style = MaterialTheme.typography.displaySmall,
+                            color = AppPalette.InkFaint,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    textStyle = MaterialTheme.typography.displaySmall.copy(
+                        color = typeColor,
+                        textAlign = TextAlign.Center
+                    ),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = typeColor
+                    )
+                )
+                if (amount > 0L) {
+                    Text(
+                        text = (if (isIncome) "+ " else "− ") + Money.cop(amount),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = AppPalette.InkSoft
+                    )
                 }
-            )
+            }
 
-            Spacer(Modifier.height(Spacing.lg))
-
-            FieldLabel("Monto")
-            TextField(
-                value = amountText,
-                onValueChange = { value ->
-                    amountText = value.filter { it.isDigit() }.take(12)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                prefix = {
-                    Text(
-                        text = "\$",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = AppPalette.InkFaint
-                    )
-                },
-                placeholder = {
-                    Text(
-                        text = "0",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = AppPalette.InkFaint
-                    )
-                },
-                textStyle = MaterialTheme.typography.headlineSmall,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                shape = MaterialTheme.shapes.medium,
-                colors = filledFieldColors()
-            )
-
-            Spacer(Modifier.height(Spacing.md))
-
-            FieldLabel("Descripción")
+            // 3. ¿Qué fue?
+            EditorSection("¿Qué fue?")
             TextField(
                 value = description,
                 onValueChange = { description = it.take(80) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Ej. Almuerzo, taxi, mercado…",
+                        text = if (isIncome) "Ej. Salario, venta, reembolso…" else "Ej. Almuerzo, taxi, mercado…",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
@@ -770,28 +825,27 @@ private fun MovementEditorSheet(
             )
 
             Spacer(Modifier.height(Spacing.md))
-
             FieldLabel("Categoría")
-            if (categories.isEmpty()) {
-                Text(
-                    text = "Todavía no hay categorías.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    items(categories, key = { it.id }) { category ->
-                        ChoiceChip(
-                            label = category.name,
-                            selected = category.id == categoryId,
-                            onClick = { categoryId = category.id }
-                        )
-                    }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                categories.forEach { category ->
+                    CategoryChip(
+                        category = category,
+                        selected = category.id == categoryId,
+                        onClick = { categoryId = category.id }
+                    )
                 }
+                ChoiceChip(
+                    label = if (categories.isEmpty()) "+ Crear categoría" else "+ Nueva",
+                    selected = false,
+                    onClick = { showNewCategory = true }
+                )
             }
 
-            Spacer(Modifier.height(Spacing.md))
-
+            // 4. ¿De dónde y cuándo?
+            EditorSection("¿De dónde y cuándo?")
             FieldLabel("Cuenta")
             if (accounts.isEmpty()) {
                 Text(
@@ -800,8 +854,11 @@ private fun MovementEditorSheet(
                     color = AppPalette.Coral
                 )
             } else {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                    items(accounts, key = { it.id }) { account ->
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
+                    verticalArrangement = Arrangement.spacedBy(Spacing.sm)
+                ) {
+                    accounts.forEach { account ->
                         ChoiceChip(
                             label = account.name,
                             selected = account.id == accountId,
@@ -812,7 +869,6 @@ private fun MovementEditorSheet(
             }
 
             Spacer(Modifier.height(Spacing.md))
-
             FieldLabel("Fecha")
             Surface(
                 onClick = { showDatePicker = true },
@@ -837,16 +893,13 @@ private fun MovementEditorSheet(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
                     )
-                    Text(
-                        text = "Cambiar",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = AppPalette.Indigo
-                    )
+                    Text("Cambiar", style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
                 }
             }
 
-            Spacer(Modifier.height(Spacing.lg))
+            Spacer(Modifier.height(Spacing.xl))
 
+            // 5. Acción principal, en el color del tipo.
             Button(
                 onClick = {
                     onSave(
@@ -863,19 +916,38 @@ private fun MovementEditorSheet(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp),
+                    .height(54.dp),
                 enabled = canSave,
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPalette.Indigo,
-                    contentColor = Color.White,
+                    containerColor = typeColor,
+                    contentColor = typeColor.readableInk(),
                     disabledContainerColor = AppPalette.SurfaceStrong,
                     disabledContentColor = AppPalette.InkFaint
                 )
             ) {
                 Text(
-                    text = if (initial.id == null) "Registrar movimiento" else "Guardar cambios",
+                    text = when {
+                        initial.id != null -> "Guardar cambios"
+                        isIncome -> "Registrar ingreso"
+                        else -> "Registrar gasto"
+                    },
                     style = MaterialTheme.typography.labelLarge
+                )
+            }
+            if (!canSave) {
+                Text(
+                    text = when {
+                        amount <= 0L -> "Escribe el monto para continuar."
+                        description.isBlank() -> "Escribe qué fue para continuar."
+                        else -> "Elige una cuenta para continuar."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = AppPalette.InkFaint,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Spacing.sm)
                 )
             }
 
@@ -892,7 +964,7 @@ private fun MovementEditorSheet(
                     )
                     Spacer(Modifier.width(Spacing.xs))
                     Text(
-                        text = "Eliminar movimiento",
+                        text = if (isIncome) "Eliminar ingreso" else "Eliminar gasto",
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -936,6 +1008,17 @@ private fun MovementEditorSheet(
         }
     }
 
+    if (showNewCategory) {
+        CategoryEditorSheet(
+            initial = null,
+            onDismiss = { showNewCategory = false },
+            onSave = { category ->
+                showNewCategory = false
+                onCreateCategory(category) { newId -> categoryId = newId }
+            }
+        )
+    }
+
     if (showDeleteConfirm && initial.id != null) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
@@ -968,66 +1051,6 @@ private fun MovementEditorSheet(
 }
 
 @Composable
-private fun TypeSelector(
-    type: TransactionType,
-    onGasto: () -> Unit,
-    onIngreso: () -> Unit
-) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        color = AppPalette.SurfaceMuted
-    ) {
-        Row(modifier = Modifier.padding(4.dp)) {
-            TypeSegment(
-                label = "Gasto",
-                selected = type == TransactionType.GASTO,
-                onClick = onGasto,
-                modifier = Modifier.weight(1f)
-            )
-            TypeSegment(
-                label = "Ingreso",
-                selected = type == TransactionType.INGRESO,
-                onClick = onIngreso,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun TypeSegment(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
-        color = if (selected) MaterialTheme.colorScheme.surface else Color.Transparent
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 10.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = if (selected) {
-                    MaterialTheme.colorScheme.onSurface
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
-        }
-    }
-}
-
-@Composable
 private fun ChoiceChip(
     label: String,
     selected: Boolean,
@@ -1035,16 +1058,64 @@ private fun ChoiceChip(
 ) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(50),
-        color = if (selected) AppPalette.Ink else AppPalette.SurfaceMuted
+        shape = MaterialTheme.shapes.small,
+        color = if (selected) AppPalette.Accent else AppPalette.SurfaceMuted
     ) {
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else AppPalette.InkSoft,
+            color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
         )
     }
+}
+
+/**
+ * Ficha de categoría para el formulario: con su color e icono. La elegida se
+ * ve llena; las demás, con su color suave.
+ */
+@Composable
+private fun CategoryChip(
+    category: Category,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val base = category.color.asColor()
+    val bg by animateColorAsState(if (selected) base else base.soft(), tween(180), label = "chipBg")
+    val ink = if (selected) base.readableInk() else AppPalette.Ink
+    val iconTint = if (selected) {
+        category.iconColor.takeIf { it.isNotBlank() }?.asColor() ?: ink
+    } else {
+        base
+    }
+    Row(
+        modifier = Modifier
+            .clip(MaterialTheme.shapes.medium)
+            .background(bg)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = IconCatalog.forCategory(category.name, category.icon),
+            contentDescription = null,
+            tint = iconTint,
+            modifier = Modifier.size(18.dp)
+        )
+        Spacer(Modifier.width(6.dp))
+        Text(category.name, style = MaterialTheme.typography.labelLarge, color = ink)
+    }
+}
+
+/** Título de un bloque del formulario: separa las preguntas con aire. */
+@Composable
+private fun EditorSection(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(top = Spacing.xl, bottom = Spacing.md)
+    )
 }
 
 @Composable
@@ -1065,7 +1136,7 @@ private fun filledFieldColors() = TextFieldDefaults.colors(
     focusedIndicatorColor = Color.Transparent,
     unfocusedIndicatorColor = Color.Transparent,
     disabledIndicatorColor = Color.Transparent,
-    cursorColor = AppPalette.Indigo,
+    cursorColor = AppPalette.Accent,
     focusedTextColor = MaterialTheme.colorScheme.onSurface,
     unfocusedTextColor = MaterialTheme.colorScheme.onSurface
 )
@@ -1074,12 +1145,18 @@ private fun filledFieldColors() = TextFieldDefaults.colors(
 
 private fun newMovement(
     categories: List<Category>,
-    accounts: List<Account>
+    accounts: List<Account>,
+    type: TransactionType = TransactionType.GASTO
 ): MovementDraft {
     val incomeId = categories.firstOrNull { it.name.equals("Ingresos", ignoreCase = true) }?.id
+    val categoryId = if (type == TransactionType.INGRESO) {
+        incomeId
+    } else {
+        categories.firstOrNull { it.id != incomeId }?.id ?: categories.firstOrNull()?.id
+    }
     return MovementDraft(
-        type = TransactionType.GASTO,
-        categoryId = categories.firstOrNull { it.id != incomeId }?.id ?: categories.firstOrNull()?.id,
+        type = type,
+        categoryId = categoryId,
         accountId = accounts.firstOrNull()?.id,
         date = Fechas.hoy()
     )

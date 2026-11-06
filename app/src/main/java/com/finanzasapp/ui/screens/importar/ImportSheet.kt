@@ -242,8 +242,8 @@ private fun IdleContent(onPick: () -> Unit) {
             .height(52.dp),
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            containerColor = AppPalette.Indigo,
-            contentColor = Color.White
+            containerColor = AppPalette.Accent,
+            contentColor = AppPalette.OnAccent
         )
     ) {
         Text(
@@ -273,7 +273,7 @@ private fun PreviewContent(
             modifier = Modifier.weight(1f)
         )
         Spacer(Modifier.width(Spacing.sm))
-        SoftPill(text = preview.format.label, color = AppPalette.Indigo)
+        SoftPill(text = preview.format.label, color = AppPalette.Accent)
     }
 
     Spacer(Modifier.height(Spacing.md))
@@ -428,8 +428,8 @@ private fun PreviewContent(
         enabled = preview.importable > 0,
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            containerColor = AppPalette.Indigo,
-            contentColor = Color.White,
+            containerColor = AppPalette.Accent,
+            contentColor = AppPalette.OnAccent,
             disabledContainerColor = AppPalette.SurfaceStrong,
             disabledContentColor = AppPalette.InkFaint
         )
@@ -451,7 +451,7 @@ private fun PreviewContent(
         Text(
             text = "Elegir otro archivo",
             style = MaterialTheme.typography.labelLarge,
-            color = AppPalette.Indigo
+            color = AppPalette.Accent
         )
     }
 
@@ -505,7 +505,7 @@ private fun AccountChip(
         Text(
             text = name,
             style = MaterialTheme.typography.labelMedium,
-            color = if (selected) Color.White else AppPalette.InkSoft,
+            color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
         )
     }
@@ -579,7 +579,7 @@ private fun BusyContent(title: String, detail: String) {    Column(
         CircularProgressIndicator(
             modifier = Modifier.size(32.dp),
             strokeWidth = 3.dp,
-            color = AppPalette.Indigo
+            color = AppPalette.Accent
         )
         Spacer(Modifier.height(Spacing.lg))
         Text(
@@ -649,8 +649,8 @@ private fun DoneContent(
                     .height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPalette.Indigo,
-                    contentColor = Color.White
+                    containerColor = AppPalette.Accent,
+                    contentColor = AppPalette.OnAccent
                 )
             ) {
                 Text(
@@ -713,8 +713,8 @@ private fun ErrorContent(
                 .height(52.dp),
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(
-                containerColor = AppPalette.Indigo,
-                contentColor = Color.White
+                containerColor = AppPalette.Accent,
+                contentColor = AppPalette.OnAccent
             )
         ) {
             Text(

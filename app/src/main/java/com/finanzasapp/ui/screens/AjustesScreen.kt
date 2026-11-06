@@ -44,23 +44,146 @@ import com.finanzasapp.ui.screens.importar.ImportSheet
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 import com.finanzasapp.ui.util.Fechas
+import android.content.Intent
+import android.provider.Settings
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
+import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.EventRepeat
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.NotificationsOff
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import com.finanzasapp.data.settings.ThemeMode
+import com.finanzasapp.notifications.PaymentReminderScheduler
+import kotlinx.coroutines.launch
+
+/** Fila que abre otra pantalla: icono de color, título, detalle y flecha. */
+@Composable
+private fun NavRow(
+    icon: ImageVector,
+    tint: Color,
+    title: String,
+    detail: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.md),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconBubble(icon = icon, tint = tint, size = 40.dp)
+        Spacer(Modifier.width(Spacing.md))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+            Text(detail, style = MaterialTheme.typography.bodySmall, color = AppPalette.InkSoft)
+        }
+        Icon(Icons.AutoMirrored.Rounded.KeyboardArrowRight, null, tint = AppPalette.InkFaint)
+    }
+}
 
 @Composable
-fun AjustesScreen() {
+fun AjustesScreen(
+    onOpenCategories: () -> Unit = {},
+    onOpenPayments: () -> Unit = {}
+) {
     val context = LocalContext.current
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
-    val database = remember(context) {
-        (context.applicationContext as FinanzasApp).database
-    }
+    val app = remember(context) { context.applicationContext as FinanzasApp }
+    val database = app.database
     val imports by database.systemDao()
         .observeImports()
         .collectAsStateWithLifecycle(initialValue = emptyList())
+    val themeMode by app.settings.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.OSCURO)
+    val scope = rememberCoroutineScope()
     var showImport by remember { mutableStateOf(false) }
+
+    // El permiso puede cambiar fuera de la app: se vuelve a leer al regresar.
+    var notificationsOn by remember { mutableStateOf(PaymentReminderScheduler.canNotify(context)) }
+    LifecycleResumeEffect(Unit) {
+        notificationsOn = PaymentReminderScheduler.canNotify(context)
+        onPauseOrDispose { }
+    }
 
     PageScaffold(
         title = "Ajustes",
         subtitle = "Tus datos, tus reglas."
     ) {
+        SectionHeader(title = "Apariencia")
+        AppCard {
+            Text("Tema", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+            Spacer(Modifier.height(Spacing.sm))
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                ThemeMode.entries.forEach { mode ->
+                    val selected = mode == themeMode
+                    Surface(
+                        onClick = { scope.launch { app.settings.setThemeMode(mode) } },
+                        shape = MaterialTheme.shapes.small,
+                        color = if (selected) AppPalette.Accent else AppPalette.SurfaceMuted
+                    ) {
+                        Text(
+                            text = mode.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+            }
+        }
+
+        SectionHeader(title = "Organización")
+        AppCard(contentPadding = PaddingValues(vertical = Spacing.xs)) {
+            NavRow(Icons.Rounded.Category, AppPalette.Violet, "Categorías", "Crea las tuyas con icono y colores.", onOpenCategories)
+            NavRow(Icons.Rounded.EventRepeat, AppPalette.Teal, "Pagos programados", "Arriendo, servicios y suscripciones con aviso.", onOpenPayments)
+        }
+
+        SectionHeader(title = "Avisos")
+        AppCard {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconBubble(
+                    icon = if (notificationsOn) Icons.Rounded.NotificationsActive else Icons.Rounded.NotificationsOff,
+                    tint = if (notificationsOn) AppPalette.Green else AppPalette.Amber,
+                    size = 44.dp
+                )
+                Spacer(Modifier.width(Spacing.md))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = if (notificationsOn) "Avisos de pago activos" else "Avisos de pago apagados",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = AppPalette.Ink
+                    )
+                    Text(
+                        text = if (notificationsOn) {
+                            "Te avisamos 7 días, 2 días y el día en que vence cada pago."
+                        } else {
+                            "La app funciona igual, pero no podrá recordarte los pagos."
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = AppPalette.InkSoft
+                    )
+                }
+            }
+            if (!notificationsOn) {
+                Spacer(Modifier.height(Spacing.md))
+                Button(
+                    onClick = {
+                        context.startActivity(
+                            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium,
+                    colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
+                ) { Text("Activar avisos") }
+            }
+        }
+
         SectionHeader(title = "Privacidad y seguridad")
 
         AppCard {
@@ -183,7 +306,7 @@ fun AjustesScreen() {
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = AppPalette.Indigo,
+                    containerColor = AppPalette.Accent,
                     contentColor = AppPalette.HeroInk
                 ),
                 contentPadding = PaddingValues(vertical = Spacing.md)

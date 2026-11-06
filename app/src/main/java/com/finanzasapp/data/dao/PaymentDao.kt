@@ -38,4 +38,10 @@ interface PaymentDao {
 
     @Query("SELECT COUNT(*) FROM scheduled_payments")
     suspend fun count(): Int
+
+    @Query("SELECT * FROM scheduled_payments WHERE id = :id")
+    suspend fun findById(id: Long): ScheduledPayment?
+
+    @Query("SELECT * FROM scheduled_payments WHERE active = 1")
+    suspend fun allActive(): List<ScheduledPayment>
 }

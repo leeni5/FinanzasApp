@@ -1,39 +1,54 @@
 package com.finanzasapp.ui.theme
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
+
+/** Color de respaldo si un valor guardado viene dañado: violeta del acento. */
+private val FallbackColor = Color(0xFF8B7CF6)
 
 /**
  * Convierte los colores guardados como texto (#RRGGBB) en colores Compose.
- * Si el valor viene dañado, cae en un acento seguro en vez de romper la fila.
+ * Si el valor viene dañado, cae en un color seguro en vez de romper la fila.
  */
-fun String.asColor(fallback: Color = AppPalette.Indigo): Color =
+fun String.asColor(fallback: Color = FallbackColor): Color =
     runCatching { Color(android.graphics.Color.parseColor(this)) }.getOrDefault(fallback)
 
-/** Tonos para categorías, cuentas y metas: ninguno compite con las alertas. */
-val IdentityPalette = listOf(
-    Color(0xFF4C5BD4), Color(0xFF2E86C8), Color(0xFF7C5CE0), Color(0xFF148F84),
-    Color(0xFF0E9AB5), Color(0xFFA24FB8), Color(0xFF6A9A1F), Color(0xFFD9548C),
-    Color(0xFF2F9E63), Color(0xFF5B6B82)
-)
+/** Convierte un color a texto #RRGGBB para guardarlo. */
+fun Color.toHex(): String = String.format("#%06X", 0xFFFFFF and toArgb())
 
 /**
  * Color de identidad (categoría, meta) a partir del texto guardado.
- * Si el tono es rojo, naranja o ámbar —los de las alertas— se cambia por uno
- * de [IdentityPalette], elegido siempre igual para la misma clave. Así las
- * bases creadas antes de este cambio tampoco confunden una categoría con un aviso.
+ * Se respeta tal cual: el usuario elige cualquier color, y las alertas se
+ * distinguen por icono y texto, no solo por el tono.
  */
-fun identityColor(stored: String, key: String): Color {
-    val color = stored.asColor()
-    val hsv = FloatArray(3)
-    android.graphics.Color.colorToHSV(color.toArgb(), hsv)
-    val warm = hsv[1] > 0.25f && (hsv[0] < 55f || hsv[0] >= 345f)
-    return if (warm) IdentityPalette[Math.floorMod(key.hashCode(), IdentityPalette.size)] else color
-}
+@Suppress("UNUSED_PARAMETER")
+fun identityColor(stored: String, key: String): Color = stored.asColor()
+
+/** Texto legible encima de un color: casi negro sobre claros, blanco sobre oscuros. */
+fun Color.readableInk(): Color =
+    if (luminance() > 0.45f) Color(0xFF15151B) else Color(0xFFFFFFFF)
+
+/** Versión atenuada de un texto sobre un color (para la línea secundaria). */
+fun Color.readableInkSoft(): Color =
+    if (luminance() > 0.45f) Color(0xFF3B3B46) else Color(0xFFE6E6EE)
 
 /**
- * Versión suave y opaca de un color: lo mezcla con blanco en vez de usar
- * transparencia. Así el tono es el mismo sobre cualquier fondo.
+ * Versión suave y opaca de un color: lo mezcla con la superficie del tema en
+ * vez de usar transparencia. En modo oscuro queda un tono profundo; en claro,
+ * un pastel.
  */
-fun Color.soft(amount: Float = 0.14f): Color = lerp(Color.White, this, amount)
+@Composable
+@ReadOnlyComposable
+fun Color.soft(amount: Float = 0.16f): Color =
+    lerp(LocalAppColors.current.surface, this, if (LocalAppColors.current.isDark) amount * 1.4f else amount)
+
+/** Paleta de partida para categorías nuevas y la importación. */
+val IdentityPalette = listOf(
+    Color(0xFF8B7CF6), Color(0xFF60A5FA), Color(0xFF2DD4BF), Color(0xFF3DD68C),
+    Color(0xFFF5C451), Color(0xFFFB923C), Color(0xFFFF6B6B), Color(0xFFF472B6),
+    Color(0xFFC084FC), Color(0xFF94A3B8), Color(0xFF22D3EE), Color(0xFFA3E635)
+)
