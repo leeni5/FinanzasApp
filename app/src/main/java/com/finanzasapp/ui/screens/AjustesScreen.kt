@@ -353,7 +353,7 @@ fun AjustesScreen(
             )
         }
         Text(
-            text = "FinanzasApp 0.5.0 · Fase 4 · Hecha para tus finanzas, no para tus datos.",
+            text = "FinanzasApp 0.6.0 · Fase 5 · Hecha para tus finanzas, no para tus datos.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
