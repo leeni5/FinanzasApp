@@ -15,6 +15,10 @@ no se leen notificaciones bancarias.
 - **Fase 3 completa:** metas con aportes reales, avance calculado, ritmo de los
   últimos tres meses, proyección de llegada y estados de en ritmo, atrasada,
   vencida o completada. Los aportes y cambios de meta se auditan.
+- **Fase 4 completa:** importación de CSV, Excel y del PDF exportado por Budge.
+  Primero se muestra una vista previa; nada se escribe hasta confirmar. Las
+  categorías y cuentas desconocidas se concilian, y volver a importar el mismo
+  archivo no duplica movimientos.
 - **Interfaz:** tipografía Inter suave, fondo neutro, tarjetas blancas sin bordes,
   un solo acento y color reservado para el dinero y las alertas.
 - **Seguridad:** base de datos cifrada con SQLCipher y clave protegida por el
@@ -27,7 +31,23 @@ no se leen notificaciones bancarias.
 - DataStore Preferences
 - WorkManager (fase de pagos programados)
 - SQLCipher 4.20.0 para cifrado en reposo
+- PDFBox-Android para leer el PDF sin salir del teléfono
 - minSdk 26, targetSdk 36, Java 17
+
+## Importación
+
+- **CSV y Excel:** se leen por encabezados (`Fecha`, `Descripción`, `Monto`,
+  `Categoría`, `Cuenta`). Si no hay encabezados, se usa el orden del export de
+  Budge como respaldo.
+- **PDF:** se acepta el export de Budge. El texto se extrae en el propio teléfono
+  y se interpreta por filas; las descripciones largas partidas en varias líneas
+  se vuelven a unir.
+- **Vista previa:** muestra cuántos movimientos se detectan, los totales, las
+  categorías que se crearán, las cuentas que se conciliaron, la cuenta para las
+  filas sin cuenta y una muestra de los primeros movimientos.
+- **Duplicados:** cada fila recibe una huella única. Al reimportar el mismo
+  archivo, las filas ya registradas se marcan como "Ya existe" y se omiten.
+- Todo el proceso queda registrado en el historial de importaciones de Ajustes.
 
 ## Seguridad de los datos
 
@@ -72,6 +92,5 @@ compilación release firmada con tu propia llave.
 
 ## Fases siguientes
 
-- **Fase 4:** importación CSV/XLSX e importación de PDF.
 - **Fase 5:** pagos programados con notificaciones locales.
 - **Fase 7:** resúmenes con Gemini.

@@ -15,8 +15,8 @@ android {
         applicationId = "com.finanzasapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 4
-        versionName = "0.4.0"
+        versionCode = 5
+        versionName = "0.5.0"
     }
 
     buildToolsVersion = "36.0.0"
@@ -81,6 +81,9 @@ dependencies {
     // que usan Room y el driver cifrado.
     implementation(libs.androidx.sqlite)
     implementation(libs.sqlcipher.android)
+
+    // Lectura de PDF en el propio teléfono. No usa red ni servicios externos.
+    implementation(libs.pdfbox.android)
 
     implementation(libs.androidx.datastore.preferences)
 

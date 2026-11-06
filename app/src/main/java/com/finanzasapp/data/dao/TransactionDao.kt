@@ -47,6 +47,10 @@ interface TransactionDao {
     @Query("SELECT EXISTS(SELECT 1 FROM transactions WHERE uniqueHash = :hash)")
     suspend fun existsByHash(hash: String): Boolean
 
+    /** Todas las huellas, para detectar duplicados sin traer los movimientos completos. */
+    @Query("SELECT uniqueHash FROM transactions")
+    suspend fun allHashes(): List<String>
+
     @Query(
         "SELECT COALESCE(SUM(amount), 0) FROM transactions " +
             "WHERE type = 'GASTO' AND date BETWEEN :from AND :to"

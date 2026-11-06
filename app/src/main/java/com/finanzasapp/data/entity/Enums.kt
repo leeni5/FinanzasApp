@@ -20,6 +20,7 @@ enum class TransactionSource {
     MANUAL,
     RAPIDA,
     CSV,
+    XLSX,
     PDF,
     IA
 }

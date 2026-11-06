@@ -56,6 +56,9 @@ interface AccountDao {
     @Query("SELECT * FROM accounts WHERE id = :id")
     suspend fun findById(id: Long): Account?
 
+    @Query("SELECT * FROM accounts ORDER BY archived ASC, name ASC")
+    suspend fun all(): List<Account>
+
     @Query("UPDATE accounts SET archived = 1 WHERE id = :id")
     suspend fun archive(id: Long)
 

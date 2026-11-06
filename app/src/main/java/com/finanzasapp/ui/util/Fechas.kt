@@ -21,6 +21,7 @@ object Fechas {
     private val longDate = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", locale)
     private val shortDate = DateTimeFormatter.ofPattern("d MMM", locale)
     private val monthShort = DateTimeFormatter.ofPattern("MMM", locale)
+    private val weekDay = DateTimeFormatter.ofPattern("EEEE", locale)
 
     fun hoy(): LocalDate = LocalDate.now(Bogota)
 
@@ -35,6 +36,10 @@ object Fechas {
 
     fun mesCorto(date: LocalDate): String =
         date.format(monthShort).replace(".", "").lowercase(locale)
+
+    /** "viernes", para los encabezados de día de la lista. */
+    fun diaSemana(date: LocalDate): String =
+        capitalize(date.format(weekDay))
 
     /** "Buenos días", "Buenas tardes" o "Buenas noches" según la hora local. */
     fun saludo(): String = when (LocalTime.now(Bogota).hour) {

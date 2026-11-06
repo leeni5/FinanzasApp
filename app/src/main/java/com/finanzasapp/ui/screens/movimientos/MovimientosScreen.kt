@@ -79,8 +79,11 @@ import com.finanzasapp.ui.components.AppCard
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.ScreenHeader
+import com.finanzasapp.ui.components.SoftPill
+import com.finanzasapp.ui.screens.importar.ImportSheet
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
+import com.finanzasapp.ui.theme.asColor
 import com.finanzasapp.ui.util.Fechas
 import com.finanzasapp.ui.util.Money
 import java.time.Instant
@@ -107,6 +110,7 @@ fun MovimientosScreen() {
     }
 
     var editor by remember { mutableStateOf<MovementDraft?>(null) }
+    var showImport by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         LazyColumn(
@@ -120,23 +124,57 @@ fun MovimientosScreen() {
             verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             item {
-                ScreenHeader(
-                    title = "Movimientos",
-                    subtitle = "Tus ingresos y gastos, en orden."
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    ScreenHeader(
+                        title = "Movimientos",
+                        subtitle = "Tus ingresos y gastos, en orden.",
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Surface(
+                        onClick = { showImport = true },
+                        shape = CircleShape,
+                        color = AppPalette.SurfaceMuted
+                    ) {
+                        Text(
+                            text = "Importar",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = AppPalette.InkSoft,
+                            modifier = Modifier.padding(
+                                horizontal = 14.dp,
+                                vertical = 9.dp
+                            )
+                        )
+                    }
+                }
+            }
+
+            item {
+                BalanceHero(
+                    month = state.month,
+                    isCurrentMonth = state.isCurrentMonth,
+                    canGoForward = state.canGoForward,
+                    balance = state.income - state.expenses,
+                    onPrevious = viewModel::previousMonth,
+                    onNext = viewModel::nextMonth
                 )
             }
 
             item {
-                MonthCard(
-                    month = state.month,
-                    isCurrentMonth = state.isCurrentMonth,
-                    canGoForward = state.canGoForward,
-                    income = state.income,
-                    expenses = state.expenses,
-                    monthCount = state.monthCount,
-                    onPrevious = viewModel::previousMonth,
-                    onNext = viewModel::nextMonth
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
+                    SummaryCard(
+                        label = "Ingresos",
+                        amount = state.income,
+                        color = AppPalette.Green,
+                        modifier = Modifier.weight(1f)
+                    )
+                    SummaryCard(
+                        label = "Gastos",
+                        amount = state.expenses,
+                        color = AppPalette.Coral,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
             }
 
             item {
@@ -145,7 +183,7 @@ fun MovimientosScreen() {
                         query = state.query,
                         onQueryChange = viewModel::setQuery
                     )
-                    FilterTabs(
+                    FilterPills(
                         selected = state.filter,
                         onSelect = viewModel::setFilter
                     )
@@ -158,8 +196,9 @@ fun MovimientosScreen() {
                 state.monthCount == 0 -> item {
                     EmptyState(
                         title = "Este mes está en blanco",
-                        message = "Registra tu primer movimiento y aquí verás el detalle " +
-                            "del día, la categoría y la cuenta.",
+                        message = "Registra tu primer movimiento o importa el archivo " +
+                            "que ya tienes. Aquí verás el detalle del día, la categoría " +
+                            "y la cuenta.",
                         icon = Icons.Filled.Add,
                         actionLabel = "Registrar el primero",
                         onAction = {
@@ -227,95 +266,134 @@ fun MovimientosScreen() {
             }
         )
     }
+
+    if (showImport) {
+        ImportSheet(
+            onDismiss = { showImport = false },
+            onImported = { date ->
+                date?.let(viewModel::showMonth)
+                showImport = false
+            }
+        )
+    }
 }
 
 // ------------------------------------------------------------------- mes
 
+/**
+ * Tarjeta de saldo: una superficie oscura y plana que da contexto al mes.
+ * El saldo es lo único grande; los totales viven debajo, en tarjetas blancas.
+ */
 @Composable
-private fun MonthCard(
+private fun BalanceHero(
     month: YearMonth,
     isCurrentMonth: Boolean,
     canGoForward: Boolean,
-    income: Long,
-    expenses: Long,
-    monthCount: Int,
+    balance: Long,
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    AppCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.md)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = onPrevious) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Mes anterior",
-                    tint = AppPalette.InkSoft,
-                    modifier = Modifier.size(20.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(AppPalette.HeroGradient)
+            .padding(horizontal = Spacing.lg, vertical = Spacing.lg)
+    ) {
+        Column {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                MonthArrow(
+                    icon = Icons.AutoMirrored.Filled.ArrowBack,
+                    description = "Mes anterior",
+                    enabled = true,
+                    onClick = onPrevious
                 )
-            }
-
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
                 Text(
                     text = Fechas.mesDe(month.atDay(1)),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.titleSmall,
+                    color = Color.White,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.weight(1f)
                 )
-                Text(
-                    text = if (isCurrentMonth) "Mes actual" else "$monthCount movimientos",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            IconButton(onClick = onNext, enabled = canGoForward) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Mes siguiente",
-                    tint = if (canGoForward) AppPalette.InkSoft else AppPalette.InkFaint.copy(alpha = 0.4f),
-                    modifier = Modifier.size(20.dp)
+                MonthArrow(
+                    icon = Icons.AutoMirrored.Filled.ArrowForward,
+                    description = "Mes siguiente",
+                    enabled = canGoForward,
+                    onClick = onNext
                 )
             }
-        }
 
-        Spacer(Modifier.height(Spacing.md))
+            Spacer(Modifier.height(Spacing.lg))
 
-        Row {
-            MonthTotal(
-                label = "Ingresos",
-                amount = income,
-                color = AppPalette.Green,
-                modifier = Modifier.weight(1f)
+            Text(
+                text = "Saldo del mes",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.62f)
             )
-            MonthTotal(
-                label = "Gastos",
-                amount = expenses,
-                color = AppPalette.Coral,
-                modifier = Modifier.weight(1f)
+            Spacer(Modifier.height(Spacing.xxs))
+            Text(
+                text = Money.cop(balance),
+                style = MaterialTheme.typography.displaySmall,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(Modifier.height(Spacing.md))
+
+            SoftPill(
+                text = if (isCurrentMonth) "Mes actual" else "Mes cerrado",
+                color = Color.White,
+                background = Color.White.copy(alpha = 0.12f)
             )
         }
     }
 }
 
 @Composable
-private fun MonthTotal(
+private fun MonthArrow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    description: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    IconButton(onClick = onClick, enabled = enabled) {
+        Icon(
+            imageVector = icon,
+            contentDescription = description,
+            tint = if (enabled) Color.White.copy(alpha = 0.78f) else Color.White.copy(alpha = 0.24f),
+            modifier = Modifier.size(20.dp)
+        )
+    }
+}
+
+@Composable
+private fun SummaryCard(
     label: String,
     amount: Long,
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(2.dp))
+    AppCard(
+        modifier = modifier,
+        contentPadding = PaddingValues(Spacing.lg)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            ColorDot(color = color, size = 8.dp)
+            Spacer(Modifier.width(Spacing.sm))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Spacer(Modifier.height(Spacing.sm))
         Text(
             text = Money.cop(amount),
             style = MaterialTheme.typography.titleLarge,
-            color = color
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -364,35 +442,24 @@ private fun SearchField(
 }
 
 @Composable
-private fun FilterTabs(
+private fun FilterPills(
     selected: MovementFilter,
     onSelect: (MovementFilter) -> Unit
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.xl)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         MovementFilter.entries.forEach { filter ->
             val isSelected = filter == selected
 
-            Column(
-                modifier = Modifier
-                    .clickable { onSelect(filter) }
-                    .padding(top = Spacing.xs, bottom = Spacing.xs)
+            Surface(
+                onClick = { onSelect(filter) },
+                shape = CircleShape,
+                color = if (isSelected) AppPalette.Ink else AppPalette.SurfaceMuted
             ) {
                 Text(
                     text = filter.label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = if (isSelected) {
-                        MaterialTheme.colorScheme.onSurface
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
-                Spacer(Modifier.height(6.dp))
-                Box(
-                    modifier = Modifier
-                        .width(20.dp)
-                        .height(2.dp)
-                        .clip(CircleShape)
-                        .background(if (isSelected) AppPalette.Indigo else Color.Transparent)
+                    style = MaterialTheme.typography.labelMedium,
+                    color = if (isSelected) Color.White else AppPalette.InkSoft,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
             }
         }
@@ -406,23 +473,37 @@ private fun DayGroup(
     group: MovementGroup,
     onEdit: (MovementRow) -> Unit
 ) {
-    Column {
+    val total = group.rows.sumOf { row ->
+        if (row.transaction.type == TransactionType.INGRESO) {
+            row.transaction.amount
+        } else {
+            -row.transaction.amount
+        }
+    }
+
+    AppCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.xs, bottom = Spacing.sm),
+                .padding(top = Spacing.md, bottom = Spacing.sm),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = dayLabel(group.date),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = Fechas.diaSemana(group.date),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Text(
-                text = dayLabel(group.date),
+                text = amountForTotal(total),
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.weight(1f))
-            Text(
-                text = if (group.rows.size == 1) "1 movimiento" else "${group.rows.size} movimientos",
-                style = MaterialTheme.typography.labelSmall,
-                color = AppPalette.InkFaint
+                color = if (total >= 0L) AppPalette.Green else AppPalette.InkSoft
             )
         }
 
@@ -435,6 +516,8 @@ private fun DayGroup(
                 onClick = { onEdit(row) }
             )
         }
+
+        Spacer(Modifier.height(Spacing.xs))
     }
 }
 
@@ -444,11 +527,16 @@ private fun MovementRowItem(
     onClick: () -> Unit
 ) {
     val transaction = row.transaction
-    val dotColor = when (transaction.type) {
+    val accent = when (transaction.type) {
         TransactionType.INGRESO -> AppPalette.Green
-        TransactionType.GASTO -> AppPalette.InkFaint
+        TransactionType.GASTO -> row.category?.color?.asColor() ?: AppPalette.Indigo
         TransactionType.TRANSFERENCIA -> AppPalette.Sky
     }
+    val initial = (row.category?.name ?: transaction.displayName())
+        .trim()
+        .firstOrNull()
+        ?.uppercase()
+        ?: "•"
 
     Row(
         modifier = Modifier
@@ -457,7 +545,19 @@ private fun MovementRowItem(
             .padding(vertical = Spacing.md),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ColorDot(color = dotColor, size = 8.dp)
+        Box(
+            modifier = Modifier
+                .size(38.dp)
+                .clip(CircleShape)
+                .background(accent.copy(alpha = 0.14f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = initial,
+                style = MaterialTheme.typography.labelLarge,
+                color = accent
+            )
+        }
         Spacer(Modifier.width(Spacing.md))
 
         Column(modifier = Modifier.weight(1f)) {
@@ -496,6 +596,9 @@ private fun MovementRowItem(
         )
     }
 }
+
+private fun amountForTotal(total: Long): String =
+    if (total > 0L) "+ ${Money.cop(total)}" else Money.cop(total)
 
 @Composable
 private fun LoadingRow() {

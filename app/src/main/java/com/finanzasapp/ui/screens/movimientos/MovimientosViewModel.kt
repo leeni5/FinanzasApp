@@ -168,6 +168,17 @@ class MovimientosViewModel(private val database: AppDatabase) : ViewModel() {
         selectedMonth.value = currentMonth
     }
 
+    /**
+     * Salta a un mes concreto. Se usa después de importar: el usuario ve de
+     * inmediato lo que acaba de entrar. Nunca salta a un mes futuro.
+     */
+    fun showMonth(date: LocalDate) {
+        val month = YearMonth.from(date)
+        if (!month.isAfter(currentMonth)) {
+            selectedMonth.value = month
+        }
+    }
+
     fun setQuery(value: String) {
         searchQuery.value = value
     }

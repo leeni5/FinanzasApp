@@ -44,6 +44,9 @@ interface SystemDao {
     @Insert
     suspend fun insertAudit(entry: AuditLog): Long
 
+    @Insert
+    suspend fun insertAudits(entries: List<AuditLog>)
+
     @Query("SELECT * FROM audit_log WHERE entity = :entity AND entityId = :entityId ORDER BY at DESC")
     suspend fun auditFor(entity: String, entityId: Long): List<AuditLog>
 
