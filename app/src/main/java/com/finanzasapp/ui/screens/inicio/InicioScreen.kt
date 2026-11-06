@@ -55,7 +55,11 @@ import com.finanzasapp.ui.util.Fechas
 import com.finanzasapp.ui.util.Money
 
 @Composable
-fun InicioScreen(onOpenPayments: () -> Unit = {}) {
+fun InicioScreen(
+    onOpenPayments: () -> Unit = {},
+    onOpenAccounts: () -> Unit = {},
+    onOpenAccount: (Long) -> Unit = {}
+) {
     val context = LocalContext.current
     val database = remember(context) {
         (context.applicationContext as FinanzasApp).database
@@ -87,6 +91,10 @@ fun InicioScreen(onOpenPayments: () -> Unit = {}) {
             income = state.monthIncome,
             expenses = state.monthExpenses
         )
+
+        Section(title = "Tus cuentas", trailing = "Ver todas", onTrailing = onOpenAccounts) {
+            AccountsStrip(onOpenAccount = onOpenAccount, onOpenAccounts = onOpenAccounts)
+        }
 
         Section(
             title = "Dónde se fue el dinero",

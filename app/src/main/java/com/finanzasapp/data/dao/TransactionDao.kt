@@ -122,4 +122,40 @@ interface TransactionDao {
 
     @Query("SELECT COUNT(*) FROM transactions")
     fun observeCount(): Flow<Int>
+
+    /** Todos los movimientos de una cuenta, del más reciente al más antiguo. */
+    @Query("SELECT * FROM transactions WHERE accountId = :accountId ORDER BY date DESC, id DESC")
+    fun observeByAccount(accountId: Long): Flow<List<Transaction>>
+
+    /**
+     * Gastos de una cuenta por categoría en un rango, para la torta.
+     * Incluye categorías archivadas: el gasto pasado sigue contando.
+     */
+    @Query(
+        """
+        SELECT c.id AS categoryId,
+               c.name AS name,
+               c.color AS color,
+               c.icon AS icon,
+               c.iconColor AS iconColor,
+               c.monthlyBudget AS budget,
+               SUM(t.amount) AS spent
+        FROM transactions t
+        JOIN categories c ON c.id = t.categoryId
+        WHERE t.accountId = :accountId
+          AND t.type = 'GASTO'
+          AND t.date BETWEEN :from AND :to
+        GROUP BY c.id
+        ORDER BY SUM(t.amount) DESC
+        """
+    )
+    fun observeAccountSpending(accountId: Long, from: LocalDate, to: LocalDate): Flow<List<CategorySpending>>
+
+    /** Gastos sin categoría de una cuenta en un rango (porción «Sin categoría»). */
+    @Query(
+        "SELECT COALESCE(SUM(amount), 0) FROM transactions " +
+            "WHERE accountId = :accountId AND type = 'GASTO' AND categoryId IS NULL " +
+            "AND date BETWEEN :from AND :to"
+    )
+    fun observeAccountUncategorized(accountId: Long, from: LocalDate, to: LocalDate): Flow<Long>
 }

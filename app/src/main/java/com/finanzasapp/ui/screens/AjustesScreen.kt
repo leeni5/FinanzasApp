@@ -50,6 +50,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Category
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.EventRepeat
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.NotificationsOff
@@ -89,7 +90,8 @@ private fun NavRow(
 @Composable
 fun AjustesScreen(
     onOpenCategories: () -> Unit = {},
-    onOpenPayments: () -> Unit = {}
+    onOpenPayments: () -> Unit = {},
+    onOpenAccounts: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -138,6 +140,7 @@ fun AjustesScreen(
 
         SectionHeader(title = "Organización")
         AppCard(contentPadding = PaddingValues(vertical = Spacing.xs)) {
+            NavRow(Icons.Rounded.AccountBalanceWallet, AppPalette.Sky, "Cuentas", "Nequi, bancos, efectivo y tarjetas.", onOpenAccounts)
             NavRow(Icons.Rounded.Category, AppPalette.Violet, "Categorías", "Crea las tuyas con icono y colores.", onOpenCategories)
             NavRow(Icons.Rounded.EventRepeat, AppPalette.Teal, "Pagos programados", "Arriendo, servicios y suscripciones con aviso.", onOpenPayments)
         }

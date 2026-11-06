@@ -13,6 +13,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.finanzasapp.ui.screens.AjustesScreen
 import com.finanzasapp.ui.screens.categorias.CategoriasScreen
+import com.finanzasapp.ui.screens.cuentas.CuentaDetalleScreen
+import com.finanzasapp.ui.screens.cuentas.CuentasScreen
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.finanzasapp.ui.screens.pagos.PagosScreen
 import com.finanzasapp.ui.screens.inicio.InicioScreen
 import com.finanzasapp.ui.screens.metas.MetasScreen
@@ -48,7 +52,11 @@ fun AppNavHost(
         popExitTransition = { fadeOut(tween(EXIT_MS, easing = LinearEasing)) }
     ) {
         composable(Destination.INICIO.route) {
-            InicioScreen(onOpenPayments = { navController.navigate(Routes.PAGOS) })
+            InicioScreen(
+                onOpenPayments = { navController.navigate(Routes.PAGOS) },
+                onOpenAccounts = { navController.navigate(Routes.CUENTAS) },
+                onOpenAccount = { id -> navController.navigate(Routes.cuenta(id)) }
+            )
         }
         composable(Destination.MOVIMIENTOS.route) { MovimientosScreen() }
         composable(Destination.PRESUPUESTOS.route) { PresupuestosScreen() }
@@ -56,7 +64,23 @@ fun AppNavHost(
         composable(Destination.AJUSTES.route) {
             AjustesScreen(
                 onOpenCategories = { navController.navigate(Routes.CATEGORIAS) },
-                onOpenPayments = { navController.navigate(Routes.PAGOS) }
+                onOpenPayments = { navController.navigate(Routes.PAGOS) },
+                onOpenAccounts = { navController.navigate(Routes.CUENTAS) }
+            )
+        }
+        composable(Routes.CUENTAS) {
+            CuentasScreen(
+                onBack = { navController.popBackStack() },
+                onOpenAccount = { id -> navController.navigate(Routes.cuenta(id)) }
+            )
+        }
+        composable(
+            route = Routes.CUENTA,
+            arguments = listOf(navArgument("id") { type = NavType.LongType })
+        ) { entry ->
+            CuentaDetalleScreen(
+                accountId = entry.arguments?.getLong("id") ?: 0L,
+                onBack = { navController.popBackStack() }
             )
         }
         composable(Routes.CATEGORIAS) {
@@ -72,4 +96,7 @@ fun AppNavHost(
 object Routes {
     const val CATEGORIAS = "categorias"
     const val PAGOS = "pagos"
+    const val CUENTAS = "cuentas"
+    const val CUENTA = "cuenta/{id}"
+    fun cuenta(id: Long) = "cuenta/$id"
 }

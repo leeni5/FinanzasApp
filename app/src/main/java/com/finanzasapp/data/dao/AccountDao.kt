@@ -37,6 +37,7 @@ interface AccountDao {
                a.name AS name,
                a.type AS type,
                a.color AS color,
+               a.logo AS logo,
                a.initialBalance AS initialBalance,
                a.creditLimit AS creditLimit,
                a.initialBalance + COALESCE(SUM(

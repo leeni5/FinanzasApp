@@ -14,6 +14,7 @@ data class AccountBalance(
     val name: String,
     val type: AccountType,
     val color: String,
+    val logo: String,
     val initialBalance: Long,
     val creditLimit: Long?,
     val balance: Long

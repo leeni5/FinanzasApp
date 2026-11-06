@@ -579,6 +579,7 @@ private fun BudgetEditorSheet(
                 onValueChange = { value ->
                     amountText = value.filter { it.isDigit() }.take(12)
                 },
+                visualTransformation = com.finanzasapp.ui.components.ThousandsTransformation,
                 modifier = Modifier.fillMaxWidth(),
                 prefix = {
                     Text(

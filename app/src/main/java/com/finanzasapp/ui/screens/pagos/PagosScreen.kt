@@ -386,7 +386,8 @@ private fun PaymentEditorSheet(
             Field(
                 amountText, { v -> amountText = v.filter(Char::isDigit).take(12) }, "Monto en pesos",
                 if (amountError) "El monto debe ser mayor que cero." else null,
-                KeyboardOptions(keyboardType = KeyboardType.Number)
+                KeyboardOptions(keyboardType = KeyboardType.Number),
+                com.finanzasapp.ui.components.ThousandsTransformation
             )
 
             Label("Frecuencia")
@@ -489,7 +490,8 @@ private fun Field(
     onChange: (String) -> Unit,
     label: String,
     error: String?,
-    keyboard: KeyboardOptions = KeyboardOptions.Default
+    keyboard: KeyboardOptions = KeyboardOptions.Default,
+    visual: androidx.compose.ui.text.input.VisualTransformation = androidx.compose.ui.text.input.VisualTransformation.None
 ) {
     Column {
         TextField(
@@ -500,6 +502,7 @@ private fun Field(
             singleLine = true,
             isError = error != null,
             keyboardOptions = keyboard,
+            visualTransformation = visual,
             shape = MaterialTheme.shapes.medium,
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = AppPalette.SurfaceMuted,

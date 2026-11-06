@@ -770,6 +770,7 @@ private fun MovementEditorSheet(
                 TextField(
                     value = amountText,
                     onValueChange = { value -> amountText = value.filter { it.isDigit() }.take(12) },
+                visualTransformation = com.finanzasapp.ui.components.ThousandsTransformation,
                     modifier = Modifier.fillMaxWidth(),
                     prefix = {
                         Text("\$ ", style = MaterialTheme.typography.displaySmall, color = typeColor)

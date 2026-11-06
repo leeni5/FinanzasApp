@@ -1,5 +1,6 @@
 package com.finanzasapp.data.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -22,5 +23,10 @@ data class Account(
     /** Día límite de pago (1-31), solo tarjetas de crédito. */
     val dueDay: Int? = null,
     val color: String = "#2383E2",
-    val archived: Boolean = false
+    val archived: Boolean = false,
+    /**
+     * Clave del logo de la entidad ("nequi", "bancolombia"…), desde la v3.
+     * "" = deducir del nombre o mostrar la inicial con el color de la cuenta.
+     */
+    @ColumnInfo(defaultValue = "") val logo: String = ""
 )

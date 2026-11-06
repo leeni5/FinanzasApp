@@ -37,7 +37,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ImportJob::class,
         AuditLog::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -74,7 +74,7 @@ abstract class AppDatabase : RoomDatabase() {
                 DB_NAME
             )
                 .openHelperFactory(SupportOpenHelperFactory(passphrase))
-                .addMigrations(MIGRATION_1_2)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
         }
 
@@ -96,6 +96,13 @@ abstract class AppDatabase : RoomDatabase() {
                     "UPDATE scheduled_payments SET anchorDay = " +
                         "CAST(strftime('%d', nextDueDate * 86400, 'unixepoch') AS INTEGER)"
                 )
+            }
+        }
+
+        /** v2 → v3: accounts.logo, la entidad elegida para mostrar su logo. */
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE accounts ADD COLUMN logo TEXT NOT NULL DEFAULT ''")
             }
         }
     }

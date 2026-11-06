@@ -875,6 +875,7 @@ private fun GoalEditorSheet(
                 onValueChange = { value ->
                     amountText = value.filter { it.isDigit() }.take(12)
                 },
+                visualTransformation = com.finanzasapp.ui.components.ThousandsTransformation,
                 modifier = Modifier.fillMaxWidth(),
                 prefix = {
                     Text(
@@ -1053,6 +1054,7 @@ private fun ContributionSheet(
                 onValueChange = { value ->
                     amountText = value.filter { it.isDigit() }.take(12)
                 },
+                visualTransformation = com.finanzasapp.ui.components.ThousandsTransformation,
                 modifier = Modifier.fillMaxWidth(),
                 prefix = {
                     Text(
