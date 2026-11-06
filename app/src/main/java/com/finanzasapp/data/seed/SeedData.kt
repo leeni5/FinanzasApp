@@ -58,14 +58,15 @@ object SeedData {
         val sortOrder: Int
     )
 
+    // Ningún tono rojo, naranja ni ámbar: esos quedan reservados para alertas.
     private val categories = listOf(
-        SeedCategory("Arriendo", 1_150_000L, "#E06A4E", 0),
+        SeedCategory("Arriendo", 1_150_000L, "#7C5CE0", 0),
         SeedCategory("Mercado", 850_000L, "#2F9E63", 1),
-        SeedCategory("Servicios", 320_000L, "#D99A18", 2),
-        SeedCategory("Transporte", 250_000L, "#2E86C8", 3),
-        SeedCategory("Restaurantes", 280_000L, "#EE8A4A", 4),
-        SeedCategory("Salud", 150_000L, "#0F9D8F", 5),
-        SeedCategory("Ocio", 120_000L, "#8A5CF6", 6),
+        SeedCategory("Servicios", 320_000L, "#2E86C8", 2),
+        SeedCategory("Transporte", 250_000L, "#0E9AB5", 3),
+        SeedCategory("Restaurantes", 280_000L, "#D9548C", 4),
+        SeedCategory("Salud", 150_000L, "#148F84", 5),
+        SeedCategory("Ocio", 120_000L, "#4C5BD4", 6),
         SeedCategory("Otros", 100_000L, "#8C857B", 7),
         SeedCategory("Ingresos", 0L, "#2F9E63", 8)
     )
@@ -110,7 +111,7 @@ object SeedData {
     )
 
     private val accounts = listOf(
-        SeedAccount("Bancolombia Ahorros", AccountType.AHORRO, 2_400_000L, color = "#D99A18"),
+        SeedAccount("Bancolombia Ahorros", AccountType.AHORRO, 2_400_000L, color = "#2E86C8"),
         SeedAccount("Nequi", AccountType.DEBITO, 350_000L, color = "#8A5CF6"),
         SeedAccount("Efectivo", AccountType.EFECTIVO, 150_000L, color = "#2F9E63"),
         SeedAccount(

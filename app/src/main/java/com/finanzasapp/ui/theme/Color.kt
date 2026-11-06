@@ -66,6 +66,8 @@ object AppPalette {
     val HeroInkFaint = Color(0xFF8F96D8)
     val HeroLine = Color(0xFF3F48A3)
     val HeroChip = Color(0xFF3A43A0)
+    val HeroDecorFar = Color(0xFF313BA0)
+    val HeroDecorNear = Color(0xFF3944AE)
     val HeroDebt = Color(0xFFFFB4A3)
     val HeroOk = Color(0xFF9BE3B8)
 }

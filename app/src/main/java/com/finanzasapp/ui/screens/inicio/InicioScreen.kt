@@ -37,10 +37,13 @@ import com.finanzasapp.data.entity.ScheduledPayment
 import com.finanzasapp.data.model.CategorySpending
 import com.finanzasapp.data.model.GoalProgress
 import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.AnimatedMoney
 import com.finanzasapp.ui.components.CategoryBadge
+import com.finanzasapp.ui.components.HeroSurface
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.TintedCard
 import com.finanzasapp.ui.theme.asColor
+import com.finanzasapp.ui.theme.identityColor
 import com.finanzasapp.ui.theme.soft
 import com.finanzasapp.ui.components.PageScaffold
 import com.finanzasapp.ui.components.SectionHeader
@@ -110,12 +113,7 @@ fun InicioScreen() {
 
 @Composable
 private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .background(AppPalette.Hero)
-    ) {
+    HeroSurface(contentPadding = PaddingValues(0.dp)) {
         Column(modifier = Modifier.padding(Spacing.xl)) {
             Text(
                 text = "Saldo disponible",
@@ -123,11 +121,7 @@ private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
                 color = AppPalette.HeroInkSoft
             )
             Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = Money.cop(balance),
-                style = MaterialTheme.typography.displaySmall,
-                color = AppPalette.HeroInk
-            )
+            AnimatedMoney(amount = balance, style = MaterialTheme.typography.displaySmall, color = AppPalette.HeroInk)
             Spacer(Modifier.height(Spacing.xs))
             Text(
                 text = "Ahorro, débito y efectivo",
@@ -203,12 +197,7 @@ private fun SummaryTile(
             )
         }
         Spacer(Modifier.height(Spacing.xs))
-        Text(
-            text = Money.cop(amount),
-            style = MaterialTheme.typography.titleLarge,
-            color = color,
-            maxLines = 1
-        )
+        AnimatedMoney(amount = amount, style = MaterialTheme.typography.titleLarge, color = color)
     }
 }
 
@@ -267,7 +256,7 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
     }
     val overBudget = item.budget > 0L && item.spent > item.budget
     val atLimit = item.budget > 0L && item.spent == item.budget
-    val categoryColor = item.color.asColor()
+    val categoryColor = identityColor(item.color, item.name)
     // El color de la categoría le da identidad a cada barra; solo cambia
     // cuando hay algo que vigilar: naranja al llegar al límite, coral al pasarlo.
     val barColor = when {
@@ -459,7 +448,7 @@ private fun GoalRow(goal: GoalProgress) {
         Spacer(Modifier.height(Spacing.sm))
         SoftProgressBar(
             progress = progress,
-            color = if (goal.completed) AppPalette.Green else goal.color.asColor()
+            color = if (goal.completed) AppPalette.Green else identityColor(goal.color, goal.name)
         )
         Spacer(Modifier.height(6.dp))
         Row {

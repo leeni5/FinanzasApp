@@ -416,9 +416,10 @@ class ImportService(
         .toString()
 
     companion object {
+        // Sin rojos, naranjas ni ámbar: esos tonos son de las alertas.
         private val COLORS = listOf(
-            "#DE5A43", "#2E86C8", "#8A5CF6", "#148F84", "#C98A12",
-            "#7C5CE0", "#EE8A4A", "#D9548C", "#2F9E63", "#8C857B"
+            "#4C5BD4", "#2E86C8", "#7C5CE0", "#148F84", "#0E9AB5",
+            "#A24FB8", "#6A9A1F", "#D9548C", "#2F9E63", "#5B6B82"
         )
     }
 }

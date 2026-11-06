@@ -66,6 +66,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.finanzasapp.FinanzasApp
 import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.AnimatedMoney
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.ScreenHeader
@@ -79,6 +80,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 import com.finanzasapp.ui.theme.asColor
+import com.finanzasapp.ui.theme.identityColor
 import com.finanzasapp.ui.util.Fechas
 import com.finanzasapp.ui.util.Money
 import java.time.Instant
@@ -90,7 +92,7 @@ private val GoalColors = listOf(
     "#148F84",
     "#7C5CE0",
     "#D9548C",
-    "#C98A12",
+    "#0E9AB5",
     "#2E86C8"
 )
 
@@ -254,11 +256,7 @@ private fun GoalsSummary(state: MetasUiState) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(Spacing.xs))
-                Text(
-                    text = Money.cop(state.totalSaved),
-                    style = MaterialTheme.typography.displaySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                AnimatedMoney(amount = state.totalSaved, style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.onSurface)
                 Text(
                     text = "de ${Money.cop(state.totalTarget)}",
                     style = MaterialTheme.typography.bodySmall,
@@ -300,9 +298,9 @@ private fun GoalsSummary(state: MetasUiState) {
 
 @Composable
 private fun GoalCard(goal: GoalRow, onClick: () -> Unit) {
-    AppCard(onClick = onClick) {
+    AppCard(onClick = onClick, elevated = false) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            ColorDot(color = goal.color.asColor(), size = 8.dp)
+            ColorDot(color = identityColor(goal.color, goal.name), size = 8.dp)
             Spacer(Modifier.width(Spacing.sm))
             Text(
                 text = goal.name,
@@ -420,7 +418,7 @@ private fun statusBackground(status: GoalStatus): Color = when (status) {
 /** La barra conserva el color de la meta; el estado lo comunica la etiqueta. */
 private fun goalAccent(goal: GoalRow): Color = when (goal.status) {
     GoalStatus.COMPLETADA -> AppPalette.Green
-    else -> goal.color.asColor()
+    else -> identityColor(goal.color, goal.name)
 }
 
 // ---------------------------------------------------------------- detalle
@@ -456,7 +454,7 @@ private fun GoalDetailSheet(
                 .padding(top = Spacing.xs, bottom = Spacing.xxl)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ColorDot(color = goal.color.asColor(), size = 10.dp)
+                ColorDot(color = identityColor(goal.color, goal.name), size = 10.dp)
                 Spacer(Modifier.width(Spacing.sm))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(

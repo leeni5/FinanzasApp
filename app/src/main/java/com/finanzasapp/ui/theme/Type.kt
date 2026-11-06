@@ -20,9 +20,9 @@ val InterFamily = FontFamily(
 )
 
 /**
- * Tipografía suave: pesos ligeros, sin tracking negativo y con interlineado
- * amplio (1.5–1.6). Los títulos pesan Medium, nunca Bold. Las cifras usan
- * figuras tabulares para que los montos no "bailen" al cambiar.
+ * Jerarquía clara: títulos y cifras protagonistas en SemiBold con tracking
+ * levemente cerrado; el texto de lectura sigue en Regular con interlineado
+ * amplio. Las cifras usan figuras tabulares para que no "bailen" al animarse.
  */
 val AppTypography = Typography(
     displayLarge = TextStyle(
@@ -41,12 +41,13 @@ val AppTypography = Typography(
         letterSpacing = 0.sp,
         fontFeatureSettings = "tnum"
     ),
+    // Cifra protagonista (saldos): firme y compacta para que destaque.
     displaySmall = TextStyle(
         fontFamily = InterFamily,
-        fontWeight = FontWeight.Light,
-        fontSize = 30.sp,
-        lineHeight = 38.sp,
-        letterSpacing = 0.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = (-0.8).sp,
         fontFeatureSettings = "tnum"
     ),
     headlineLarge = TextStyle(
@@ -56,12 +57,13 @@ val AppTypography = Typography(
         lineHeight = 35.sp,
         letterSpacing = 0.sp
     ),
+    // Título de pantalla.
     headlineMedium = TextStyle(
         fontFamily = InterFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 23.sp,
-        lineHeight = 31.sp,
-        letterSpacing = 0.sp
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 34.sp,
+        letterSpacing = (-0.6).sp
     ),
     headlineSmall = TextStyle(
         fontFamily = InterFamily,
@@ -72,17 +74,19 @@ val AppTypography = Typography(
     ),
     titleLarge = TextStyle(
         fontFamily = InterFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 18.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 19.sp,
         lineHeight = 26.sp,
-        letterSpacing = 0.sp
+        letterSpacing = (-0.3).sp,
+        fontFeatureSettings = "tnum"
     ),
+    // Títulos de sección.
     titleMedium = TextStyle(
         fontFamily = InterFamily,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 17.sp,
         lineHeight = 24.sp,
-        letterSpacing = 0.sp
+        letterSpacing = (-0.2).sp
     ),
     titleSmall = TextStyle(
         fontFamily = InterFamily,

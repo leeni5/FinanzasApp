@@ -77,7 +77,9 @@ import com.finanzasapp.data.entity.TransactionType
 import com.finanzasapp.data.model.displayName
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.finanzasapp.ui.components.AppCard
+import com.finanzasapp.ui.components.AnimatedMoney
 import com.finanzasapp.ui.components.CategoryBadge
+import com.finanzasapp.ui.components.HeroSurface
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.ScreenHeader
@@ -90,6 +92,7 @@ import com.finanzasapp.ui.screens.importar.ImportSheet
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 import com.finanzasapp.ui.theme.asColor
+import com.finanzasapp.ui.theme.identityColor
 import com.finanzasapp.ui.util.Fechas
 import com.finanzasapp.ui.util.Money
 import java.time.Instant
@@ -296,13 +299,7 @@ private fun BalanceHero(
     onPrevious: () -> Unit,
     onNext: () -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraLarge)
-            .background(AppPalette.Hero)
-            .padding(horizontal = Spacing.lg, vertical = Spacing.lg)
-    ) {
+    HeroSurface(contentPadding = PaddingValues(Spacing.lg)) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MonthArrow(
@@ -334,13 +331,7 @@ private fun BalanceHero(
                 color = AppPalette.HeroInkSoft
             )
             Spacer(Modifier.height(Spacing.xxs))
-            Text(
-                text = Money.cop(balance),
-                style = MaterialTheme.typography.displaySmall,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            AnimatedMoney(amount = balance, style = MaterialTheme.typography.displaySmall, color = Color.White)
 
             Spacer(Modifier.height(Spacing.md))
 
@@ -392,13 +383,7 @@ private fun SummaryCard(
             )
         }
         Spacer(Modifier.height(Spacing.sm))
-        Text(
-            text = Money.cop(amount),
-            style = MaterialTheme.typography.titleLarge,
-            color = color,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        AnimatedMoney(amount = amount, style = MaterialTheme.typography.titleLarge, color = color)
     }
 }
 
@@ -485,7 +470,10 @@ private fun DayGroup(
         }
     }
 
-    AppCard(contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)) {
+    AppCard(
+        elevated = false,
+        contentPadding = PaddingValues(horizontal = Spacing.lg, vertical = Spacing.xs)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -533,7 +521,7 @@ private fun MovementRowItem(
     val transaction = row.transaction
     val accent = when (transaction.type) {
         TransactionType.INGRESO -> AppPalette.Green
-        TransactionType.GASTO -> row.category?.color?.asColor() ?: AppPalette.Indigo
+        TransactionType.GASTO -> row.category?.let { identityColor(it.color, it.name) } ?: AppPalette.Indigo
         TransactionType.TRANSFERENCIA -> AppPalette.Sky
     }
     Row(

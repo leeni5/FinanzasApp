@@ -54,6 +54,7 @@ import com.finanzasapp.FinanzasApp
 import com.finanzasapp.ui.components.AppCard
 import com.finanzasapp.ui.components.CategoryBadge
 import com.finanzasapp.ui.theme.asColor
+import com.finanzasapp.ui.theme.identityColor
 import com.finanzasapp.ui.components.ColorDot
 import com.finanzasapp.ui.components.EmptyState
 import com.finanzasapp.ui.components.PageScaffold
@@ -392,7 +393,7 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
     ) {
         CategoryBadge(
             categoryName = row.name,
-            color = row.color.asColor(),
+            color = identityColor(row.color, row.name),
             size = 36.dp
         )
         Spacer(Modifier.width(Spacing.md))
@@ -478,7 +479,7 @@ private fun barColor(row: BudgetRow): Color = when (row.status) {
     BudgetStatus.EXCEDIDO -> AppPalette.Coral
     BudgetStatus.COMPLETO -> AppPalette.Orange
     BudgetStatus.RIESGO, BudgetStatus.AL_LIMITE -> AppPalette.Amber
-    else -> row.color.asColor()
+    else -> identityColor(row.color, row.name)
 }
 
 // --------------------------------------------------------------- editor
