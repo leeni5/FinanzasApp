@@ -336,6 +336,22 @@ fun AjustesScreen(
             }
         }
 
+        SectionHeader(title = "Créditos")
+        AppCard {
+            Text(
+                text = "Logos de las entidades: Wikimedia Commons, recortados a su símbolo. Las marcas pertenecen a sus dueños " +
+                    "y se usan solo para identificar cada cuenta.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(Spacing.sm))
+            Text(
+                text = "Logo de Nequi: recorte de «Nequi Colombia logo», autor Nequi (www.nequi.com.co), " +
+                    "licencia CC BY-SA 4.0 (creativecommons.org/licenses/by-sa/4.0).",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
         Text(
             text = "FinanzasApp 0.5.0 · Fase 4 · Hecha para tus finanzas, no para tus datos.",
             style = MaterialTheme.typography.bodySmall,

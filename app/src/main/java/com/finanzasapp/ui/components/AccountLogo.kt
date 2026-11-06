@@ -42,7 +42,7 @@ data class Bank(
 )
 
 /**
- * Entidades más usadas en Colombia. La clave se guarda en `accounts.logo`,
+ * Entidades con logo incluido en la app (Wikimedia Commons; créditos en Ajustes). La clave se guarda en `accounts.logo`,
  * así que **no se renombra una clave existente**.
  *
  * El logo de cada una es el recurso `drawable/logo_<clave>` si existe; si no,
@@ -52,20 +52,16 @@ object BankCatalog {
     val banks: List<Bank> = listOf(
         Bank("nequi", "Nequi", Color(0xFFDA0081), listOf("nequi")),
         Bank("bancolombia", "Bancolombia", Color(0xFFFDDA24), listOf("bancolombia")),
-        Bank("daviplata", "Daviplata", Color(0xFFE2231A), listOf("daviplata")),
         Bank("davivienda", "Davivienda", Color(0xFFED1C24), listOf("davivienda")),
         Bank("bancodebogota", "Banco de Bogotá", Color(0xFF0B3B8C), listOf("bogota")),
         Bank("bbva", "BBVA", Color(0xFF004481), listOf("bbva")),
         Bank("nu", "Nu", Color(0xFF820AD1), listOf("nu ", "nubank", "nu colombia")),
-        Bank("lulo", "Lulo Bank", Color(0xFF1E1E1E), listOf("lulo")),
         Bank("occidente", "Banco de Occidente", Color(0xFF0066B3), listOf("occidente")),
         Bank("colpatria", "Scotiabank Colpatria", Color(0xFFEC111A), listOf("colpatria", "scotiabank")),
         Bank("cajasocial", "Banco Caja Social", Color(0xFF005BAA), listOf("caja social")),
         Bank("avvillas", "AV Villas", Color(0xFF00529B), listOf("av villas", "avvillas")),
         Bank("popular", "Banco Popular", Color(0xFF00843D), listOf("popular")),
         Bank("falabella", "Banco Falabella", Color(0xFF3B8C2E), listOf("falabella")),
-        Bank("rappipay", "RappiPay", Color(0xFFFF441F), listOf("rappi")),
-        Bank("mercadopago", "Mercado Pago", Color(0xFF00B1EA), listOf("mercado pago", "mercadopago")),
         Bank("paypal", "PayPal", Color(0xFF003087), listOf("paypal"))
     )
 
@@ -113,7 +109,7 @@ fun AccountLogo(
                 .size(size)
                 .clip(shape)
                 .background(Color.White)
-                .padding(size * 0.12f),
+                .padding(size * 0.08f),
             contentAlignment = Alignment.Center
         ) {
             Image(
