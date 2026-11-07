@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import com.finanzasapp.data.db.AppDatabase
 import com.finanzasapp.data.seed.SeedData
 import com.finanzasapp.data.settings.SettingsStore
+import com.finanzasapp.data.security.AppLock
 import com.finanzasapp.notifications.PaymentReminderScheduler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,9 @@ class FinanzasApp : Application() {
 
     /** Preferencias de la app (tema). */
     val settings: SettingsStore by lazy { SettingsStore(this) }
+
+    /** Bloqueo con huella (opcional, se activa en Ajustes). */
+    val appLock: AppLock by lazy { AppLock(this) }
 
     override fun onCreate() {
         super.onCreate()

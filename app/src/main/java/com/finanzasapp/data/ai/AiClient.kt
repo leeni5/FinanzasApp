@@ -36,7 +36,10 @@ object AiClient {
             .map { it.removePrefix("models/") }
             // Fuera los que no conversan: audio, imágenes, embeddings, moderación.
             .filterNot { id ->
-                listOf("whisper", "tts", "embed", "moderation", "guard", "image", "vision-preview", "ocr", "transcribe")
+                listOf(
+                    "whisper", "tts", "embed", "moderation", "guard", "image", "vision-preview", "ocr",
+                    "transcribe", "aqa", "deep-research", "imagen", "veo", "lyria", "audio", "computer-use", "robotics"
+                )
                     .any { id.contains(it, ignoreCase = true) }
             }
             .distinct()

@@ -72,6 +72,7 @@ object BackupService {
     private val TABLES = listOf(
         "accounts",
         "categories",
+        "category_budgets",
         "categorization_rules",
         "transactions",
         "savings_goals",
@@ -146,10 +147,12 @@ object BackupService {
                 throw BackupException("El archivo no es una copia de FinanzasApp.")
             }
             val schema = json.optInt("schema", -1)
-            if (schema != AppDatabase.SCHEMA_VERSION) {
+            // Copias de versiones anteriores (desde la v4) se adaptan al restaurar;
+            // una copia de una app más nueva no se puede leer aquí.
+            if (schema < 4 || schema > AppDatabase.SCHEMA_VERSION) {
                 throw BackupException(
                     "La copia es de otra versión de la base (v$schema; esta app usa " +
-                        "v${AppDatabase.SCHEMA_VERSION}). Actualiza la app que la hizo o esta."
+                        "v${AppDatabase.SCHEMA_VERSION}). Actualiza la app para restaurarla."
                 )
             }
             val tables = json.getJSONObject("tables")
@@ -175,6 +178,9 @@ object BackupService {
                     db.insert(table, SQLiteDatabase.CONFLICT_ABORT, rows.getJSONObject(index).toContentValues())
                 }
             }
+            // Copias de la v4: no traen presupuestos por mes; cada categoría
+            // arranca con su límite actual, igual que en la migración.
+            if (!contents.tables.has("category_budgets")) db.execSQL(AppDatabase.SEED_BUDGETS_SQL)
             database.systemDao().insertAudit(
                 AuditLog(
                     entity = "backup",

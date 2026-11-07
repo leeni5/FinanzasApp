@@ -54,6 +54,8 @@ import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.EventRepeat
 import androidx.compose.material.icons.rounded.FactCheck
 import com.finanzasapp.ui.screens.respaldo.BackupCard
+import com.finanzasapp.ui.screens.respaldo.LockCard
+import com.finanzasapp.ui.screens.respaldo.ShareApkCard
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.runtime.rememberCoroutineScope
@@ -203,6 +205,8 @@ fun AjustesScreen(
 
         SectionHeader(title = "Privacidad y seguridad")
 
+        LockCard()
+
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
@@ -345,6 +349,8 @@ fun AjustesScreen(
 
         BackupCard()
 
+        ShareApkCard()
+
         if (imports.isNotEmpty()) {
             SectionHeader(title = "Últimas importaciones")
             AppCard(contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -377,7 +383,7 @@ fun AjustesScreen(
             )
         }
         Text(
-            text = "FinanzasApp 0.8.0 · Fase 7 · Hecha para tus finanzas, no para tus datos.",
+            text = "FinanzasApp ${context.packageManager.getPackageInfo(context.packageName, 0).versionName} · Hecha para tus finanzas, no para tus datos.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

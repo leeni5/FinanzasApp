@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!--
+        Android 12+ siempre muestra una pantalla de arranque con el icono.
+        Aquí se vuelve invisible: mismo fondo que la app y sin icono, así la
+        app aparece directo, sin el splash genérico del sistema.
+    -->
+    <style name="Theme.FinanzasApp" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">#FF0E0F14</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:windowSplashScreenBackground">#FF0E0F14</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_vacio</item>
+        <item name="android:windowSplashScreenAnimationDuration">0</item>
+    </style>
+
+</resources>

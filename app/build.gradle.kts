@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -15,15 +16,42 @@ android {
         applicationId = "com.finanzasapp"
         minSdk = 26
         targetSdk = 36
-        versionCode = 8
-        versionName = "0.8.0"
+        versionCode = 9
+        versionName = "1.0.0"
+
+        // Solo procesadores ARM (todos los teléfonos Android actuales). Las
+        // librerías nativas de SQLCipher para x86 son peso muerto en un teléfono.
+        ndk {
+            abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
+    }
+
+    // La llave de release vive FUERA del repositorio. La ruta del archivo de
+    // propiedades sale de FINANZAS_KEYSTORE o de ~/.finanzasapp/keystore.properties.
+    // Sin ella, la release se compila sin firmar (como antes).
+    val keystoreFile = System.getenv("FINANZAS_KEYSTORE")?.let(::file)
+        ?: file("${System.getProperty("user.home")}/.finanzasapp/keystore.properties")
+    val releaseSigning = if (keystoreFile.exists()) {
+        val props = Properties().apply { keystoreFile.inputStream().use(::load) }
+        signingConfigs.create("release") {
+            storeFile = file(props.getProperty("storeFile"))
+            storePassword = props.getProperty("storePassword")
+            keyAlias = props.getProperty("keyAlias")
+            keyPassword = props.getProperty("keyPassword")
+        }
+    } else {
+        null
     }
 
     buildToolsVersion = "36.0.0"
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 quita código y recursos sin usar (los iconos que no se usan,
+            // partes de PDFBox...) y optimiza: la app pesa menos y va más fluida.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = releaseSigning
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -40,9 +68,22 @@ android {
         compose = true
     }
 
+    // Mapas de caracteres chinos, japoneses y coreanos de PDFBox (están en
+    // assets): los extractos que se importan están en español.
+    androidResources {
+        ignoreAssetsPatterns += listOf(
+            "UniCNS*", "UniGB*", "UniJIS*", "UniKS*",
+            "Adobe-CNS1*", "Adobe-GB1*", "Adobe-Japan1*", "Adobe-Korea1*"
+        )
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            // Tablas de criptografía postcuántica de BouncyCastle (dependencia de
+            // PDFBox para PDF cifrados): ~4 MB que esta app nunca usa.
+            excludes += "org/bouncycastle/pqc/**"
+
         }
     }
 }

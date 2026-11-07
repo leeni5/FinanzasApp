@@ -20,10 +20,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.finanzasapp.data.settings.ThemeMode
 import com.finanzasapp.notifications.PaymentReminderScheduler
 import com.finanzasapp.ui.FinanzasRoot
+import com.finanzasapp.ui.LockScreen
 import com.finanzasapp.ui.theme.FinanzasTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
+
+    /** true mientras la app espera la huella: se tapa todo el contenido. */
+    private var locked by mutableStateOf(false)
 
     /** Pantalla que pidió abrir una notificación ("pagos"), si la hay. */
     private var openRequest by mutableStateOf<String?>(null)
@@ -55,6 +59,10 @@ class MainActivity : ComponentActivity() {
             )
         }
 
+        val lock = (application as FinanzasApp).appLock
+        // Al abrir en frío se pide la huella; al rotar, no.
+        if (savedInstanceState == null) locked = lock.enabled
+
         openRequest = intent?.getStringExtra(EXTRA_OPEN)
         askNotificationPermissionOnce(savedInstanceState)
 
@@ -82,8 +90,30 @@ class MainActivity : ComponentActivity() {
                     openRequest = openRequest,
                     onOpenHandled = { openRequest = null }
                 )
+                if (locked) {
+                    LockScreen(onUnlock = ::unlock)
+                }
             }
         }
+    }
+
+    private fun unlock() {
+        val lock = (application as FinanzasApp).appLock
+        lock.authenticate(this, "Desbloquear FinanzasApp") { ok, _ ->
+            if (ok) locked = false
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val lock = (application as FinanzasApp).appLock
+        if (lock.shouldLockOnReturn()) locked = true
+    }
+
+    override fun onStop() {
+        super.onStop()
+        // Al cambiar de app se empieza a contar el tiempo para volver a bloquear.
+        if (!isChangingConfigurations) (application as FinanzasApp).appLock.onBackground()
     }
 
     override fun onNewIntent(intent: Intent) {

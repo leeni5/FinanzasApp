@@ -40,6 +40,10 @@ no se leen notificaciones bancarias.
   preguntar sobre las propias finanzas (Movimientos → «Preguntar» o Ajustes →
   «Abrir el chat»). Funciona con Groq, Mistral, OpenRouter o Gemini y la clave
   del usuario; ver «IA» más abajo.
+- **Versión 1.0.0 (release):** firmada con llave propia, R8 activo (de 31,5 MB
+  a 7,3 MB), sin splash genérico, **bloqueo con huella** opcional, botón para
+  **compartir o guardar el APK** y **presupuestos por mes** (editar un mes cambia
+  ese mes y los siguientes, no los anteriores).
 - **Interfaz:** modo oscuro por defecto (selector Oscuro / Claro / Según el
   teléfono en Ajustes), acento violeta, barra inferior flotante con indicador
   animado, movimientos en tarjetas del color de su categoría, botón «+» que
@@ -51,7 +55,7 @@ no se leen notificaciones bancarias.
 ## Stack
 
 - Kotlin + Jetpack Compose + Material 3
-- Room 2.8.5 con esquema exportado (versión 4; migraciones 1→2, 2→3 y 3→4 en
+- Room 2.8.5 con esquema exportado (versión 5; migraciones 1→2 a 4→5 en
   `AppDatabase`)
 - DataStore Preferences (tema)
 - WorkManager 2.12.0 (avisos de pagos programados)
@@ -178,6 +182,42 @@ Las compilaciones de depuración siembran cuentas, categorías, movimientos de
 cuatro meses, pagos y una meta para poder probar la interfaz. La versión release
 arranca vacía: solo crea las categorías base y la cuenta "Efectivo".
 
+## Presupuestos por mes
+
+- Tabla `category_budgets` (v5): `(categoryId, fromMonth, amount)`, con
+  `fromMonth` = año*100+mes y 0 = «desde siempre». El límite de un mes es la
+  fila con el `fromMonth` más alto que no lo pase.
+- Editar en la pantalla de Presupuestos crea la fila «desde este mes» y borra
+  las posteriores: cambia ese mes y los siguientes; los anteriores conservan
+  su límite. `categories.monthlyBudget` queda como el límite vigente (Inicio, IA).
+- La migración 4→5 y la restauración de copias v4 siembran el límite actual
+  de cada categoría como «desde siempre».
+
+## Bloqueo con huella
+
+- Ajustes → Privacidad y seguridad. Usa el `BiometricPrompt` del sistema (sin
+  librerías): huella o rostro fuerte, con PIN/patrón del teléfono como
+  alternativa. Activarlo y quitarlo también pide la huella.
+- Se pide al abrir la app y al volver tras más de 30 s fuera, para que elegir un
+  archivo no obligue a desbloquear. Mientras tanto, una cortina opaca tapa todo.
+
+## Release y firma
+
+- La llave vive **fuera del repositorio**: `~/.finanzasapp/finanzasapp-release.jks`
+  con su `keystore.properties` al lado (o la ruta en `FINANZAS_KEYSTORE`). Sin
+  ella la release sale sin firmar. **Respaldar esa carpeta**: sin la llave no se
+  puede publicar una actualización que se instale encima sin borrar datos.
+- `./gradlew assembleRelease` → `app/build/outputs/apk/release/app-release.apk`.
+- R8 + `shrinkResources`; reglas en `proguard-rules.pro` (SQLCipher y PDFBox) y
+  `res/raw/keep.xml` (logos cargados por nombre). Solo `arm64-v8a` y
+  `armeabi-v7a`. Se excluyen las tablas postcuánticas de BouncyCastle y los
+  cmaps CJK de PDFBox.
+- La pantalla de arranque de Android 12+ usa el fondo de la app sin icono
+  (`values-v31/themes.xml`).
+- **Compartir la app:** Ajustes → Tus datos → «Descargar la app (APK)»:
+  Compartir (FileProvider, por WhatsApp/Drive/correo) o Guardar. Copia el APK
+  instalado; no lleva datos.
+
 ## Compilar
 
 Requisitos: JDK 17 o superior y Android SDK 36 con build-tools 36.0.0.
@@ -209,5 +249,6 @@ usa su insignia de color.
 
 ## Fases siguientes
 
-- **Fase 7 (pendiente):** probar el chat con una clave real de cada proveedor.
-- **Release:** keystore propio, R8 y QA final.
+- Probar la release en un teléfono limpio y los avisos de pago tras reiniciar.
+- Mejoras menores: cambiar gasto ↔ ingreso al editar, editar desde el detalle
+  de cuenta, editar transferencias.

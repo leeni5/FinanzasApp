@@ -17,6 +17,7 @@ import com.finanzasapp.data.entity.Account
 import com.finanzasapp.data.entity.AuditLog
 import com.finanzasapp.data.entity.CategorizationRule
 import com.finanzasapp.data.entity.Category
+import com.finanzasapp.data.entity.CategoryBudget
 import com.finanzasapp.data.entity.GoalContribution
 import com.finanzasapp.data.entity.ImportJob
 import com.finanzasapp.data.entity.SavingsGoal
@@ -35,9 +36,10 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         GoalContribution::class,
         ScheduledPayment::class,
         ImportJob::class,
-        AuditLog::class
+        AuditLog::class,
+        CategoryBudget::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -74,7 +76,7 @@ abstract class AppDatabase : RoomDatabase() {
                 DB_NAME
             )
                 .openHelperFactory(SupportOpenHelperFactory(passphrase))
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                 .build()
         }
 
@@ -113,7 +115,29 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
-        /** Versión del esquema; las copias de seguridad solo se restauran en la misma. */
-        const val SCHEMA_VERSION = 4
+        /**
+         * v4 → v5: category_budgets, presupuesto por mes. Cada categoría arranca
+         * con su límite actual «desde siempre» (fromMonth = 0).
+         */
+        val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `category_budgets` (`categoryId` INTEGER NOT NULL, " +
+                        "`fromMonth` INTEGER NOT NULL, `amount` INTEGER NOT NULL, " +
+                        "PRIMARY KEY(`categoryId`, `fromMonth`), FOREIGN KEY(`categoryId`) " +
+                        "REFERENCES `categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )"
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_category_budgets_categoryId` ON `category_budgets` (`categoryId`)")
+                db.execSQL(SEED_BUDGETS_SQL)
+            }
+        }
+
+        /** Siembra el límite actual de cada categoría como «desde siempre». */
+        const val SEED_BUDGETS_SQL =
+            "INSERT OR IGNORE INTO category_budgets (categoryId, fromMonth, amount) " +
+                "SELECT id, 0, monthlyBudget FROM categories"
+
+        /** Versión del esquema. Las copias de versiones anteriores se adaptan al restaurar. */
+        const val SCHEMA_VERSION = 5
     }
 }

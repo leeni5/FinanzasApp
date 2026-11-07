@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Los logos de las entidades se cargan por nombre (logo_<clave>) con
+    getIdentifier: R8 no ve esa referencia y los borraría al reducir recursos.
+-->
+<resources xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@drawable/logo_*" />

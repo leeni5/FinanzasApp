@@ -8,6 +8,7 @@ import androidx.room.withTransaction
 import com.finanzasapp.data.db.AppDatabase
 import com.finanzasapp.data.entity.AuditLog
 import com.finanzasapp.data.entity.Category
+import com.finanzasapp.data.entity.CategoryBudget
 import com.finanzasapp.ui.util.Fechas
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,7 +81,7 @@ class PresupuestosViewModel(private val database: AppDatabase) : ViewModel() {
 
     private val spending = selectedMonth.flatMapLatest { month ->
         database.transactionDao()
-            .observeBudgetProgress(month.atDay(1), month.atEndOfMonth())
+            .observeBudgetProgress(month.atDay(1), month.atEndOfMonth(), month.key())
             .map { rows -> month to rows }
     }
 
@@ -102,15 +103,31 @@ class PresupuestosViewModel(private val database: AppDatabase) : ViewModel() {
         }
     }
 
+    /**
+     * Cambia el límite desde el mes que se está viendo en adelante; los meses
+     * anteriores conservan el suyo (ver [CategoryBudget]).
+     */
     fun setBudget(row: BudgetRow, amount: Long) {
         val normalized = amount.coerceAtLeast(0L)
+        val month = selectedMonth.value.key()
         viewModelScope.launch {
             database.withTransaction {
-                val before = database.categoryDao().findById(row.categoryId) ?: return@withTransaction
-                if (before.monthlyBudget == normalized) return@withTransaction
+                val dao = database.categoryDao()
+                val before = dao.findById(row.categoryId) ?: return@withTransaction
+                if (row.budget == normalized) return@withTransaction
 
+                // Si no hay límite guardado antes de este mes, se fija el que
+                // regía hasta ahora para que los meses anteriores no cambien.
+                if (dao.countBudgetsBefore(before.id, month) == 0) {
+                    dao.upsertBudget(CategoryBudget(before.id, 0, row.budget))
+                }
+                dao.upsertBudget(CategoryBudget(before.id, month, normalized))
+                dao.deleteBudgetsAfter(before.id, month)
+
+                // monthlyBudget queda como el límite vigente, el que usan Inicio
+                // y la IA: el cambio aplica hasta hoy porque cubre los meses siguientes.
                 val after = before.copy(monthlyBudget = normalized)
-                database.categoryDao().update(after)
+                dao.update(after)
                 database.systemDao().insertAudit(
                     AuditLog(
                         entity = "category",
@@ -246,3 +263,6 @@ class PresupuestosViewModel(private val database: AppDatabase) : ViewModel() {
         }
     }
 }
+
+/** Clave del mes para category_budgets: 202611. */
+private fun YearMonth.key(): Int = year * 100 + monthValue

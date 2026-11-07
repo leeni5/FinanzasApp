@@ -119,7 +119,9 @@ interface TransactionDao {
                c.color AS color,
                c.icon AS icon,
                c.iconColor AS iconColor,
-               c.monthlyBudget AS budget,
+               COALESCE((SELECT b.amount FROM category_budgets b
+                         WHERE b.categoryId = c.id AND b.fromMonth <= :month
+                         ORDER BY b.fromMonth DESC LIMIT 1), c.monthlyBudget) AS budget,
                COALESCE(SUM(t.amount), 0) AS spent
         FROM categories c
         LEFT JOIN transactions t ON t.categoryId = c.id
@@ -130,7 +132,7 @@ interface TransactionDao {
         ORDER BY c.sortOrder ASC, c.name ASC
         """
     )
-    fun observeBudgetProgress(from: LocalDate, to: LocalDate): Flow<List<CategorySpending>>
+    fun observeBudgetProgress(from: LocalDate, to: LocalDate, month: Int): Flow<List<CategorySpending>>
 
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun count(): Int
