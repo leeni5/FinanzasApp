@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Silueta para los iconos temáticos de Android 13+: el sistema la colorea. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M37,59a5,5 0 0 1 10,0v11a5,5 0 0 1 -10,0zM49,48a5,5 0 0 1 10,0v22a5,5 0 0 1 -10,0zM61,37a5,5 0 0 1 10,0v33a5,5 0 0 1 -10,0z" />
+</vector>
