@@ -59,6 +59,7 @@ class AppLock(context: Context) {
             @Suppress("DEPRECATION")
             builder.setDeviceCredentialAllowed(true)
         }
+        runCatching {
         builder.build().authenticate(
             CancellationSignal(),
             activity.mainExecutor,
@@ -73,6 +74,7 @@ class AppLock(context: Context) {
                 }
             }
         )
+        }.onFailure { onResult(false, "No se pudo abrir la huella: ${it.message ?: "error del sistema"}.") }
     }
 
     /** null si se puede usar; si no, el motivo para mostrarlo. */
@@ -82,7 +84,9 @@ class AppLock(context: Context) {
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val manager = context.getSystemService(BiometricManager::class.java)
-            return when (manager.canAuthenticate(AUTHENTICATORS)) {
+            val status = runCatching { manager.canAuthenticate(AUTHENTICATORS) }
+                .getOrElse { return "No se pudo consultar la huella: ${it.message ?: "error del sistema"}." }
+            return when (status) {
                 BiometricManager.BIOMETRIC_SUCCESS -> null
                 BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED ->
                     "Primero registra una huella o un bloqueo de pantalla en los ajustes del teléfono."

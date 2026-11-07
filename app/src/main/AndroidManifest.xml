@@ -10,6 +10,9 @@
     <!-- Avisos locales de pagos programados (fase 5). Android 13+ lo pide en ejecución. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <!-- Bloqueo opcional con huella: sin esto Android rechaza la consulta. -->
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
     <application
         android:name=".FinanzasApp"
         android:allowBackup="false"
