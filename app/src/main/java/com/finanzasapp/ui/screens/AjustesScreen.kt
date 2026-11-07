@@ -34,6 +34,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.finanzasapp.FinanzasApp
+import com.finanzasapp.R
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.data.entity.ImportJob
 import com.finanzasapp.data.entity.ImportStatus
 import com.finanzasapp.ui.components.AppCard
@@ -62,6 +65,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.finanzasapp.data.settings.ThemeMode
+import com.finanzasapp.data.settings.AppLanguage
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.notifications.PaymentReminderScheduler
 import kotlinx.coroutines.launch
 
@@ -112,6 +117,7 @@ fun AjustesScreen(
     val themeMode by app.settings.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.OSCURO)
     val scope = rememberCoroutineScope()
     var showImport by remember { mutableStateOf(false) }
+    var showCredits by remember { mutableStateOf(false) }
 
     // El permiso puede cambiar fuera de la app: se vuelve a leer al regresar.
     var notificationsOn by remember { mutableStateOf(PaymentReminderScheduler.canNotify(context)) }
@@ -121,12 +127,12 @@ fun AjustesScreen(
     }
 
     PageScaffold(
-        title = "Ajustes",
-        subtitle = "Tus datos, tus reglas."
+        title = stringResource(R.string.aj_title),
+        subtitle = stringResource(R.string.aj_subtitle)
     ) {
-        SectionHeader(title = "Apariencia")
+        SectionHeader(title = stringResource(R.string.aj_section_appearance))
         AppCard {
-            Text("Tema", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.aj_theme_title), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
             Spacer(Modifier.height(Spacing.sm))
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 ThemeMode.entries.forEach { mode ->
@@ -137,7 +143,27 @@ fun AjustesScreen(
                         color = if (selected) AppPalette.Accent else AppPalette.SurfaceMuted
                     ) {
                         Text(
-                            text = mode.label,
+                            text = stringResource(mode.labelRes),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.height(Spacing.md))
+            Text(stringResource(R.string.aj_language_title), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+            Spacer(Modifier.height(Spacing.sm))
+            Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
+                AppLanguage.entries.forEach { language ->
+                    val selected = language == Idioma.current
+                    Surface(
+                        onClick = { (context as? android.app.Activity)?.let { Idioma.set(it, language) } },
+                        shape = MaterialTheme.shapes.small,
+                        color = if (selected) AppPalette.Accent else AppPalette.SurfaceMuted
+                    ) {
+                        Text(
+                            text = language.label,
                             style = MaterialTheme.typography.labelMedium,
                             color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
@@ -147,21 +173,21 @@ fun AjustesScreen(
             }
         }
 
-        SectionHeader(title = "Organización")
+        SectionHeader(title = stringResource(R.string.aj_section_organization))
         AppCard(contentPadding = PaddingValues(vertical = Spacing.xs)) {
-            NavRow(Icons.Rounded.AccountBalanceWallet, AppPalette.Sky, "Cuentas", "Nequi, bancos, efectivo y tarjetas.", onOpenAccounts)
-            NavRow(Icons.Rounded.Category, AppPalette.Violet, "Categorías", "Crea las tuyas con icono y colores.", onOpenCategories)
-            NavRow(Icons.Rounded.EventRepeat, AppPalette.Teal, "Pagos programados", "Arriendo, servicios y suscripciones con aviso.", onOpenPayments)
+            NavRow(Icons.Rounded.AccountBalanceWallet, AppPalette.Sky, stringResource(R.string.aj_nav_accounts), stringResource(R.string.aj_nav_accounts_detail), onOpenAccounts)
+            NavRow(Icons.Rounded.Category, AppPalette.Violet, stringResource(R.string.aj_nav_categories), stringResource(R.string.aj_nav_categories_detail), onOpenCategories)
+            NavRow(Icons.Rounded.EventRepeat, AppPalette.Teal, stringResource(R.string.aj_nav_payments), stringResource(R.string.aj_nav_payments_detail), onOpenPayments)
             NavRow(
                 Icons.Rounded.FactCheck,
                 if (pendingReview > 0) AppPalette.Amber else AppPalette.Green,
-                if (pendingReview > 0) "Revisión · $pendingReview por revisar" else "Revisión",
-                "Pendientes, reglas de categorías e historial de cambios.",
+                if (pendingReview > 0) stringResource(R.string.aj_nav_review_pending, pendingReview) else stringResource(R.string.aj_nav_review),
+                stringResource(R.string.aj_nav_review_detail),
                 onOpenReview
             )
         }
 
-        SectionHeader(title = "Avisos")
+        SectionHeader(title = stringResource(R.string.aj_section_alerts))
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
@@ -172,15 +198,15 @@ fun AjustesScreen(
                 Spacer(Modifier.width(Spacing.md))
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = if (notificationsOn) "Avisos de pago activos" else "Avisos de pago apagados",
+                        text = if (notificationsOn) stringResource(R.string.aj_alerts_on) else stringResource(R.string.aj_alerts_off),
                         style = MaterialTheme.typography.titleSmall,
                         color = AppPalette.Ink
                     )
                     Text(
                         text = if (notificationsOn) {
-                            "Te avisamos 7 días, 2 días y el día en que vence cada pago."
+                            stringResource(R.string.aj_alerts_on_detail)
                         } else {
-                            "La app funciona igual, pero no podrá recordarte los pagos."
+                            stringResource(R.string.aj_alerts_off_detail)
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = AppPalette.InkSoft
@@ -199,77 +225,15 @@ fun AjustesScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-                ) { Text("Activar avisos") }
+                ) { Text(stringResource(R.string.aj_alerts_enable)) }
             }
         }
 
-        SectionHeader(title = "Privacidad y seguridad")
+        SectionHeader(title = stringResource(R.string.aj_section_privacy))
 
         LockCard()
 
-        AppCard {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconBubble(
-                    icon = Icons.Filled.Lock,
-                    tint = AppPalette.Teal,
-                    size = 50.dp
-                )
-                Spacer(Modifier.width(Spacing.md))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Todo local y cifrado",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Tu base de datos vive en este teléfono, protegida con AES-256.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(Spacing.md))
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.outline
-            )
-            Spacer(Modifier.height(Spacing.md))
-
-            SecurityRow(
-                title = "Base de datos cifrada",
-                detail = "SQLCipher cifra el archivo completo. Sin la clave solo hay ruido ilegible."
-            )
-            SecurityRow(
-                title = "Clave en el Android Keystore",
-                detail = "La llave que descifra tus datos nunca sale del almacén seguro del teléfono."
-            )
-            SecurityRow(
-                title = "Sin copias en la nube",
-                detail = "La copia de seguridad de Android está desactivada: tu base no se sube a Google Drive."
-            )
-            SecurityRow(
-                title = "Internet solo para la IA",
-                detail = "La app no envía nada a ningún servidor salvo cuando usas el chat con IA, " +
-                    "y antes te muestra exactamente qué datos salen."
-            )
-
-            if (isDebuggable) {
-                SecurityRow(
-                    title = "Capturas permitidas en pruebas",
-                    detail = "Esta compilación deja tomar capturas para revisar el diseño. " +
-                        "La versión final bloqueará capturas y la vista reciente.",
-                    icon = Icons.Filled.Info
-                )
-            } else {
-                SecurityRow(
-                    title = "Capturas bloqueadas",
-                    detail = "La vista reciente y las capturas de pantalla quedan ocultas."
-                )
-            }
-        }
-
-        SectionHeader(title = "Inteligencia artificial")
+        SectionHeader(title = stringResource(R.string.aj_section_ai))
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
@@ -280,14 +244,12 @@ fun AjustesScreen(
                 Spacer(Modifier.width(Spacing.md))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Chat con IA",
+                        text = stringResource(R.string.aj_ai_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Pregunta sobre tus gastos con Groq, Mistral, OpenRouter o Gemini y tu " +
-                            "propia clave, guardada cifrada. Antes de enviar ves qué datos salen. " +
-                            "La IA solo responde: no cambia tus movimientos.",
+                        text = stringResource(R.string.aj_ai_detail),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -299,10 +261,10 @@ fun AjustesScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text("Abrir el chat") }
+            ) { Text(stringResource(R.string.aj_ai_open)) }
         }
 
-        SectionHeader(title = "Tus datos")
+        SectionHeader(title = stringResource(R.string.aj_section_data))
         AppCard {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconBubble(
@@ -313,13 +275,12 @@ fun AjustesScreen(
                 Spacer(Modifier.width(Spacing.md))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Importar movimientos",
+                        text = stringResource(R.string.aj_import_title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "CSV, Excel o el PDF de Budge. Se muestra una vista previa " +
-                            "y nada se guarda hasta que confirmes.",
+                        text = stringResource(R.string.aj_import_detail),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -341,7 +302,7 @@ fun AjustesScreen(
                 contentPadding = PaddingValues(vertical = Spacing.md)
             ) {
                 Text(
-                    text = "Elegir archivo para importar",
+                    text = stringResource(R.string.aj_import_pick),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -352,7 +313,7 @@ fun AjustesScreen(
         ShareApkCard()
 
         if (imports.isNotEmpty()) {
-            SectionHeader(title = "Últimas importaciones")
+            SectionHeader(title = stringResource(R.string.aj_section_recent_imports))
             AppCard(contentPadding = androidx.compose.foundation.layout.PaddingValues(
                 horizontal = Spacing.lg,
                 vertical = Spacing.sm
@@ -366,24 +327,8 @@ fun AjustesScreen(
             }
         }
 
-        SectionHeader(title = "Créditos")
-        AppCard {
-            Text(
-                text = "Logos de las entidades: Wikimedia Commons, recortados a su símbolo. Las marcas pertenecen a sus dueños " +
-                    "y se usan solo para identificar cada cuenta.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.height(Spacing.sm))
-            Text(
-                text = "Logo de Nequi: recorte de «Nequi Colombia logo», autor Nequi (www.nequi.com.co), " +
-                    "licencia CC BY-SA 4.0 (creativecommons.org/licenses/by-sa/4.0).",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
         Text(
-            text = "FinanzasApp ${context.packageManager.getPackageInfo(context.packageName, 0).versionName} · Hecha para tus finanzas, no para tus datos.",
+            text = stringResource(R.string.aj_footer, context.packageManager.getPackageInfo(context.packageName, 0).versionName.toString()),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
@@ -391,6 +336,27 @@ fun AjustesScreen(
                 .padding(top = Spacing.sm),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
+        // Créditos discretos: un enlace pequeño que despliega las licencias.
+        // La licencia CC BY-SA del logo de Nequi exige mostrar el crédito.
+        Text(
+            text = if (showCredits) stringResource(R.string.aj_credits_hide) else stringResource(R.string.aj_credits_show),
+            style = MaterialTheme.typography.labelSmall,
+            color = AppPalette.InkFaint,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showCredits = !showCredits }
+                .padding(vertical = Spacing.xs)
+        )
+        if (showCredits) {
+            Text(
+                text = stringResource(R.string.aj_credits_text),
+                style = MaterialTheme.typography.labelSmall,
+                color = AppPalette.InkFaint,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 
     if (showImport) {
@@ -402,13 +368,14 @@ fun AjustesScreen(
 private fun ImportHistoryRow(job: ImportJob) {
     val succeeded = job.status == ImportStatus.COMPLETADO
     val label = when (job.status) {
-        ImportStatus.COMPLETADO -> "Completada"
-        ImportStatus.ERROR -> "Con error"
-        ImportStatus.PROCESANDO -> "Procesando"
-        ImportStatus.REVISAR -> "Por revisar"
-        ImportStatus.PENDIENTE -> "Pendiente"
+        ImportStatus.COMPLETADO -> stringResource(R.string.aj_import_status_done)
+        ImportStatus.ERROR -> stringResource(R.string.aj_import_status_error)
+        ImportStatus.PROCESANDO -> stringResource(R.string.aj_import_status_processing)
+        ImportStatus.REVISAR -> stringResource(R.string.aj_import_status_review)
+        ImportStatus.PENDIENTE -> stringResource(R.string.aj_import_status_pending)
     }
     val color = if (succeeded) AppPalette.Green else AppPalette.Coral
+    val importedText = pluralStringResource(R.plurals.aj_import_count, job.imported, job.imported)
 
     Row(
         modifier = Modifier
@@ -431,8 +398,7 @@ private fun ImportHistoryRow(job: ImportJob) {
                     append(label)
                     if (job.imported > 0) {
                         append(" · ")
-                        append(job.imported)
-                        append(if (job.imported == 1) " movimiento" else " movimientos")
+                        append(importedText)
                     }
                 },
                 style = MaterialTheme.typography.bodySmall,

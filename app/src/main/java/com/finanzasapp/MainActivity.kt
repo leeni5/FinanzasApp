@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.finanzasapp.data.settings.ThemeMode
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.notifications.PaymentReminderScheduler
 import com.finanzasapp.ui.FinanzasRoot
 import com.finanzasapp.ui.LockScreen
@@ -43,6 +44,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(Idioma.wrap(newBase))
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()

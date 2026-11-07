@@ -1,6 +1,8 @@
 package com.finanzasapp.ui.screens.importar
 
 import android.content.Intent
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.R
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -131,12 +133,12 @@ fun ImportSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Importar movimientos",
+                        text = stringResource(R.string.mv_import_title),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "CSV, Excel o PDF. Nada sale de este teléfono.",
+                        text = stringResource(R.string.mv_import_subtitle),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -152,7 +154,7 @@ fun ImportSheet(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = stringResource(R.string.mv_close),
                             tint = AppPalette.InkSoft,
                             modifier = Modifier.size(18.dp)
                         )
@@ -166,8 +168,8 @@ fun ImportSheet(
                 ImportPhase.IDLE -> IdleContent(onPick = openPicker)
 
                 ImportPhase.READING -> BusyContent(
-                    title = "Leyendo el archivo…",
-                    detail = "Estamos separando fechas, montos y categorías."
+                    title = stringResource(R.string.mv_import_reading),
+                    detail = stringResource(R.string.mv_import_reading_detail)
                 )
 
                 ImportPhase.PREVIEW -> state.preview?.let { preview ->
@@ -186,8 +188,8 @@ fun ImportSheet(
                 }
 
                 ImportPhase.IMPORTING -> BusyContent(
-                    title = "Guardando movimientos…",
-                    detail = "Se están creando las categorías y cuentas que faltan."
+                    title = stringResource(R.string.mv_import_saving),
+                    detail = stringResource(R.string.mv_import_saving_detail)
                 )
 
                 ImportPhase.DONE -> state.result?.let { result ->
@@ -202,7 +204,7 @@ fun ImportSheet(
                 }
 
                 ImportPhase.ERROR -> ErrorContent(
-                    message = state.error ?: "No pudimos leer el archivo.",
+                    message = state.error ?: stringResource(R.string.mv_import_read_error),
                     onRetry = {
                         viewModel.reset()
                         openPicker()
@@ -218,16 +220,13 @@ fun ImportSheet(
 private fun IdleContent(onPick: () -> Unit) {
     AppCard(containerColor = AppPalette.SurfaceMuted) {
         Text(
-            text = "Qué puedes importar",
+            text = stringResource(R.string.mv_import_what),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            text = "• CSV y Excel con columnas de fecha, descripción y monto.\n" +
-                "• PDF exportado por Budge.\n" +
-                "• Se muestra una vista previa antes de guardar.\n" +
-                "• Si vuelves a importar el mismo archivo, no se duplica nada.",
+            text = stringResource(R.string.mv_import_what_list),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -247,7 +246,7 @@ private fun IdleContent(onPick: () -> Unit) {
         )
     ) {
         Text(
-            text = "Elegir archivo",
+            text = stringResource(R.string.mv_import_choose_file),
             style = MaterialTheme.typography.labelLarge
         )
     }
@@ -287,19 +286,19 @@ private fun PreviewContent(
             horizontalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             PreviewStat(
-                label = "Detectados",
+                label = stringResource(R.string.mv_import_detected),
                 value = preview.detected.toString(),
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.weight(1f)
             )
             PreviewStat(
-                label = "Ingresos",
+                label = stringResource(R.string.mv_income),
                 value = Money.cop(preview.income),
                 color = AppPalette.Green,
                 modifier = Modifier.weight(1f)
             )
             PreviewStat(
-                label = "Gastos",
+                label = stringResource(R.string.mv_expenses),
                 value = Money.cop(preview.expenses),
                 color = AppPalette.Coral,
                 modifier = Modifier.weight(1f)
@@ -310,8 +309,7 @@ private fun PreviewContent(
     if (preview.duplicates > 0) {
         Spacer(Modifier.height(Spacing.md))
         Text(
-            text = "${preview.duplicates} ya estaban registrados y se omitirán. " +
-                "Se importarán ${preview.importable}.",
+            text = stringResource(R.string.mv_import_duplicates, preview.duplicates, preview.importable),
             style = MaterialTheme.typography.bodySmall,
             color = AppPalette.Amber
         )
@@ -321,16 +319,16 @@ private fun PreviewContent(
         Spacer(Modifier.height(Spacing.md))
         Text(
             text = buildString {
-                append("Se crearán ")
+                append(stringResource(R.string.mv_import_will_create))
                 val parts = buildList {
                     if (preview.newCategories.isNotEmpty()) {
-                        add("${preview.newCategories.size} categorías")
+                        add(stringResource(R.string.mv_import_n_categories, preview.newCategories.size))
                     }
                     if (preview.newAccounts.isNotEmpty()) {
-                        add("${preview.newAccounts.size} cuentas")
+                        add(stringResource(R.string.mv_import_n_accounts, preview.newAccounts.size))
                     }
                 }
-                append(parts.joinToString(" y "))
+                append(parts.joinToString(stringResource(R.string.mv_import_and)))
                 val names = (preview.newCategories + preview.newAccounts).take(3)
                 if (names.isNotEmpty()) {
                     append(": ")
@@ -347,14 +345,14 @@ private fun PreviewContent(
     if (preview.rowsWithoutAccount > 0) {
         Spacer(Modifier.height(Spacing.md))
         Text(
-            text = "Cuenta para ${preview.rowsWithoutAccount} filas sin cuenta",
+            text = stringResource(R.string.mv_import_account_for_rows, preview.rowsWithoutAccount),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Spacer(Modifier.height(Spacing.sm))
         if (accounts.isEmpty()) {
             Text(
-                text = "Se creará la cuenta “Efectivo”.",
+                text = stringResource(R.string.mv_import_will_create_cash),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -393,7 +391,7 @@ private fun PreviewContent(
 
     Spacer(Modifier.height(Spacing.lg))
     Text(
-        text = "Vista previa",
+        text = stringResource(R.string.mv_import_preview),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
@@ -412,7 +410,7 @@ private fun PreviewContent(
     if (preview.rows.size > 6) {
         Spacer(Modifier.height(Spacing.sm))
         Text(
-            text = "y ${preview.rows.size - 6} movimientos más…",
+            text = stringResource(R.string.mv_import_more_rows, preview.rows.size - 6),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -436,9 +434,9 @@ private fun PreviewContent(
     ) {
         Text(
             text = if (preview.importable > 0) {
-                "Importar ${preview.importable} movimientos"
+                stringResource(R.string.mv_import_confirm, preview.importable)
             } else {
-                "Nada nuevo por importar"
+                stringResource(R.string.mv_import_nothing_new)
             },
             style = MaterialTheme.typography.labelLarge
         )
@@ -449,7 +447,7 @@ private fun PreviewContent(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Elegir otro archivo",
+            text = stringResource(R.string.mv_import_choose_other),
             style = MaterialTheme.typography.labelLarge,
             color = AppPalette.Accent
         )
@@ -460,7 +458,7 @@ private fun PreviewContent(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "Cancelar",
+            text = stringResource(R.string.mv_cancel),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -532,7 +530,7 @@ private fun ImportRowLine(row: ImportRowPreview) {
                 text = buildString {
                     append(Fechas.corta(row.date))
                     append(" · ")
-                    append(row.categoryName ?: "Sin categoría")
+                    append(row.categoryName ?: stringResource(R.string.mv_no_category))
                     row.accountName?.takeIf { it.isNotBlank() }?.let {
                         append(" · ")
                         append(it)
@@ -557,7 +555,7 @@ private fun ImportRowLine(row: ImportRowPreview) {
             )
             if (muted) {
                 Text(
-                    text = "Ya existe",
+                    text = stringResource(R.string.mv_import_exists),
                     style = MaterialTheme.typography.labelSmall,
                     color = AppPalette.InkFaint
                 )
@@ -614,16 +612,16 @@ private fun DoneContent(
         )
         Spacer(Modifier.height(Spacing.md))
         Text(
-            text = "Importación completa",
+            text = stringResource(R.string.mv_import_complete),
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(Spacing.xs))
         Text(
             text = buildString {
-                append("Se guardaron ${result.imported} movimientos.")
+                append(stringResource(R.string.mv_import_saved_n, result.imported))
                 if (result.duplicates > 0) {
-                    append(" Se omitieron ${result.duplicates} que ya existían.")
+                    append(stringResource(R.string.mv_import_skipped_n, result.duplicates))
                 }
             },
             style = MaterialTheme.typography.bodyMedium,
@@ -633,7 +631,7 @@ private fun DoneContent(
         if (result.newCategories.isNotEmpty() || result.newAccounts.isNotEmpty()) {
             Spacer(Modifier.height(Spacing.md))
             Text(
-                text = "También se crearon las categorías y cuentas que faltaban.",
+                text = stringResource(R.string.mv_import_also_created),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -654,7 +652,7 @@ private fun DoneContent(
                 )
             ) {
                 Text(
-                    text = "Ver los movimientos importados",
+                    text = stringResource(R.string.mv_import_view_imported),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -666,7 +664,7 @@ private fun DoneContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Cerrar",
+                text = stringResource(R.string.mv_close),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -691,7 +689,7 @@ private fun ErrorContent(
             Spacer(Modifier.width(Spacing.sm))
             Column {
                 Text(
-                    text = "No pudimos importar",
+                    text = stringResource(R.string.mv_import_failed),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -718,7 +716,7 @@ private fun ErrorContent(
             )
         ) {
             Text(
-                text = "Elegir otro archivo",
+                text = stringResource(R.string.mv_import_choose_other),
                 style = MaterialTheme.typography.labelLarge
             )
         }
@@ -728,7 +726,7 @@ private fun ErrorContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Cerrar",
+                text = stringResource(R.string.mv_close),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

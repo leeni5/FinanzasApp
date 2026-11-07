@@ -2,6 +2,7 @@ package com.finanzasapp.data.ai
 
 import com.finanzasapp.data.db.AppDatabase
 import com.finanzasapp.data.entity.TransactionType
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.data.model.displayName
 import kotlinx.coroutines.flow.first
 import java.time.LocalDate
@@ -83,8 +84,26 @@ object FinanceContext {
         return FinanceSnapshot(text.trim(), movements.size, includeDetail && movements.size > MAX_ROWS)
     }
 
-    /** Instrucciones fijas del asistente. */
-    val systemPrompt = """
+    /** Instrucciones fijas del asistente, en el idioma de la app. */
+    val systemPrompt: String
+        get() = if (Idioma.isEnglish) systemPromptEnglish else systemPromptSpanish
+
+    private val systemPromptEnglish = """
+        You are the assistant of FinanzasApp, a personal finance app in Colombia.
+        Always answer in English, briefly and clearly, using only the data given below.
+        The data block is written in Spanish; translate any labels you mention.
+        Write amounts as $ 1.234.567 (dot as thousands separator, no decimals),
+        in Colombian pesos.
+        The data covers only the stated period. If the question needs dates that
+        are not included, say so and suggest naming the time span in the question
+        (for example "in March" or "the last 6 months"); never make up figures.
+        Transfers between accounts are neither expenses nor income.
+        You do not give investment advice: if asked, make clear you are not a
+        financial advisor and limit the answer to the user's numbers.
+        You cannot create, edit or delete transactions.
+    """.trimIndent()
+
+    private val systemPromptSpanish = """
         Eres el asistente de FinanzasApp, una app personal de finanzas en Colombia.
         Responde en español, breve y claro, usando solo los datos que te doy abajo.
         Escribe los montos como $ 1.234.567 (punto de miles, sin decimales).

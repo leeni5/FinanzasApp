@@ -1,5 +1,8 @@
 package com.finanzasapp.ui.screens.metas
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.data.settings.Idioma
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -131,15 +134,15 @@ fun MetasScreen() {
         ) {
             item {
                 ScreenHeader(
-                    title = "Metas",
-                    subtitle = "Ahorrar también es parte del plan."
+                    title = stringResource(R.string.fz_metas_title),
+                    subtitle = stringResource(R.string.fz_metas_subtitle)
                 )
             }
 
             when {
                 state.loading -> item {
                     Text(
-                        text = "Leyendo tus metas…",
+                        text = stringResource(R.string.fz_metas_loading),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -147,11 +150,10 @@ fun MetasScreen() {
 
                 state.goals.isEmpty() -> item {
                     EmptyState(
-                        title = "Todavía no hay metas",
-                        message = "Crea una meta, define cuánto necesitas y registra tus " +
-                            "aportes. El avance y la proyección se calculan solos.",
+                        title = stringResource(R.string.fz_metas_empty_title),
+                        message = stringResource(R.string.fz_metas_empty_message),
                         icon = Icons.Filled.Star,
-                        actionLabel = "Crear mi primera meta",
+                        actionLabel = stringResource(R.string.fz_metas_empty_action),
                         onAction = { editor = GoalDraft() }
                     )
                 }
@@ -160,7 +162,7 @@ fun MetasScreen() {
                     item { GoalsSummary(state) }
 
                     if (state.active.isNotEmpty()) {
-                        item { SectionHeader(title = "En curso", trailing = "${state.activeCount}") }
+                        item { SectionHeader(title = stringResource(R.string.fz_metas_section_active), trailing = "${state.activeCount}") }
                         items(state.active, key = { it.goalId }) { goal ->
                             GoalCard(
                                 goal = goal,
@@ -172,7 +174,7 @@ fun MetasScreen() {
                     if (state.completed.isNotEmpty()) {
                         item {
                             SectionHeader(
-                                title = "Completadas",
+                                title = stringResource(R.string.fz_metas_section_completed),
                                 trailing = "${state.completedCount}"
                             )
                         }
@@ -189,7 +191,7 @@ fun MetasScreen() {
 
         ScrollAwareFab(
             visible = fabVisible,
-            description = "Nueva meta",
+            description = stringResource(R.string.fz_metas_new),
             onClick = { editor = GoalDraft() },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -251,14 +253,14 @@ private fun GoalsSummary(state: MetasUiState) {
         Row(verticalAlignment = Alignment.Top) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Ahorrado para tus metas",
+                    text = stringResource(R.string.fz_metas_saved_total),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.height(Spacing.xs))
                 AnimatedMoney(amount = state.totalSaved, style = MaterialTheme.typography.displaySmall, color = MaterialTheme.colorScheme.onSurface)
                 Text(
-                    text = "de ${Money.cop(state.totalTarget)}",
+                    text = stringResource(R.string.fz_metas_of_amount, Money.cop(state.totalTarget)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -266,9 +268,9 @@ private fun GoalsSummary(state: MetasUiState) {
             if (state.completedCount > 0) {
                 SoftPill(
                     text = if (state.completedCount == 1) {
-                        "1 completada"
+                        stringResource(R.string.fz_metas_completed_one)
                     } else {
-                        "${state.completedCount} completadas"
+                        stringResource(R.string.fz_metas_completed_many, state.completedCount)
                     },
                     color = AppPalette.Green
                 )
@@ -280,13 +282,13 @@ private fun GoalsSummary(state: MetasUiState) {
         Spacer(Modifier.height(Spacing.sm))
         Row {
             Text(
-                text = if (state.activeCount == 1) "1 en curso" else "${state.activeCount} en curso",
+                text = if (state.activeCount == 1) stringResource(R.string.fz_metas_active_one) else stringResource(R.string.fz_metas_active_many, state.activeCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "${Money.percent(state.progress)} ahorrado",
+                text = stringResource(R.string.fz_metas_percent_saved, Money.percent(state.progress)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -321,7 +323,7 @@ private fun GoalCard(goal: GoalRow, onClick: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = " de ${Money.cop(goal.targetAmount)}",
+                text = stringResource(R.string.fz_metas_of_amount_spaced, Money.cop(goal.targetAmount)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = 1.dp)
@@ -337,16 +339,16 @@ private fun GoalCard(goal: GoalRow, onClick: () -> Unit) {
         Spacer(Modifier.height(6.dp))
         Row {
             Text(
-                text = "${Money.percent(goal.progress)} ahorrado",
+                text = stringResource(R.string.fz_metas_percent_saved, Money.percent(goal.progress)),
                 style = MaterialTheme.typography.labelSmall,
                 color = AppPalette.InkFaint
             )
             Spacer(Modifier.weight(1f))
             Text(
                 text = if (goal.completed) {
-                    "Meta cumplida"
+                    stringResource(R.string.fz_metas_goal_reached)
                 } else {
-                    "Faltan ${Money.cop(goal.remaining)}"
+                    stringResource(R.string.fz_metas_remaining, Money.cop(goal.remaining))
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -356,7 +358,7 @@ private fun GoalCard(goal: GoalRow, onClick: () -> Unit) {
         Spacer(Modifier.height(Spacing.xs))
         Row {
             Text(
-                text = "Meta: ${targetLabel(goal.targetDate)}",
+                text = stringResource(R.string.fz_metas_target_label, targetLabel(goal.targetDate)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -382,11 +384,11 @@ private fun GoalStatusPill(status: GoalStatus) {
 }
 
 private fun statusLabel(status: GoalStatus): String = when (status) {
-    GoalStatus.COMPLETADA -> "Completada"
-    GoalStatus.EN_RITMO -> "En ritmo"
-    GoalStatus.ATRASADA -> "Atrasada"
-    GoalStatus.VENCIDA -> "Vencida"
-    GoalStatus.SIN_RITMO -> "Sin ritmo"
+    GoalStatus.COMPLETADA -> Idioma.text(R.string.fz_metas_status_completed)
+    GoalStatus.EN_RITMO -> Idioma.text(R.string.fz_metas_status_on_track)
+    GoalStatus.ATRASADA -> Idioma.text(R.string.fz_metas_status_behind)
+    GoalStatus.VENCIDA -> Idioma.text(R.string.fz_metas_status_overdue)
+    GoalStatus.SIN_RITMO -> Idioma.text(R.string.fz_metas_status_no_pace)
 }
 
 /**
@@ -395,10 +397,10 @@ private fun statusLabel(status: GoalStatus): String = when (status) {
  */
 private fun goalHint(goal: GoalRow): String? = when (goal.status) {
     GoalStatus.COMPLETADA -> null
-    GoalStatus.EN_RITMO -> goal.projectedDate?.let { "Llegas el ${Fechas.corta(it)}" }
+    GoalStatus.EN_RITMO -> goal.projectedDate?.let { Idioma.text(R.string.fz_metas_hint_arrive, Fechas.corta(it)) }
     GoalStatus.ATRASADA, GoalStatus.SIN_RITMO ->
-        if (goal.requiredMonthly > 0L) "Ahorra ${Money.cop(goal.requiredMonthly)}/mes" else null
-    GoalStatus.VENCIDA -> "Ajusta la fecha"
+        if (goal.requiredMonthly > 0L) Idioma.text(R.string.fz_metas_hint_save_monthly, Money.cop(goal.requiredMonthly)) else null
+    GoalStatus.VENCIDA -> Idioma.text(R.string.fz_metas_hint_adjust_date)
 }
 
 @Composable
@@ -482,7 +484,7 @@ private fun GoalDetailSheet(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = stringResource(R.string.fz_close),
                             tint = AppPalette.InkSoft,
                             modifier = Modifier.size(18.dp)
                         )
@@ -493,7 +495,7 @@ private fun GoalDetailSheet(
             Spacer(Modifier.height(Spacing.xl))
 
             Text(
-                text = "Ahorrado",
+                text = stringResource(R.string.fz_metas_saved),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -503,7 +505,7 @@ private fun GoalDetailSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "de ${Money.cop(goal.targetAmount)}",
+                text = stringResource(R.string.fz_metas_of_amount, Money.cop(goal.targetAmount)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -513,16 +515,16 @@ private fun GoalDetailSheet(
             Spacer(Modifier.height(Spacing.sm))
             Row {
                 Text(
-                    text = "${Money.percent(goal.progress)} ahorrado",
+                    text = stringResource(R.string.fz_metas_percent_saved, Money.percent(goal.progress)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
                     text = if (goal.completed) {
-                        "Meta cumplida"
+                        stringResource(R.string.fz_metas_goal_reached)
                     } else {
-                        "Faltan ${Money.cop(goal.remaining)}"
+                        stringResource(R.string.fz_metas_remaining, Money.cop(goal.remaining))
                     },
                     style = MaterialTheme.typography.labelMedium,
                     color = if (goal.completed) {
@@ -536,23 +538,23 @@ private fun GoalDetailSheet(
             Spacer(Modifier.height(Spacing.lg))
 
             TintedCard(color = AppPalette.SurfaceMuted) {
-                DetailRow(label = "Fecha objetivo", value = longTargetLabel(goal.targetDate))
+                DetailRow(label = stringResource(R.string.fz_metas_target_date), value = longTargetLabel(goal.targetDate))
                 Spacer(Modifier.height(Spacing.sm))
                 DetailRow(
-                    label = "Ritmo de los últimos 3 meses",
+                    label = stringResource(R.string.fz_metas_recent_pace),
                     value = if (goal.recentMonthly > 0L) {
-                        "${Money.cop(goal.recentMonthly)}/mes"
+                        stringResource(R.string.fz_metas_per_month, Money.cop(goal.recentMonthly))
                     } else {
-                        "Sin aportes"
+                        stringResource(R.string.fz_metas_no_contributions)
                     }
                 )
                 Spacer(Modifier.height(Spacing.sm))
                 DetailRow(
-                    label = "Necesitas",
+                    label = stringResource(R.string.fz_metas_you_need),
                     value = when {
                         goal.completed -> "—"
-                        goal.status == GoalStatus.VENCIDA -> "Fecha vencida"
-                        else -> "${Money.cop(goal.requiredMonthly)}/mes"
+                        goal.status == GoalStatus.VENCIDA -> stringResource(R.string.fz_metas_date_passed)
+                        else -> stringResource(R.string.fz_metas_per_month, Money.cop(goal.requiredMonthly))
                     },
                     valueColor = when {
                         goal.status == GoalStatus.VENCIDA -> AppPalette.Coral
@@ -563,10 +565,10 @@ private fun GoalDetailSheet(
                 if (!goal.completed) {
                     Spacer(Modifier.height(Spacing.sm))
                     DetailRow(
-                        label = "A este ritmo",
+                        label = stringResource(R.string.fz_metas_at_this_pace),
                         value = goal.projectedDate?.let {
                             Fechas.mesDe(it).lowercase()
-                        } ?: "Sin ritmo de ahorro"
+                        } ?: stringResource(R.string.fz_metas_no_saving_pace)
                     )
                 }
             }
@@ -592,7 +594,7 @@ private fun GoalDetailSheet(
                     )
                     Spacer(Modifier.width(Spacing.xs))
                     Text(
-                        text = "Aportar a esta meta",
+                        text = stringResource(R.string.fz_metas_contribute_this),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -610,7 +612,7 @@ private fun GoalDetailSheet(
                 )
                 Spacer(Modifier.width(Spacing.xs))
                 Text(
-                    text = "Editar meta",
+                    text = stringResource(R.string.fz_metas_edit),
                     style = MaterialTheme.typography.labelLarge,
                     color = AppPalette.Accent
                 )
@@ -619,15 +621,14 @@ private fun GoalDetailSheet(
             Spacer(Modifier.height(Spacing.md))
 
             SectionHeader(
-                title = "Aportes",
+                title = stringResource(R.string.fz_metas_contributions),
                 trailing = if (goal.contributions.isEmpty()) null else "${goal.contributions.size}"
             )
             Spacer(Modifier.height(Spacing.sm))
 
             if (goal.contributions.isEmpty()) {
                 Text(
-                    text = "Todavía no hay aportes. Cada aporte que registres suma de " +
-                        "inmediato al avance.",
+                    text = stringResource(R.string.fz_metas_no_contributions_message),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -662,7 +663,7 @@ private fun GoalDetailSheet(
                             ) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = "Eliminar aporte",
+                                    contentDescription = stringResource(R.string.fz_metas_delete_contribution),
                                     tint = AppPalette.InkFaint,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -686,7 +687,7 @@ private fun GoalDetailSheet(
                 )
                 Spacer(Modifier.width(Spacing.xs))
                 Text(
-                    text = "Eliminar meta",
+                    text = stringResource(R.string.fz_metas_delete_goal),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -696,11 +697,10 @@ private fun GoalDetailSheet(
     contributionToDelete?.let { contribution ->
         AlertDialog(
             onDismissRequest = { contributionToDelete = null },
-            title = { Text("¿Eliminar este aporte?") },
+            title = { Text(stringResource(R.string.fz_metas_delete_contribution_title)) },
             text = {
                 Text(
-                    "Se restarán ${Money.cop(contribution.amount)} del avance de la meta. " +
-                        "La operación queda en el historial de la app."
+                    stringResource(R.string.fz_metas_delete_contribution_message, Money.cop(contribution.amount))
                 )
             },
             confirmButton = {
@@ -711,12 +711,12 @@ private fun GoalDetailSheet(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = AppPalette.Coral)
                 ) {
-                    Text("Eliminar")
+                    Text(stringResource(R.string.fz_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { contributionToDelete = null }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.fz_cancel))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface
@@ -726,11 +726,10 @@ private fun GoalDetailSheet(
     if (showDeleteGoal) {
         AlertDialog(
             onDismissRequest = { showDeleteGoal = false },
-            title = { Text("¿Eliminar esta meta?") },
+            title = { Text(stringResource(R.string.fz_metas_delete_goal_title)) },
             text = {
                 Text(
-                    "Se eliminarán la meta y todos sus aportes. El historial de la app " +
-                        "conserva el registro de lo que se borró."
+                    stringResource(R.string.fz_metas_delete_goal_message)
                 )
             },
             confirmButton = {
@@ -741,12 +740,12 @@ private fun GoalDetailSheet(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = AppPalette.Coral)
                 ) {
-                    Text("Eliminar")
+                    Text(stringResource(R.string.fz_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteGoal = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.fz_cancel))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface
@@ -819,12 +818,12 @@ private fun GoalEditorSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (initial.id == null) "Nueva meta" else "Editar meta",
+                        text = if (initial.id == null) stringResource(R.string.fz_metas_new) else stringResource(R.string.fz_metas_edit),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "El avance se calcula con tus aportes.",
+                        text = stringResource(R.string.fz_metas_progress_from_contributions),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -840,7 +839,7 @@ private fun GoalEditorSheet(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = stringResource(R.string.fz_close),
                             tint = AppPalette.InkSoft,
                             modifier = Modifier.size(18.dp)
                         )
@@ -850,14 +849,14 @@ private fun GoalEditorSheet(
 
             Spacer(Modifier.height(Spacing.lg))
 
-            FieldLabel("Nombre de la meta")
+            FieldLabel(stringResource(R.string.fz_metas_name_label))
             TextField(
                 value = name,
                 onValueChange = { name = it.take(60) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = "Ej. Viaje a Cartagena",
+                        text = stringResource(R.string.fz_metas_name_placeholder),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
@@ -869,7 +868,7 @@ private fun GoalEditorSheet(
 
             Spacer(Modifier.height(Spacing.md))
 
-            FieldLabel("Cuánto necesitas")
+            FieldLabel(stringResource(R.string.fz_metas_amount_label))
             TextField(
                 value = amountText,
                 onValueChange = { value ->
@@ -901,7 +900,7 @@ private fun GoalEditorSheet(
             if (initial.id != null && initial.saved > 0L) {
                 Spacer(Modifier.height(Spacing.xs))
                 Text(
-                    text = "Ya tienes ${Money.cop(initial.saved)} ahorrados.",
+                    text = stringResource(R.string.fz_metas_already_saved, Money.cop(initial.saved)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -909,7 +908,7 @@ private fun GoalEditorSheet(
 
             Spacer(Modifier.height(Spacing.md))
 
-            FieldLabel("Fecha objetivo")
+            FieldLabel(stringResource(R.string.fz_metas_target_date))
             DateField(
                 date = targetDate,
                 onClick = { showDatePicker = true }
@@ -917,7 +916,7 @@ private fun GoalEditorSheet(
 
             Spacer(Modifier.height(Spacing.md))
 
-            FieldLabel("Color")
+            FieldLabel(stringResource(R.string.fz_color))
             ColorPicker(
                 selected = color,
                 onSelect = { color = it }
@@ -926,8 +925,7 @@ private fun GoalEditorSheet(
             if (willComplete) {
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
-                    text = "Tu ahorro actual ya supera este objetivo; la meta quedará " +
-                        "completada.",
+                    text = stringResource(R.string.fz_metas_already_exceeds),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.Green
                 )
@@ -962,7 +960,7 @@ private fun GoalEditorSheet(
                 )
             ) {
                 Text(
-                    text = if (initial.id == null) "Crear meta" else "Guardar cambios",
+                    text = if (initial.id == null) stringResource(R.string.fz_metas_create) else stringResource(R.string.fz_save_changes),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -1016,13 +1014,12 @@ private fun ContributionSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Aportar a ${goal.name}",
+                        text = stringResource(R.string.fz_metas_contribute_to, goal.name),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Llevas ${Money.cop(goal.saved)} de " +
-                            "${Money.cop(goal.targetAmount)}.",
+                        text = stringResource(R.string.fz_metas_saved_of, Money.cop(goal.saved), Money.cop(goal.targetAmount)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -1038,7 +1035,7 @@ private fun ContributionSheet(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = stringResource(R.string.fz_close),
                             tint = AppPalette.InkSoft,
                             modifier = Modifier.size(18.dp)
                         )
@@ -1048,7 +1045,7 @@ private fun ContributionSheet(
 
             Spacer(Modifier.height(Spacing.lg))
 
-            FieldLabel("Monto del aporte")
+            FieldLabel(stringResource(R.string.fz_metas_contribution_amount))
             TextField(
                 value = amountText,
                 onValueChange = { value ->
@@ -1079,7 +1076,7 @@ private fun ContributionSheet(
 
             Spacer(Modifier.height(Spacing.md))
 
-            FieldLabel("Fecha del aporte")
+            FieldLabel(stringResource(R.string.fz_metas_contribution_date))
             DateField(
                 date = date,
                 onClick = { showDatePicker = true }
@@ -1088,7 +1085,7 @@ private fun ContributionSheet(
             if (futureDate) {
                 Spacer(Modifier.height(Spacing.xs))
                 Text(
-                    text = "La fecha del aporte no puede ser futura.",
+                    text = stringResource(R.string.fz_metas_contribution_future),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.Coral
                 )
@@ -1111,7 +1108,7 @@ private fun ContributionSheet(
                 )
             ) {
                 Text(
-                    text = "Guardar aporte",
+                    text = stringResource(R.string.fz_metas_save_contribution),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -1158,7 +1155,7 @@ private fun DateField(date: LocalDate, onClick: () -> Unit) {
                 modifier = Modifier.weight(1f)
             )
             Text(
-                text = "Cambiar",
+                text = stringResource(R.string.fz_change),
                 style = MaterialTheme.typography.labelMedium,
                 color = AppPalette.Accent
             )
@@ -1194,12 +1191,12 @@ private fun DatePickerModal(
                     } ?: onDismiss()
                 }
             ) {
-                Text("Listo")
+                Text(stringResource(R.string.fz_done))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancelar")
+                Text(stringResource(R.string.fz_cancel))
             }
         }
     ) {
@@ -1258,7 +1255,7 @@ private fun metaFieldColors() = TextFieldDefaults.colors(
 
 private fun targetLabel(date: LocalDate): String = "${Fechas.corta(date)} ${date.year}"
 
-private fun longTargetLabel(date: LocalDate): String = "${Fechas.diaYMes(date)} de ${date.year}"
+private fun longTargetLabel(date: LocalDate): String = Idioma.text(R.string.fz_metas_long_target, Fechas.diaYMes(date), date.year)
 
 private fun GoalRow.toDraft(): GoalDraft = GoalDraft(
     id = goalId,

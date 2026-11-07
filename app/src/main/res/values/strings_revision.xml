@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Revisión -->
+    <string name="rv_tab_pending">Por revisar</string>
+    <string name="rv_tab_rules">Reglas</string>
+    <string name="rv_tab_history">Historial</string>
+    <string name="rv_back">Volver</string>
+    <string name="rv_title">Revisión</string>
+    <string name="rv_pending_empty_title">Nada por revisar</string>
+    <string name="rv_pending_empty_msg">Aquí llegan los movimientos importados sin categoría o marcados como no pagados, para que los confirmes.</string>
+    <string name="rv_pending_hint">Toca uno para elegir su categoría y confirmarlo.</string>
+    <string name="rv_confirm_all">Confirmar todos</string>
+    <string name="rv_rules_explainer">Si la descripción de un movimiento contiene el texto de la regla, recibe esa categoría. Se usan al importar y solo rellenan movimientos que llegan sin categoría.</string>
+    <string name="rv_new_rule">Nueva regla</string>
+    <string name="rv_rules_empty_title">Sin reglas todavía</string>
+    <string name="rv_rules_empty_msg">Crea una aquí o al revisar un movimiento.</string>
+    <string name="rv_history_empty_title">Sin cambios registrados</string>
+    <string name="rv_history_empty_msg">Cada alta, edición o borrado queda anotado aquí.</string>
+    <string name="rv_history_count">Los últimos %1$d cambios. El historial no se puede editar ni borrar.</string>
+    <string name="rv_rule_created_more">Regla creada; categorizó %1$d movimientos más.</string>
+    <string name="rv_rule_created_n">Regla creada; categorizó %1$d movimientos.</string>
+    <string name="rv_rule_created">Regla creada.</string>
+    <string name="rv_delete_rule_title">¿Borrar la regla «%1$s»?</string>
+    <string name="rv_delete_rule_text">Los movimientos que ya categorizó se quedan como están.</string>
+    <string name="rv_delete">Borrar</string>
+    <string name="rv_cancel">Cancelar</string>
+    <string name="rv_confirm_all_title">¿Confirmar los %1$d movimientos?</string>
+    <string name="rv_confirm_all_text">Salen de la bandeja con la categoría que tienen ahora; los que no tienen quedan «Sin categoría».</string>
+    <string name="rv_no_account">Sin cuenta</string>
+    <string name="rv_no_category">Sin categoría</string>
+    <string name="rv_rule_contains">Contiene «%1$s»</string>
+    <string name="rv_rule_deleted_category">Categoría borrada</string>
+    <string name="rv_rule_used_once">→ %1$s · usada %2$d vez</string>
+    <string name="rv_rule_used_many">→ %1$s · usada %2$d veces</string>
+    <string name="rv_review_date">%1$s de %2$d · %3$s</string>
+    <string name="rv_category">Categoría</string>
+    <string name="rv_always_use">Usar siempre esta categoría cuando la descripción contenga…</string>
+    <string name="rv_rule_text">Texto de la regla</string>
+    <string name="rv_rule_text_hint">Deja solo la parte que se repite, por ejemplo «RAPPI» o «EXITO».</string>
+    <string name="rv_confirm">Confirmar</string>
+    <string name="rv_rule_if_contains">Si la descripción contiene</string>
+    <string name="rv_rule_case_hint">No distingue mayúsculas ni tildes.</string>
+    <string name="rv_rule_goes_to">va a la categoría</string>
+    <string name="rv_save_apply">Guardar y aplicar</string>
+
+    <!-- Historial: entidades -->
+    <string name="rv_ent_transaction">Movimiento</string>
+    <string name="rv_ent_transfer">Transferencia</string>
+    <string name="rv_ent_category">Categoría</string>
+    <string name="rv_ent_account">Cuenta</string>
+    <string name="rv_ent_goal">Meta</string>
+    <string name="rv_ent_goal_contribution">Aporte</string>
+    <string name="rv_ent_app">App</string>
+    <string name="rv_ent_payment">Pago programado</string>
+    <string name="rv_ent_budget">Presupuesto</string>
+    <string name="rv_ent_rule">Regla</string>
+    <string name="rv_ent_import">Importación</string>
+    <string name="rv_ent_backup">Datos</string>
+    <string name="rv_ent_ia">Consulta a la IA</string>
+
+    <!-- Historial: acciones (m = masculino, f = femenino) -->
+    <string name="rv_act_created_m">creado</string>
+    <string name="rv_act_created_f">creada</string>
+    <string name="rv_act_edited_m">editado</string>
+    <string name="rv_act_edited_f">editada</string>
+    <string name="rv_act_deleted_m">borrado</string>
+    <string name="rv_act_deleted_f">borrada</string>
+    <string name="rv_act_archived_m">archivado</string>
+    <string name="rv_act_archived_f">archivada</string>
+    <string name="rv_act_recovered_m">recuperado</string>
+    <string name="rv_act_recovered_f">recuperada</string>
+    <string name="rv_act_reviewed_m">revisado</string>
+    <string name="rv_act_reviewed_f">revisada</string>
+    <string name="rv_act_completed">completada</string>
+    <string name="rv_act_backup">copia de seguridad creada</string>
+    <string name="rv_act_restored">restaurados desde una copia</string>
+    <string name="rv_act_exported">exportados a CSV</string>
+    <string name="rv_act_seeded">preparada</string>
+    <string name="rv_act_query">enviada</string>
+    <string name="rv_detail_movements">%1$d movimientos</string>
+    <string name="rv_detail_imported">%1$d importados</string>
+
+    <!-- Historial: origen -->
+    <string name="rv_src_user">Tú</string>
+    <string name="rv_src_import">Importación</string>
+    <string name="rv_src_seed">Datos de ejemplo</string>
+    <string name="rv_src_rule">Regla</string>
+    <string name="rv_src_ai">IA</string>
+    <string name="rv_src_payment">Pago programado</string>
+
+    <!-- Chat con la IA -->
+    <string name="rv_chat_status_reviewing">Revisando tus movimientos</string>
+    <string name="rv_chat_status_thinking">%1$s está pensando</string>
+    <string name="rv_chat_title">Pregúntale a la IA</string>
+    <string name="rv_chat_not_configured">Sin configurar</string>
+    <string name="rv_chat_view_data">Ver qué datos se envían</string>
+    <string name="rv_chat_provider_model">Proveedor y modelo</string>
+    <string name="rv_chat_placeholder">Escribe tu pregunta</string>
+    <string name="rv_chat_stop">Detener</string>
+    <string name="rv_chat_send">Enviar</string>
+    <string name="rv_chat_data_title">Qué se envía a %1$s</string>
+    <string name="rv_chat_data_text">Esto, más tus instrucciones fijas y la conversación. Nada más sale del teléfono: ni notas, ni metas, ni la base.</string>
+    <string name="rv_chat_paste_key">Pega la clave de %1$s.</string>
+    <string name="rv_chat_no_models">%1$s no devolvió modelos de chat para esta clave.</string>
+    <string name="rv_chat_setup_title">Conectar una IA</string>
+    <string name="rv_chat_setup_text">Usa tu propia clave. Se guarda cifrada en este teléfono y solo se usa para hablar con el proveedor que elijas.</string>
+    <string name="rv_chat_key_url">La clave se saca en %1$s</string>
+    <string name="rv_chat_key_saved">Clave guardada · pega otra para cambiarla</string>
+    <string name="rv_chat_key_label">Clave de la API</string>
+    <string name="rv_chat_checking">Comprobando…</string>
+    <string name="rv_chat_check_key">Comprobar clave y ver modelos</string>
+    <string name="rv_chat_model">Modelo</string>
+    <string name="rv_chat_use_model">Usar %1$s</string>
+    <string name="rv_chat_key_deleted">Clave de %1$s borrada del teléfono.</string>
+    <string name="rv_chat_delete_key">Borrar la clave de %1$s</string>
+
+    <!-- Proveedores de IA -->
+    <string name="rv_note_groq">Plan gratuito con límites diarios. Muy rápido.</string>
+    <string name="rv_note_mistral">Plan gratuito con teléfono verificado, sin tarjeta. Puede usar lo enviado para entrenar si no lo desactivas en su consola.</string>
+    <string name="rv_note_openrouter">Da acceso a muchos modelos; los que terminan en «:free» no cobran.</string>
+    <string name="rv_note_gemini">Clave de Google AI Studio. En el plan gratuito Google puede usar lo enviado.</string>
+
+    <!-- Errores de la IA -->
+    <string name="rv_ai_no_text">El modelo no devolvió texto. Intenta de nuevo o elige otro modelo.</string>
+    <string name="rv_ai_offline">Sin conexión a internet. La app sigue funcionando; la IA no está disponible ahora.</string>
+    <string name="rv_ai_timeout">%1$s tardó demasiado en responder. Intenta de nuevo.</string>
+    <string name="rv_ai_io">No se pudo hablar con %1$s: %2$s.</string>
+    <string name="rv_ai_network_error">error de red</string>
+    <string name="rv_ai_400">La petición no fue aceptada</string>
+    <string name="rv_ai_401">La clave no es válida o no tiene permiso</string>
+    <string name="rv_ai_404">El modelo no existe para esta clave; elige otro en Ajustes</string>
+    <string name="rv_ai_413">Se enviaron demasiados datos; elige un período más corto</string>
+    <string name="rv_ai_429">Llegaste al límite del plan gratuito; espera un rato o cambia de modelo</string>
+    <string name="rv_ai_5xx">El proveedor tiene problemas ahora mismo</string>
+    <string name="rv_ai_error_code">Error %1$d</string>
+</resources>

@@ -1,6 +1,8 @@
 package com.finanzasapp.domain.importing
 
 import com.finanzasapp.domain.dedupe.UniqueHash
+import com.finanzasapp.data.settings.Idioma
+import com.finanzasapp.R
 
 /**
  * Lector del PDF de Budge (budge-app.info).
@@ -151,8 +153,7 @@ object BudgeTextParser {
 
         if (rows.isEmpty()) {
             throw ImportParseException(
-                "No encontramos movimientos en el PDF. " +
-                    "Por ahora aceptamos los PDF exportados por Budge."
+                Idioma.text(R.string.mv_parse_pdf_none)
             )
         }
         return rows

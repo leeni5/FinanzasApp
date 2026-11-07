@@ -1,6 +1,8 @@
 package com.finanzasapp.data.importing
 
 import android.content.Context
+import com.finanzasapp.data.settings.Idioma
+import com.finanzasapp.R
 import androidx.room.withTransaction
 import com.finanzasapp.data.dao.AccountDao
 import com.finanzasapp.data.dao.CategoryDao
@@ -68,12 +70,12 @@ class ImportService(
         val skippedCurrency = rows.size - usable.size
         val finalWarnings = warnings.toMutableList()
         if (skippedCurrency > 0) {
-            finalWarnings += "$skippedCurrency movimientos no están en COP y se omitirán."
+            finalWarnings += Idioma.text(R.string.mv_import_non_cop, skippedCurrency)
         }
 
         if (usable.isEmpty()) {
             throw ImportParseException(
-                "El archivo no tiene movimientos en pesos colombianos (COP)."
+                Idioma.text(R.string.mv_import_no_cop)
             )
         }
 
@@ -239,7 +241,7 @@ class ImportService(
 
                 if (fallbackAccount == null) {
                     throw ImportParseException(
-                        "No hay una cuenta disponible para importar los movimientos."
+                        Idioma.text(R.string.mv_import_no_account)
                     )
                 }
 

@@ -1,5 +1,8 @@
 package com.finanzasapp.ui.screens.cuentas
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.data.settings.Idioma
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -81,10 +84,10 @@ import kotlinx.coroutines.launch
 
 /** Etiqueta en español de cada tipo de cuenta. */
 fun AccountType.label(): String = when (this) {
-    AccountType.AHORRO -> "Ahorros"
-    AccountType.DEBITO -> "Débito"
-    AccountType.CREDITO -> "Tarjeta de crédito"
-    AccountType.EFECTIVO -> "Efectivo"
+    AccountType.AHORRO -> Idioma.text(R.string.fz_acc_type_savings)
+    AccountType.DEBITO -> Idioma.text(R.string.fz_acc_type_debit)
+    AccountType.CREDITO -> Idioma.text(R.string.fz_acc_type_credit)
+    AccountType.EFECTIVO -> Idioma.text(R.string.fz_acc_type_cash)
 }
 
 /** Lista de cuentas con su saldo: lo que hay, lo que se debe y cada cuenta. */
@@ -109,19 +112,19 @@ fun CuentasScreen(onBack: () -> Unit, onOpenAccount: (Long) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
             item {
-                BackTitle("Cuentas", onBack)
+                BackTitle(stringResource(R.string.fz_acc_title), onBack)
                 Spacer(Modifier.height(Spacing.md))
                 HeroSurface {
-                    Text("Disponible en tus cuentas", style = MaterialTheme.typography.labelMedium, color = AppPalette.HeroInkSoft)
+                    Text(stringResource(R.string.fz_acc_available), style = MaterialTheme.typography.labelMedium, color = AppPalette.HeroInkSoft)
                     Spacer(Modifier.height(Spacing.xs))
                     AnimatedMoney(available, MaterialTheme.typography.displaySmall, AppPalette.HeroInk)
                     if (debt > 0L) {
                         Spacer(Modifier.height(Spacing.sm))
-                        Text("Deuda en tarjetas ${Money.cop(debt)}", style = MaterialTheme.typography.bodySmall, color = AppPalette.HeroDebt)
+                        Text(stringResource(R.string.fz_acc_card_debt, Money.cop(debt)), style = MaterialTheme.typography.bodySmall, color = AppPalette.HeroDebt)
                     }
                 }
                 Spacer(Modifier.height(Spacing.md))
-                SectionHeader("Tus cuentas", trailing = "${list.size}")
+                SectionHeader(stringResource(R.string.fz_acc_your_accounts), trailing = "${list.size}")
             }
 
             items(list, key = { it.accountId }) { account ->
@@ -131,7 +134,7 @@ fun CuentasScreen(onBack: () -> Unit, onOpenAccount: (Long) -> Unit) {
 
         ScrollAwareFab(
             visible = listState.isScrollingUp(),
-            description = "Nueva cuenta",
+            description = stringResource(R.string.fz_acc_new),
             onClick = { creating = true },
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = Spacing.page, bottom = Spacing.lg)
         )
@@ -170,7 +173,7 @@ private fun AccountRow(account: AccountBalance, onClick: () -> Unit) {
                         else -> AppPalette.Ink
                     }
                 )
-                Text(if (isCredit) "Deuda" else "Saldo", style = MaterialTheme.typography.labelSmall, color = AppPalette.InkFaint)
+                Text(if (isCredit) stringResource(R.string.fz_acc_debt) else stringResource(R.string.fz_acc_balance), style = MaterialTheme.typography.labelSmall, color = AppPalette.InkFaint)
             }
         }
     }
@@ -181,7 +184,7 @@ fun BackTitle(title: String, onBack: () -> Unit, trailing: (@Composable () -> Un
     Row(verticalAlignment = Alignment.CenterVertically) {
         Surface(onClick = onBack, shape = CircleShape, color = AppPalette.SurfaceMuted) {
             Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Volver", tint = AppPalette.Ink)
+                Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.fz_back), tint = AppPalette.Ink)
             }
         }
         Spacer(Modifier.width(Spacing.md))
@@ -235,18 +238,18 @@ fun AccountEditorSheet(
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AccountLogo(name.ifBlank { "Cuenta" }, effectiveLogo, type, color.toHex(), size = 48.dp)
+                AccountLogo(name.ifBlank { stringResource(R.string.fz_account) }, effectiveLogo, type, color.toHex(), size = 48.dp)
                 Spacer(Modifier.width(Spacing.md))
                 Text(
-                    if (initial == null) "Nueva cuenta" else "Editar cuenta",
+                    if (initial == null) stringResource(R.string.fz_acc_new) else stringResource(R.string.fz_acc_edit),
                     style = MaterialTheme.typography.headlineSmall,
                     color = AppPalette.Ink
                 )
             }
 
-            FieldBox(name, { name = it.take(32) }, "Nombre (ej. Nequi, Bancolombia ahorros)", if (tried && name.isBlank()) "Escribe un nombre." else null)
+            FieldBox(name, { name = it.take(32) }, stringResource(R.string.fz_acc_name_hint), if (tried && name.isBlank()) stringResource(R.string.fz_write_name) else null)
 
-            Label("Entidad")
+            Label(stringResource(R.string.fz_acc_bank))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 BankChoice(null, selected = effectiveLogo.isBlank(), type = type, color = color.toHex()) { logo = "" }
                 BankCatalog.banks.forEach { bank ->
@@ -254,7 +257,7 @@ fun AccountEditorSheet(
                 }
             }
 
-            Label("Tipo")
+            Label(stringResource(R.string.fz_acc_type))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(Spacing.sm), verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 AccountType.entries.forEach { option ->
                     val selected = option == type
@@ -270,13 +273,13 @@ fun AccountEditorSheet(
             }
 
             if (type == AccountType.CREDITO) {
-                FieldBox(limitText, { limitText = it.filter(Char::isDigit).take(12) }, "Cupo total", null, number = true)
-                FieldBox(balanceText, { balanceText = it.filter(Char::isDigit).take(12) }, "Deuda actual (opcional)", null, number = true)
+                FieldBox(limitText, { limitText = it.filter(Char::isDigit).take(12) }, stringResource(R.string.fz_acc_credit_limit), null, number = true)
+                FieldBox(balanceText, { balanceText = it.filter(Char::isDigit).take(12) }, stringResource(R.string.fz_acc_current_debt_optional), null, number = true)
             } else {
-                FieldBox(balanceText, { balanceText = it.filter(Char::isDigit).take(12) }, "Saldo inicial", null, number = true)
+                FieldBox(balanceText, { balanceText = it.filter(Char::isDigit).take(12) }, stringResource(R.string.fz_acc_initial_balance), null, number = true)
             }
 
-            Label("Color (si la entidad no tiene logo)")
+            Label(stringResource(R.string.fz_acc_color_hint))
             ColorPicker(color = color, onColorChange = { color = it })
 
             Button(
@@ -299,14 +302,14 @@ fun AccountEditorSheet(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text(if (initial == null) "Crear cuenta" else "Guardar cambios", style = MaterialTheme.typography.labelLarge) }
+            ) { Text(if (initial == null) stringResource(R.string.fz_acc_create) else stringResource(R.string.fz_save_changes), style = MaterialTheme.typography.labelLarge) }
 
             if (initial != null && onArchive != null) {
                 TextButton(onClick = { onArchive(initial) }, modifier = Modifier.fillMaxWidth()) {
-                    Text(if (initial.archived) "Recuperar cuenta" else "Archivar cuenta", color = AppPalette.Coral)
+                    Text(if (initial.archived) stringResource(R.string.fz_acc_restore) else stringResource(R.string.fz_acc_archive), color = AppPalette.Coral)
                 }
                 Text(
-                    "Archivar la oculta de listas y formularios; sus movimientos se conservan.",
+                    stringResource(R.string.fz_acc_archive_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkFaint,
                     textAlign = TextAlign.Center,
@@ -329,9 +332,9 @@ private fun BankChoice(key: String?, selected: Boolean, type: AccountType, color
             .padding(Spacing.xs),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        AccountLogo(bank?.name ?: "Otra", key ?: "", if (bank == null) type else AccountType.AHORRO, color, size = 40.dp)
+        AccountLogo(bank?.name ?: stringResource(R.string.fz_acc_other), key ?: "", if (bank == null) type else AccountType.AHORRO, color, size = 40.dp)
         Text(
-            bank?.name ?: "Otra",
+            bank?.name ?: stringResource(R.string.fz_acc_other),
             style = MaterialTheme.typography.labelSmall,
             color = AppPalette.InkSoft,
             maxLines = 1,

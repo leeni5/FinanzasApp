@@ -38,6 +38,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.finanzasapp.FinanzasApp
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.data.backup.BackupContents
 import com.finanzasapp.data.backup.BackupException
 import com.finanzasapp.data.backup.BackupService
@@ -81,7 +84,7 @@ fun BackupCard() {
             } catch (e: BackupException) {
                 error = e.message
             } catch (e: Exception) {
-                error = "No se pudo completar: ${e.message ?: e.javaClass.simpleName}"
+                error = Idioma.text(R.string.aj_backup_failed_generic, e.message ?: e.javaClass.simpleName)
             } finally {
                 busy = false
             }
@@ -93,7 +96,7 @@ fun BackupCard() {
     ) { uri ->
         if (uri != null) run {
             val count = BackupService.exportCsv(context, database, uri)
-            toast("Exportados $count movimientos.")
+            toast(Idioma.text(R.string.aj_csv_exported, count))
         }
     }
 
@@ -105,7 +108,7 @@ fun BackupCard() {
         if (uri != null && password != null) run {
             try {
                 val count = BackupService.createBackup(context, database, uri, password)
-                toast("Copia creada con $count movimientos. Guarda la contraseña: sin ella no se abre.")
+                toast(Idioma.text(R.string.aj_backup_created, count))
             } finally {
                 password.fill(' ')
             }
@@ -126,11 +129,9 @@ fun BackupCard() {
             IconBubble(icon = Icons.Rounded.Backup, tint = AppPalette.Green, size = 44.dp)
             Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
-                Text("Copia de seguridad", style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
+                Text(stringResource(R.string.aj_backup_title), style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
                 Text(
-                    text = "Android no respalda esta app. Crea una copia cifrada con tu contraseña " +
-                        "y guárdala fuera del teléfono; si lo pierdes o desinstalas la app, " +
-                        "es la única forma de recuperar tus datos.",
+                    text = stringResource(R.string.aj_backup_detail),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkSoft
                 )
@@ -145,21 +146,21 @@ fun BackupCard() {
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent),
                 contentPadding = PaddingValues(vertical = Spacing.md)
-            ) { Text("Crear copia") }
+            ) { Text(stringResource(R.string.aj_backup_create)) }
             OutlinedButton(
                 onClick = { openLauncher.launch(arrayOf("*/*")) },
                 enabled = !busy,
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.medium,
                 contentPadding = PaddingValues(vertical = Spacing.md)
-            ) { Text("Restaurar", color = AppPalette.Ink) }
+            ) { Text(stringResource(R.string.aj_backup_restore), color = AppPalette.Ink) }
         }
         if (busy) {
             Spacer(Modifier.height(Spacing.md))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(Modifier.height(18.dp).width(18.dp), strokeWidth = 2.dp, color = AppPalette.Accent)
                 Spacer(Modifier.width(Spacing.sm))
-                Text("Trabajando…", style = MaterialTheme.typography.bodySmall, color = AppPalette.InkSoft)
+                Text(stringResource(R.string.aj_backup_working), style = MaterialTheme.typography.bodySmall, color = AppPalette.InkSoft)
             }
         }
     }
@@ -169,10 +170,9 @@ fun BackupCard() {
             IconBubble(icon = Icons.Rounded.TableView, tint = AppPalette.Sky, size = 44.dp)
             Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
-                Text("Exportar a CSV", style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
+                Text(stringResource(R.string.aj_csv_title), style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
                 Text(
-                    text = "Todos los movimientos para abrir en Excel o Sheets. El archivo no va " +
-                        "cifrado: guárdalo en un lugar seguro.",
+                    text = stringResource(R.string.aj_csv_detail),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkSoft
                 )
@@ -185,7 +185,7 @@ fun BackupCard() {
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.medium,
             contentPadding = PaddingValues(vertical = Spacing.md)
-        ) { Text("Exportar movimientos", color = AppPalette.Ink) }
+        ) { Text(stringResource(R.string.aj_csv_export), color = AppPalette.Ink) }
     }
 
     passwordMode?.let { mode ->
@@ -216,13 +216,10 @@ fun BackupCard() {
         val date = contents.createdAt.atZone(Fechas.Bogota).toLocalDate()
         AlertDialog(
             onDismissRequest = { toRestore = null },
-            title = { Text("¿Reemplazar todo con esta copia?") },
+            title = { Text(stringResource(R.string.aj_restore_title)) },
             text = {
                 Text(
-                    "Copia del ${Fechas.diaYMes(date)} de ${date.year}: ${contents.movements} movimientos, " +
-                        "${contents.accounts} cuentas, ${contents.categories} categorías, " +
-                        "${contents.goals} metas y ${contents.payments} pagos.\n\n" +
-                        "Lo que hay ahora en la app se borra y queda lo de la copia. No se puede deshacer."
+                    stringResource(R.string.aj_restore_detail, Fechas.diaYMes(date), date.year, contents.movements, contents.accounts, contents.categories, contents.goals, contents.payments)
                 )
             },
             confirmButton = {
@@ -231,20 +228,20 @@ fun BackupCard() {
                     run {
                         BackupService.restore(database, contents)
                         PaymentReminderScheduler.rescheduleAll(context, database)
-                        toast("Copia restaurada: ${contents.movements} movimientos.")
+                        toast(Idioma.text(R.string.aj_restore_done, contents.movements))
                     }
-                }) { Text("Reemplazar todo", color = AppPalette.Coral) }
+                }) { Text(stringResource(R.string.aj_restore_confirm), color = AppPalette.Coral) }
             },
-            dismissButton = { TextButton(onClick = { toRestore = null }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { toRestore = null }) { Text(stringResource(R.string.aj_cancel)) } }
         )
     }
 
     error?.let { message ->
         AlertDialog(
             onDismissRequest = { error = null },
-            title = { Text("No se pudo") },
+            title = { Text(stringResource(R.string.aj_error_title)) },
             text = { Text(message) },
-            confirmButton = { TextButton(onClick = { error = null }) { Text("Entendido") } }
+            confirmButton = { TextButton(onClick = { error = null }) { Text(stringResource(R.string.aj_ok)) } }
         )
     }
 }
@@ -262,22 +259,21 @@ private fun PasswordDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (creating) "Contraseña para la copia" else "Contraseña de la copia") },
+        title = { Text(if (creating) stringResource(R.string.aj_password_create_title) else stringResource(R.string.aj_password_open_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 Text(
                     text = if (creating) {
-                        "Mínimo ${BackupService.MIN_PASSWORD} caracteres. La app no la guarda: " +
-                            "si la olvidas, la copia no se puede abrir."
+                        stringResource(R.string.aj_password_create_hint, BackupService.MIN_PASSWORD)
                     } else {
-                        "La que usaste al crear la copia."
+                        stringResource(R.string.aj_password_open_hint)
                     },
                     style = MaterialTheme.typography.bodySmall
                 )
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    label = { Text("Contraseña") },
+                    label = { Text(stringResource(R.string.aj_password_label)) },
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
@@ -286,7 +282,7 @@ private fun PasswordDialog(
                     OutlinedTextField(
                         value = repeat,
                         onValueChange = { repeat = it },
-                        label = { Text("Repítela") },
+                        label = { Text(stringResource(R.string.aj_password_repeat)) },
                         singleLine = true,
                         isError = repeat.isNotEmpty() && repeat != password,
                         visualTransformation = PasswordVisualTransformation(),
@@ -297,9 +293,9 @@ private fun PasswordDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(password.toCharArray()) }, enabled = valid) {
-                Text(if (creating) "Elegir dónde guardar" else "Abrir copia")
+                Text(if (creating) stringResource(R.string.aj_password_pick_location) else stringResource(R.string.aj_password_open_backup))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancelar") } }
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.aj_cancel)) } }
     )
 }

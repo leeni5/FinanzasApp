@@ -1,5 +1,8 @@
 package com.finanzasapp.ui.screens.categorias
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
@@ -65,7 +68,7 @@ import com.finanzasapp.ui.theme.readableInk
 import com.finanzasapp.ui.theme.toHex
 
 /** Cómo se pinta el icono de la categoría. */
-private enum class IconInk(val label: String) { AUTO("Auto"), BLANCO("Blanco"), NEGRO("Negro"), OTRO("Elegir") }
+private enum class IconInk(@StringRes val label: Int) { AUTO(R.string.fz_ink_auto), BLANCO(R.string.fz_ink_white), NEGRO(R.string.fz_ink_black), OTRO(R.string.fz_ink_pick) }
 
 /**
  * Crear o editar una categoría: nombre, icono, color de fondo y color del
@@ -125,7 +128,7 @@ fun CategoryEditorSheet(
             verticalArrangement = Arrangement.spacedBy(Spacing.lg)
         ) {
             Text(
-                text = if (initial == null) "Nueva categoría" else "Editar categoría",
+                text = if (initial == null) stringResource(R.string.fz_cat_new) else stringResource(R.string.fz_cat_edit),
                 style = MaterialTheme.typography.headlineSmall,
                 color = AppPalette.Ink
             )
@@ -147,7 +150,7 @@ fun CategoryEditorSheet(
                 )
                 Spacer(Modifier.width(Spacing.lg))
                 Text(
-                    text = name.ifBlank { "Nombre de la categoría" },
+                    text = name.ifBlank { stringResource(R.string.fz_cat_name_placeholder) },
                     style = MaterialTheme.typography.titleMedium,
                     color = animatedBg.readableInk(),
                     maxLines = 1,
@@ -159,7 +162,7 @@ fun CategoryEditorSheet(
                 value = name,
                 onValueChange = { name = it.take(32) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text("Nombre") },
+                label = { Text(stringResource(R.string.fz_name)) },
                 singleLine = true,
                 shape = MaterialTheme.shapes.medium,
                 colors = editorFieldColors()
@@ -184,19 +187,19 @@ fun CategoryEditorSheet(
                     )
                     Spacer(Modifier.width(Spacing.md))
                     Text(
-                        text = if (iconKey.isBlank()) "Elegir un icono" else "Cambiar icono",
+                        text = if (iconKey.isBlank()) stringResource(R.string.fz_cat_choose_an_icon) else stringResource(R.string.fz_cat_change_icon),
                         style = MaterialTheme.typography.bodyMedium,
                         color = AppPalette.Ink,
                         modifier = Modifier.weight(1f)
                     )
-                    Text("Ver todos", style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
+                    Text(stringResource(R.string.fz_cat_see_all), style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
                 }
             }
 
-            EditorLabel("Color")
+            EditorLabel(stringResource(R.string.fz_color))
             ColorPicker(color = color, onColorChange = { color = it })
 
-            EditorLabel("Color del icono")
+            EditorLabel(stringResource(R.string.fz_cat_icon_color))
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 IconInk.entries.forEach { option ->
                     val selected = option == iconInk
@@ -206,7 +209,7 @@ fun CategoryEditorSheet(
                         color = if (selected) AppPalette.Accent else AppPalette.SurfaceMuted
                     ) {
                         Text(
-                            text = option.label,
+                            text = stringResource(option.label),
                             style = MaterialTheme.typography.labelMedium,
                             color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
@@ -240,7 +243,7 @@ fun CategoryEditorSheet(
                 )
             ) {
                 Text(
-                    text = if (initial == null) "Crear categoría" else "Guardar cambios",
+                    text = if (initial == null) stringResource(R.string.fz_cat_create) else stringResource(R.string.fz_save_changes),
                     style = MaterialTheme.typography.labelLarge
                 )
             }
@@ -251,7 +254,7 @@ fun CategoryEditorSheet(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = if (initial.archived) "Recuperar categoría" else "Archivar categoría",
+                        text = if (initial.archived) stringResource(R.string.fz_cat_restore) else stringResource(R.string.fz_cat_archive),
                         color = AppPalette.Coral,
                         style = MaterialTheme.typography.labelLarge
                     )
@@ -295,14 +298,14 @@ fun IconPickerDialog(
             Column(modifier = Modifier.padding(Spacing.lg)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = "Elegir icono",
+                        text = stringResource(R.string.fz_cat_choose_icon),
                         style = MaterialTheme.typography.titleLarge,
                         color = AppPalette.Ink,
                         modifier = Modifier.weight(1f)
                     )
                     Surface(onClick = onDismiss, shape = CircleShape, color = AppPalette.SurfaceMuted) {
                         Box(Modifier.size(36.dp), contentAlignment = Alignment.Center) {
-                            Icon(Icons.Rounded.Close, "Cerrar", tint = AppPalette.InkSoft, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Rounded.Close, stringResource(R.string.fz_close), tint = AppPalette.InkSoft, modifier = Modifier.size(18.dp))
                         }
                     }
                 }
@@ -311,7 +314,7 @@ fun IconPickerDialog(
                     value = query,
                     onValueChange = { query = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Buscar: mercado, regalo, carro…") },
+                    placeholder = { Text(stringResource(R.string.fz_cat_search_placeholder)) },
                     leadingIcon = { Icon(Icons.Rounded.Search, null, tint = AppPalette.InkSoft) },
                     singleLine = true,
                     shape = MaterialTheme.shapes.medium,
@@ -342,7 +345,7 @@ fun IconPickerDialog(
                     } else if (results.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             Text(
-                                text = "No hay iconos para “$query”.",
+                                text = stringResource(R.string.fz_cat_no_icons, query),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = AppPalette.InkSoft
                             )

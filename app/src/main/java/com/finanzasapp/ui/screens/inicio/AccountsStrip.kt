@@ -1,6 +1,8 @@
 package com.finanzasapp.ui.screens.inicio
 
 import androidx.compose.foundation.border
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,7 +72,7 @@ fun AccountsStrip(onOpenAccount: (Long) -> Unit, onOpenAccounts: () -> Unit) {
                         maxLines = 1
                     )
                     if (isCredit) {
-                        Text("Deuda", style = MaterialTheme.typography.labelSmall, color = AppPalette.InkFaint)
+                        Text(stringResource(R.string.mv_home_debt), style = MaterialTheme.typography.labelSmall, color = AppPalette.InkFaint)
                     }
                 }
             }
@@ -89,8 +91,8 @@ fun AccountsStrip(onOpenAccount: (Long) -> Unit, onOpenAccounts: () -> Unit) {
                         Icon(Icons.Rounded.Add, null, tint = AppPalette.Accent)
                     }
                     Spacer(Modifier.height(Spacing.md))
-                    Text("Cuentas", style = MaterialTheme.typography.labelLarge, color = AppPalette.Accent)
-                    Text("ver y agregar", style = MaterialTheme.typography.labelSmall, color = AppPalette.InkFaint)
+                    Text(stringResource(R.string.mv_home_accounts), style = MaterialTheme.typography.labelLarge, color = AppPalette.Accent)
+                    Text(stringResource(R.string.mv_home_see_and_add), style = MaterialTheme.typography.labelSmall, color = AppPalette.InkFaint)
                 }
             }
         }

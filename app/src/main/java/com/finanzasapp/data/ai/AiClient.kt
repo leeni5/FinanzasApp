@@ -1,5 +1,7 @@
 package com.finanzasapp.data.ai
 
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -98,7 +100,7 @@ object AiClient {
             request(provider, apiKey, "POST", "/chat/completions", payload(false), onLine)
         }
         val content = answer.toString().trim()
-        if (content.isEmpty()) throw AiException("El modelo no devolvió texto. Intenta de nuevo o elige otro modelo.")
+        if (content.isEmpty()) throw AiException(Idioma.text(R.string.rv_ai_no_text))
         return content
     }
 
@@ -145,12 +147,12 @@ object AiClient {
         } catch (error: AiException) {
             throw error
         } catch (error: UnknownHostException) {
-            throw AiException("Sin conexión a internet. La app sigue funcionando; la IA no está disponible ahora.")
+            throw AiException(Idioma.text(R.string.rv_ai_offline))
         } catch (error: SocketTimeoutException) {
-            throw AiException("${provider.label} tardó demasiado en responder. Intenta de nuevo.")
+            throw AiException(Idioma.text(R.string.rv_ai_timeout, provider.label))
         } catch (error: IOException) {
             coroutineContext.ensureActive()
-            throw AiException("No se pudo hablar con ${provider.label}: ${error.message ?: "error de red"}.")
+            throw AiException(Idioma.text(R.string.rv_ai_io, provider.label, error.message ?: Idioma.text(R.string.rv_ai_network_error)))
         } finally {
             handle?.dispose()
             connection.disconnect()
@@ -165,13 +167,13 @@ object AiClient {
                 ?: json.optString("detail").takeIf { it.isNotBlank() }
         }.getOrNull()?.take(200)
         val base = when (code) {
-            400 -> "La petición no fue aceptada"
-            401, 403 -> "La clave no es válida o no tiene permiso"
-            404 -> "El modelo no existe para esta clave; elige otro en Ajustes"
-            413 -> "Se enviaron demasiados datos; elige un período más corto"
-            429 -> "Llegaste al límite del plan gratuito; espera un rato o cambia de modelo"
-            in 500..599 -> "El proveedor tiene problemas ahora mismo"
-            else -> "Error $code"
+            400 -> Idioma.text(R.string.rv_ai_400)
+            401, 403 -> Idioma.text(R.string.rv_ai_401)
+            404 -> Idioma.text(R.string.rv_ai_404)
+            413 -> Idioma.text(R.string.rv_ai_413)
+            429 -> Idioma.text(R.string.rv_ai_429)
+            in 500..599 -> Idioma.text(R.string.rv_ai_5xx)
+            else -> Idioma.text(R.string.rv_ai_error_code, code)
         }
         return if (detail != null) "$base. ($detail)" else "$base."
     }

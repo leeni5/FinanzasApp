@@ -1,5 +1,8 @@
 package com.finanzasapp.domain.importing
 
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
+
 /**
  * Lector CSV sin dependencias.
  *
@@ -13,10 +16,10 @@ object CsvParser {
             .replace("\r\n", "\n")
             .replace('\r', '\n')
 
-        if (text.isBlank()) throw ImportParseException("El archivo está vacío.")
+        if (text.isBlank()) throw ImportParseException(Idioma.text(R.string.mv_parse_empty))
 
         val rows = readRows(text)
-        if (rows.isEmpty()) throw ImportParseException("No encontramos filas en el archivo.")
+        if (rows.isEmpty()) throw ImportParseException(Idioma.text(R.string.mv_parse_no_rows_found))
 
         return TableParser.parse(rows, fileName)
     }

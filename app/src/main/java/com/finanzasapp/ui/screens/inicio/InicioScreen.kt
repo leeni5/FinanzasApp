@@ -1,6 +1,8 @@
 package com.finanzasapp.ui.screens.inicio
 
 import android.content.pm.ApplicationInfo
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -75,7 +77,7 @@ fun InicioScreen(
     ) {
         if (state.loading) {
             Text(
-                text = "Cargando tus datos…",
+                text = stringResource(R.string.mv_home_loading),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -92,22 +94,22 @@ fun InicioScreen(
             expenses = state.monthExpenses
         )
 
-        Section(title = "Tus cuentas", trailing = "Ver todas", onTrailing = onOpenAccounts) {
+        Section(title = stringResource(R.string.mv_home_your_accounts), trailing = stringResource(R.string.mv_home_see_all), onTrailing = onOpenAccounts) {
             AccountsStrip(onOpenAccount = onOpenAccount, onOpenAccounts = onOpenAccounts)
         }
 
         Section(
-            title = "Dónde se fue el dinero",
+            title = stringResource(R.string.mv_home_where_money),
             trailing = Fechas.mesActual()
         ) {
             SpendingCard(categories = state.categories)
         }
 
-        Section(title = "Próximos pagos", trailing = "Ver todos", onTrailing = onOpenPayments) {
+        Section(title = stringResource(R.string.mv_home_upcoming), trailing = stringResource(R.string.mv_home_see_all_m), onTrailing = onOpenPayments) {
             PaymentsCard(payments = state.payments, onClick = onOpenPayments)
         }
 
-        Section(title = "Metas") {
+        Section(title = stringResource(R.string.mv_home_goals)) {
             GoalsCard(goals = state.goals)
         }
 
@@ -124,7 +126,7 @@ private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
     HeroSurface(contentPadding = PaddingValues(0.dp)) {
         Column(modifier = Modifier.padding(Spacing.xl)) {
             Text(
-                text = "Saldo disponible",
+                text = stringResource(R.string.mv_home_available),
                 style = MaterialTheme.typography.labelMedium,
                 color = AppPalette.HeroInkSoft
             )
@@ -132,7 +134,7 @@ private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
             AnimatedMoney(amount = balance, style = MaterialTheme.typography.displaySmall, color = AppPalette.HeroInk)
             Spacer(Modifier.height(Spacing.xs))
             Text(
-                text = "Ahorro, débito y efectivo",
+                text = stringResource(R.string.mv_home_available_detail),
                 style = MaterialTheme.typography.bodySmall,
                 color = AppPalette.HeroInkFaint
             )
@@ -142,13 +144,13 @@ private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
             Spacer(Modifier.height(Spacing.md))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Deuda en tarjetas",
+                    text = stringResource(R.string.mv_home_card_debt),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.HeroInkSoft
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = if (cardDebt > 0L) Money.cop(cardDebt) else "Sin deuda",
+                    text = if (cardDebt > 0L) Money.cop(cardDebt) else stringResource(R.string.mv_home_no_debt),
                     style = MaterialTheme.typography.labelLarge,
                     color = if (cardDebt > 0L) AppPalette.HeroDebt else AppPalette.HeroOk
                 )
@@ -162,19 +164,19 @@ private fun HeroBalanceCard(balance: Long, cardDebt: Long) {
 private fun MonthSummary(income: Long, expenses: Long) {
     Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
         Text(
-            text = "Este mes · ${Fechas.mesActual()}",
+            text = stringResource(R.string.mv_home_this_month, Fechas.mesActual()),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
             SummaryTile(
-                label = "Ingresos",
+                label = stringResource(R.string.mv_income),
                 amount = income,
                 color = AppPalette.Green,
                 modifier = Modifier.weight(1f)
             )
             SummaryTile(
-                label = "Gastos",
+                label = stringResource(R.string.mv_expenses),
                 amount = expenses,
                 color = AppPalette.Coral,
                 modifier = Modifier.weight(1f)
@@ -231,8 +233,7 @@ private fun SpendingCard(categories: List<CategorySpending>) {
     AppCard {
         if (top.isEmpty()) {
             InlineEmpty(
-                text = "Todavía no hay gastos este mes. Cuando registres el primero, " +
-                    "aquí verás en qué se va el dinero."
+                text = stringResource(R.string.mv_home_no_expenses)
             )
             return@AppCard
         }
@@ -248,7 +249,7 @@ private fun SpendingCard(categories: List<CategorySpending>) {
         if (categories.size > top.size) {
             Spacer(Modifier.height(Spacing.md))
             Text(
-                text = "+ ${categories.size - top.size} categorías más",
+                text = stringResource(R.string.mv_home_more_categories, categories.size - top.size),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -302,9 +303,9 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
         Row {
             Text(
                 text = if (item.budget > 0L) {
-                    "${Money.percent(progress)} del presupuesto"
+                    stringResource(R.string.mv_home_of_budget, Money.percent(progress))
                 } else {
-                    "Sin presupuesto"
+                    stringResource(R.string.mv_home_no_budget)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -313,9 +314,9 @@ private fun CategoryRow(item: CategorySpending, maxSpent: Long) {
             if (item.budget > 0L) {
                 Text(
                     text = when {
-                        overBudget -> "${Money.cop(item.spent - item.budget)} de más"
-                        atLimit -> "Límite alcanzado"
-                        else -> "${Money.cop(item.budget - item.spent)} disponibles"
+                        overBudget -> stringResource(R.string.mv_home_over, Money.cop(item.spent - item.budget))
+                        atLimit -> stringResource(R.string.mv_home_limit)
+                        else -> stringResource(R.string.mv_home_left, Money.cop(item.budget - item.spent))
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = when {
@@ -338,8 +339,7 @@ private fun PaymentsCard(payments: List<ScheduledPayment>, onClick: () -> Unit) 
     AppCard(onClick = onClick) {
         if (next.isEmpty()) {
             InlineEmpty(
-                text = "No tienes pagos programados. Cuando agregues uno, " +
-                    "aquí aparecerá con su fecha y su aviso."
+                text = stringResource(R.string.mv_home_no_payments)
             )
             return@AppCard
         }
@@ -414,8 +414,7 @@ private fun GoalsCard(goals: List<GoalProgress>) {
     AppCard {
         if (visible.isEmpty()) {
             InlineEmpty(
-                text = "Todavía no hay metas. Crea una en Metas y aquí verás " +
-                    "cómo crece con cada aporte."
+                text = stringResource(R.string.mv_home_no_goals)
             )
             return@AppCard
         }
@@ -447,7 +446,7 @@ private fun GoalRow(goal: GoalProgress) {
                 modifier = Modifier.weight(1f)
             )
             if (goal.completed || goal.saved >= goal.targetAmount) {
-                SoftPill(text = "Completada", color = AppPalette.Green)
+                SoftPill(text = stringResource(R.string.mv_home_completed), color = AppPalette.Green)
             } else {
                 Text(
                     text = Money.percent(progress),
@@ -464,13 +463,13 @@ private fun GoalRow(goal: GoalProgress) {
         Spacer(Modifier.height(6.dp))
         Row {
             Text(
-                text = "${Money.cop(goal.saved)} de ${Money.cop(goal.targetAmount)}",
+                text = stringResource(R.string.mv_home_saved_of, Money.cop(goal.saved), Money.cop(goal.targetAmount)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "Meta: ${Fechas.corta(goal.targetDate)}",
+                text = stringResource(R.string.mv_home_goal_date, Fechas.corta(goal.targetDate)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -513,8 +512,7 @@ private fun DebugNote() {
         )
         Spacer(Modifier.width(Spacing.sm))
         Text(
-            text = "Estás viendo datos de ejemplo. La versión final arranca vacía, " +
-                "solo con tus categorías.",
+            text = stringResource(R.string.mv_home_sample_data),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

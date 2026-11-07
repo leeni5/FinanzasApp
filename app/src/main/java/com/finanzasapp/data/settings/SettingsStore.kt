@@ -1,6 +1,8 @@
 package com.finanzasapp.data.settings
 
 import android.content.Context
+import androidx.annotation.StringRes
+import com.finanzasapp.R
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -8,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 /** Cómo se pinta la app. Oscuro es el valor por defecto. */
-enum class ThemeMode(val label: String) {
-    OSCURO("Oscuro"),
-    CLARO("Claro"),
-    SISTEMA("Según el teléfono")
+enum class ThemeMode(@StringRes val labelRes: Int) {
+    OSCURO(R.string.aj_theme_dark),
+    CLARO(R.string.aj_theme_light),
+    SISTEMA(R.string.aj_theme_system)
 }
 
 private val Context.settingsDataStore by preferencesDataStore(name = "ajustes")

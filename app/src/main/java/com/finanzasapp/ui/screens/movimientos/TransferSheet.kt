@@ -1,6 +1,8 @@
 package com.finanzasapp.ui.screens.movimientos
 
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -93,10 +95,9 @@ fun TransferSheet(
                 .padding(bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Text("Transferencia", style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.mv_transfer), style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
             Text(
-                "Mueve dinero entre tus cuentas. No cuenta como gasto ni ingreso; " +
-                    "pagar la tarjeta desde el banco también es una transferencia.",
+                stringResource(R.string.mv_transfer_intro),
                 style = MaterialTheme.typography.bodySmall,
                 color = AppPalette.InkSoft
             )
@@ -104,7 +105,7 @@ fun TransferSheet(
             OutlinedTextField(
                 value = amountText,
                 onValueChange = { value -> amountText = value.filter { it.isDigit() }.take(12) },
-                label = { Text("Monto") },
+                label = { Text(stringResource(R.string.mv_amount)) },
                 prefix = { Text("$ ") },
                 singleLine = true,
                 visualTransformation = ThousandsTransformation,
@@ -112,17 +113,17 @@ fun TransferSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            AccountChoice("Sale de", accounts, fromId) { fromId = it }
-            AccountChoice("Llega a", accounts, toId) { toId = it }
+            AccountChoice(stringResource(R.string.mv_from), accounts, fromId) { fromId = it }
+            AccountChoice(stringResource(R.string.mv_to), accounts, toId) { toId = it }
             if (fromId != null && fromId == toId) {
-                Text("Elige dos cuentas distintas.", style = MaterialTheme.typography.bodySmall, color = AppPalette.Coral)
+                Text(stringResource(R.string.mv_two_accounts), style = MaterialTheme.typography.bodySmall, color = AppPalette.Coral)
             }
 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Descripción (opcional)") },
-                placeholder = { Text("Transferencia") },
+                label = { Text(stringResource(R.string.mv_description_optional)) },
+                placeholder = { Text(stringResource(R.string.mv_transfer)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -151,7 +152,7 @@ fun TransferSheet(
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
             ) {
-                Text(if (amount > 0L) "Transferir ${Money.cop(amount)}" else "Transferir")
+                Text(if (amount > 0L) stringResource(R.string.mv_transfer_amount, Money.cop(amount)) else stringResource(R.string.mv_transfer_action))
             }
         }
     }
@@ -166,9 +167,9 @@ fun TransferSheet(
                 TextButton(onClick = {
                     state.selectedDateMillis?.let { date = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
                     showDate = false
-                }) { Text("Listo") }
+                }) { Text(stringResource(R.string.mv_done)) }
             },
-            dismissButton = { TextButton(onClick = { showDate = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showDate = false }) { Text(stringResource(R.string.mv_cancel)) } }
         ) { DatePicker(state = state, showModeToggle = false) }
     }
 }
@@ -218,25 +219,24 @@ fun TransferInfoDialog(
         text = {
             Text(
                 if (confirming) {
-                    "Se borran los dos movimientos (salida y entrada) y los saldos vuelven a como estaban."
+                    stringResource(R.string.mv_transfer_delete_message)
                 } else {
-                    "${Money.cop(amount)} de $fromName a $toName, el ${Fechas.diaYMes(date)}.\n\n" +
-                        "Para cambiarla, bórrala y créala de nuevo."
+                    stringResource(R.string.mv_transfer_info, Money.cop(amount), fromName, toName, Fechas.diaYMes(date))
                 }
             )
         },
         confirmButton = {
             if (confirming) {
-                TextButton(onClick = onDelete) { Text("Borrar transferencia", color = AppPalette.Coral) }
+                TextButton(onClick = onDelete) { Text(stringResource(R.string.mv_delete_transfer), color = AppPalette.Coral) }
             } else {
-                TextButton(onClick = onDismiss) { Text("Cerrar") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.mv_close)) }
             }
         },
         dismissButton = {
             if (confirming) {
-                TextButton(onClick = { confirming = false }) { Text("Cancelar") }
+                TextButton(onClick = { confirming = false }) { Text(stringResource(R.string.mv_cancel)) }
             } else {
-                TextButton(onClick = { confirming = true }) { Text("Borrar", color = AppPalette.Coral) }
+                TextButton(onClick = { confirming = true }) { Text(stringResource(R.string.mv_delete_short), color = AppPalette.Coral) }
             }
         }
     )

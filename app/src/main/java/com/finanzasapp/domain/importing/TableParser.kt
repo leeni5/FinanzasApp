@@ -1,6 +1,8 @@
 package com.finanzasapp.domain.importing
 
 import kotlin.math.abs
+import com.finanzasapp.data.settings.Idioma
+import com.finanzasapp.R
 
 /**
  * Convierte una tabla (CSV o Excel) en movimientos.
@@ -40,7 +42,7 @@ object TableParser {
         accountNames + goalNames + typeNames
 
     fun parse(rows: List<List<String>>, fileName: String): Pair<List<ParsedRow>, List<String>> {
-        if (rows.isEmpty()) throw ImportParseException("El archivo no tiene filas.")
+        if (rows.isEmpty()) throw ImportParseException(Idioma.text(R.string.mv_parse_no_rows))
 
         val headerIndex = rows.indexOfFirst { row ->
             val keys = row.map { ParseUtils.normalize(it) }.toSet()
@@ -68,8 +70,7 @@ object TableParser {
 
         if (dateIndex == null || amountIndex == null) {
             throw ImportParseException(
-                "No encontramos las columnas de fecha y monto. " +
-                    "Revisa que el archivo tenga encabezados como Fecha, Descripción y Monto."
+                Idioma.text(R.string.mv_parse_no_columns)
             )
         }
 
@@ -105,7 +106,7 @@ object TableParser {
             if (date == null) {
                 omitted++
                 if (warnings.size < 8) {
-                    warnings += "Fila ${rowIndex + 1}: no entendimos la fecha “$dateRaw”."
+                    warnings += Idioma.text(R.string.mv_parse_bad_date, rowIndex + 1, dateRaw)
                 }
                 continue
             }
@@ -115,7 +116,7 @@ object TableParser {
             if (amount == null || amount == 0L) {
                 omitted++
                 if (warnings.size < 8) {
-                    warnings += "Fila ${rowIndex + 1}: el monto “$amountRaw” no es válido."
+                    warnings += Idioma.text(R.string.mv_parse_bad_amount, rowIndex + 1, amountRaw)
                 }
                 continue
             }
@@ -162,13 +163,12 @@ object TableParser {
         }
 
         if (omitted > warnings.size) {
-            warnings += "Y ${omitted - warnings.size} filas más con datos incompletos."
+            warnings += Idioma.text(R.string.mv_parse_more_rows, omitted - warnings.size)
         }
 
         if (parsed.isEmpty()) {
             throw ImportParseException(
-                "No encontramos movimientos válidos en “$fileName”. " +
-                    "Revisa que las fechas y los montos estén en columnas separadas."
+                Idioma.text(R.string.mv_parse_no_valid, fileName)
             )
         }
 

@@ -67,6 +67,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -152,12 +155,12 @@ fun ChatScreen(onBack: () -> Unit) {
         input = ""
         val history = turns.filter { !it.error }.map { AiMessage(if (it.fromUser) "user" else "assistant", it.text) }
         partial = ""
-        status = "Revisando tus movimientos"
+        status = Idioma.text(R.string.rv_chat_status_reviewing)
         sending = scope.launch {
             try {
                 val data = FinanceContext.build(app.database, questionRange, includeDetail = true, today = today)
                 snapshot = data
-                status = "${provider.label} está pensando"
+                status = Idioma.text(R.string.rv_chat_status_thinking, provider.label)
                 val answer = AiClient.chat(
                     provider,
                     key,
@@ -209,24 +212,24 @@ fun ChatScreen(onBack: () -> Unit) {
         ) {
             Surface(onClick = onBack, shape = CircleShape, color = AppPalette.SurfaceMuted) {
                 Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Volver", tint = AppPalette.Ink)
+                    Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.rv_back), tint = AppPalette.Ink)
                 }
             }
             Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
-                Text("Pregúntale a la IA", style = MaterialTheme.typography.titleLarge, color = AppPalette.Ink)
+                Text(stringResource(R.string.rv_chat_title), style = MaterialTheme.typography.titleLarge, color = AppPalette.Ink)
                 Text(
-                    if (configured) "${provider.label} · $model" else "Sin configurar",
+                    if (configured) "${provider.label} · $model" else stringResource(R.string.rv_chat_not_configured),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkSoft,
                     maxLines = 1
                 )
             }
             IconButton(onClick = { showData = true }) {
-                Icon(Icons.Rounded.Visibility, "Ver qué datos se envían", tint = AppPalette.InkSoft)
+                Icon(Icons.Rounded.Visibility, stringResource(R.string.rv_chat_view_data), tint = AppPalette.InkSoft)
             }
             IconButton(onClick = { showSetup = true }) {
-                Icon(Icons.Rounded.Tune, "Proveedor y modelo", tint = AppPalette.InkSoft)
+                Icon(Icons.Rounded.Tune, stringResource(R.string.rv_chat_provider_model), tint = AppPalette.InkSoft)
             }
         }
 
@@ -256,7 +259,7 @@ fun ChatScreen(onBack: () -> Unit) {
             OutlinedTextField(
                 value = input,
                 onValueChange = { input = it },
-                placeholder = { Text("Escribe tu pregunta") },
+                placeholder = { Text(stringResource(R.string.rv_chat_placeholder)) },
                 modifier = Modifier.weight(1f).heightIn(max = 140.dp),
                 shape = MaterialTheme.shapes.large
             )
@@ -285,9 +288,9 @@ fun ChatScreen(onBack: () -> Unit) {
             ) {
                 Box(Modifier.size(52.dp), contentAlignment = Alignment.Center) {
                     if (busy) {
-                        Icon(Icons.Rounded.Stop, "Detener", tint = AppPalette.Coral)
+                        Icon(Icons.Rounded.Stop, stringResource(R.string.rv_chat_stop), tint = AppPalette.Coral)
                     } else {
-                        Icon(Icons.AutoMirrored.Rounded.Send, "Enviar", tint = if (canSend) AppPalette.OnAccent else AppPalette.InkFaint)
+                        Icon(Icons.AutoMirrored.Rounded.Send, stringResource(R.string.rv_chat_send), tint = if (canSend) AppPalette.OnAccent else AppPalette.InkFaint)
                     }
                 }
             }
@@ -394,9 +397,9 @@ private fun DataSheet(text: String, provider: AiProvider, onDismiss: () -> Unit)
                 .padding(bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
-            Text("Qué se envía a ${provider.label}", style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.rv_chat_data_title, provider.label), style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
             Text(
-                "Esto, más tus instrucciones fijas y la conversación. Nada más sale del teléfono: ni notas, ni metas, ni la base.",
+                stringResource(R.string.rv_chat_data_text),
                 style = MaterialTheme.typography.bodySmall,
                 color = AppPalette.InkSoft
             )
@@ -426,7 +429,7 @@ fun AiSetupSheet(
 
     fun loadModels() {
         val apiKey = key.trim().ifBlank { settings.apiKey(provider).orEmpty() }
-        if (apiKey.isBlank()) { error = "Pega la clave de ${provider.label}."; return }
+        if (apiKey.isBlank()) { error = Idioma.text(R.string.rv_chat_paste_key, provider.label); return }
         loading = true
         error = null
         scope.launch {
@@ -435,7 +438,7 @@ fun AiSetupSheet(
                 if (key.isNotBlank()) settings.setApiKey(provider, key)
                 settings.provider = provider
                 if (selected !in models) selected = models.firstOrNull().orEmpty()
-                if (models.isEmpty()) error = "${provider.label} no devolvió modelos de chat para esta clave."
+                if (models.isEmpty()) error = Idioma.text(R.string.rv_chat_no_models, provider.label)
             } catch (e: AiException) {
                 error = e.message
             } finally {
@@ -459,9 +462,9 @@ fun AiSetupSheet(
                 .padding(bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Text("Conectar una IA", style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.rv_chat_setup_title), style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
             Text(
-                "Usa tu propia clave. Se guarda cifrada en este teléfono y solo se usa para hablar con el proveedor que elijas.",
+                stringResource(R.string.rv_chat_setup_text),
                 style = MaterialTheme.typography.bodySmall,
                 color = AppPalette.InkSoft
             )
@@ -488,13 +491,13 @@ fun AiSetupSheet(
                     }
                 }
             }
-            Text(provider.note, style = MaterialTheme.typography.bodySmall, color = AppPalette.InkSoft)
-            Text("La clave se saca en ${provider.keyUrl}", style = MaterialTheme.typography.bodySmall, color = AppPalette.Accent)
+            Text(stringResource(provider.note), style = MaterialTheme.typography.bodySmall, color = AppPalette.InkSoft)
+            Text(stringResource(R.string.rv_chat_key_url, provider.keyUrl), style = MaterialTheme.typography.bodySmall, color = AppPalette.Accent)
 
             OutlinedTextField(
                 value = key,
                 onValueChange = { key = it.trim() },
-                label = { Text(if (hasSavedKey) "Clave guardada · pega otra para cambiarla" else "Clave de la API") },
+                label = { Text(if (hasSavedKey) stringResource(R.string.rv_chat_key_saved) else stringResource(R.string.rv_chat_key_label)) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -506,12 +509,12 @@ fun AiSetupSheet(
                 modifier = Modifier.fillMaxWidth(),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text(if (loading) "Comprobando…" else "Comprobar clave y ver modelos") }
+            ) { Text(if (loading) stringResource(R.string.rv_chat_checking) else stringResource(R.string.rv_chat_check_key)) }
 
             error?.let { Text(it, style = MaterialTheme.typography.bodySmall, color = AppPalette.Coral) }
 
             if (models.isNotEmpty()) {
-                Text("Modelo", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+                Text(stringResource(R.string.rv_chat_model), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
                 models.forEach { id ->
                     val isSelected = id == selected
                     Surface(
@@ -538,7 +541,7 @@ fun AiSetupSheet(
                     modifier = Modifier.fillMaxWidth(),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-                ) { Text("Usar $selected") }
+                ) { Text(stringResource(R.string.rv_chat_use_model, selected)) }
             }
 
             if (hasSavedKey) {
@@ -546,8 +549,8 @@ fun AiSetupSheet(
                     settings.clearKey(provider)
                     models = emptyList()
                     selected = ""
-                    error = "Clave de ${provider.label} borrada del teléfono."
-                }) { Text("Borrar la clave de ${provider.label}", color = AppPalette.Coral) }
+                    error = Idioma.text(R.string.rv_chat_key_deleted, provider.label)
+                }) { Text(stringResource(R.string.rv_chat_delete_key, provider.label), color = AppPalette.Coral) }
             }
         }
     }

@@ -1,6 +1,9 @@
 package com.finanzasapp.ui.screens.movimientos
 
 import androidx.compose.foundation.background
+import com.finanzasapp.data.settings.Idioma
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -169,8 +172,8 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ScreenHeader(
-                        title = "Movimientos",
-                        subtitle = "Tus ingresos y gastos, en orden.",
+                        title = stringResource(R.string.mv_title),
+                        subtitle = stringResource(R.string.mv_subtitle),
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(Modifier.width(Spacing.sm))
@@ -181,7 +184,7 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.AutoAwesome,
-                            contentDescription = "Preguntar a la IA",
+                            contentDescription = stringResource(R.string.mv_ask_ai),
                             tint = AppPalette.Accent,
                             modifier = Modifier.padding(9.dp).size(22.dp)
                         )
@@ -193,7 +196,7 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
                         color = AppPalette.AccentSoft
                     ) {
                         Text(
-                            text = "Importar",
+                            text = stringResource(R.string.mv_import),
                             style = MaterialTheme.typography.labelLarge,
                             color = AppPalette.Accent,
                             modifier = Modifier.padding(
@@ -219,13 +222,13 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.md)) {
                     SummaryCard(
-                        label = "Ingresos",
+                        label = stringResource(R.string.mv_income),
                         amount = state.income,
                         color = AppPalette.Green,
                         modifier = Modifier.weight(1f)
                     )
                     SummaryCard(
-                        label = "Gastos",
+                        label = stringResource(R.string.mv_expenses),
                         amount = state.expenses,
                         color = AppPalette.Coral,
                         modifier = Modifier.weight(1f)
@@ -251,12 +254,10 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
 
                 state.monthCount == 0 -> item {
                     EmptyState(
-                        title = "Este mes está en blanco",
-                        message = "Registra tu primer movimiento o importa el archivo " +
-                            "que ya tienes. Aquí verás el detalle del día, la categoría " +
-                            "y la cuenta.",
+                        title = stringResource(R.string.mv_empty_month_title),
+                        message = stringResource(R.string.mv_empty_month_message),
                         icon = Icons.Filled.Add,
-                        actionLabel = "Registrar el primero",
+                        actionLabel = stringResource(R.string.mv_empty_month_action),
                         onAction = {
                             dialOpen = true
                         }
@@ -265,11 +266,10 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
 
                 state.visibleCount == 0 -> item {
                     EmptyState(
-                        title = "Sin resultados",
-                        message = "No encontramos movimientos para “${state.query}”. " +
-                            "Prueba con otra palabra o quita el filtro.",
+                        title = stringResource(R.string.mv_no_results_title),
+                        message = stringResource(R.string.mv_no_results_message, state.query),
                         icon = Icons.Filled.Search,
-                        actionLabel = "Limpiar búsqueda",
+                        actionLabel = stringResource(R.string.mv_clear_search),
                         onAction = {
                             viewModel.setQuery("")
                             viewModel.setFilter(MovementFilter.TODOS)
@@ -306,16 +306,16 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
             actions = listOfNotNull(
                 // Hace falta más de una cuenta para transferir entre ellas.
                 if (activeAccounts.size >= 2) {
-                    SpeedDialAction("Transferencia", Icons.Rounded.SwapHoriz, AppPalette.Sky) {
+                    SpeedDialAction(stringResource(R.string.mv_transfer), Icons.Rounded.SwapHoriz, AppPalette.Sky) {
                         creatingTransfer = true
                     }
                 } else {
                     null
                 },
-                SpeedDialAction("Ingreso", Icons.AutoMirrored.Rounded.TrendingUp, incomeColor) {
+                SpeedDialAction(stringResource(R.string.mv_income_one), Icons.AutoMirrored.Rounded.TrendingUp, incomeColor) {
                     editor = newMovement(activeCategories, activeAccounts, TransactionType.INGRESO)
                 },
-                SpeedDialAction("Gasto", Icons.AutoMirrored.Rounded.TrendingDown, expenseColor) {
+                SpeedDialAction(stringResource(R.string.mv_expense_one), Icons.AutoMirrored.Rounded.TrendingDown, expenseColor) {
                     editor = newMovement(activeCategories, activeAccounts, TransactionType.GASTO)
                 }
             )
@@ -365,8 +365,8 @@ fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
 
     viewingTransfer?.let { row ->
         val transaction = row.transaction
-        val otherName = state.accounts.firstOrNull { it.id == row.counterpartAccountId }?.name ?: "otra cuenta"
-        val thisName = row.account?.name ?: "esta cuenta"
+        val otherName = state.accounts.firstOrNull { it.id == row.counterpartAccountId }?.name ?: stringResource(R.string.mv_other_account)
+        val thisName = row.account?.name ?: stringResource(R.string.mv_this_account)
         TransferInfoDialog(
             description = transaction.displayName(),
             amount = transaction.amount,
@@ -414,7 +414,7 @@ private fun BalanceHero(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 MonthArrow(
                     icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    description = "Mes anterior",
+                    description = stringResource(R.string.mv_prev_month),
                     enabled = true,
                     onClick = onPrevious
                 )
@@ -427,7 +427,7 @@ private fun BalanceHero(
                 )
                 MonthArrow(
                     icon = Icons.AutoMirrored.Filled.ArrowForward,
-                    description = "Mes siguiente",
+                    description = stringResource(R.string.mv_next_month),
                     enabled = canGoForward,
                     onClick = onNext
                 )
@@ -436,7 +436,7 @@ private fun BalanceHero(
             Spacer(Modifier.height(Spacing.lg))
 
             Text(
-                text = "Saldo del mes",
+                text = stringResource(R.string.mv_month_balance),
                 style = MaterialTheme.typography.labelMedium,
                 color = AppPalette.HeroInkSoft
             )
@@ -446,7 +446,7 @@ private fun BalanceHero(
             Spacer(Modifier.height(Spacing.md))
 
             SoftPill(
-                text = if (isCurrentMonth) "Mes actual" else "Mes cerrado",
+                text = if (isCurrentMonth) stringResource(R.string.mv_current_month) else stringResource(R.string.mv_closed_month),
                 color = AppPalette.HeroInk,
                 background = AppPalette.HeroChip
             )
@@ -510,7 +510,7 @@ private fun SearchField(
         modifier = Modifier.fillMaxWidth(),
         placeholder = {
             Text(
-                text = "Buscar movimiento",
+                text = stringResource(R.string.mv_search_hint),
                 style = MaterialTheme.typography.bodyMedium
             )
         },
@@ -527,7 +527,7 @@ private fun SearchField(
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
                         imageVector = Icons.Filled.Clear,
-                        contentDescription = "Limpiar búsqueda",
+                        contentDescription = stringResource(R.string.mv_clear_search),
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -555,7 +555,7 @@ private fun FilterPills(
                 color = if (isSelected) AppPalette.Accent else AppPalette.SurfaceMuted
             ) {
                 Text(
-                    text = filter.label,
+                    text = stringResource(filter.labelRes),
                     style = MaterialTheme.typography.labelMedium,
                     color = if (isSelected) AppPalette.OnAccent else AppPalette.InkSoft,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
@@ -667,9 +667,12 @@ private fun MovementRowItem(
             )
             Text(
                 text = if (transaction.type == TransactionType.TRANSFERENCIA) {
-                    (if (transaction.transferOut) "Sale de " else "Llega a ") + (row.account?.name ?: "una cuenta")
+                    stringResource(
+                        if (transaction.transferOut) R.string.mv_transfer_out_from else R.string.mv_transfer_in_to,
+                        row.account?.name ?: stringResource(R.string.mv_an_account)
+                    )
                 } else {
-                    row.account?.name ?: (category?.name ?: "Sin categoría")
+                    row.account?.name ?: (category?.name ?: stringResource(R.string.mv_no_category))
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = inkSoft,
@@ -706,7 +709,7 @@ private fun LoadingRow() {
         )
         Spacer(Modifier.width(Spacing.sm))
         Text(
-            text = "Leyendo tus movimientos…",
+            text = stringResource(R.string.mv_loading),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -806,16 +809,16 @@ private fun MovementEditorSheet(
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = when {
-                            initial.id != null && isIncome -> "Editar ingreso"
-                            initial.id != null -> "Editar gasto"
-                            isIncome -> "Nuevo ingreso"
-                            else -> "Nuevo gasto"
+                            initial.id != null && isIncome -> stringResource(R.string.mv_edit_income)
+                            initial.id != null -> stringResource(R.string.mv_edit_expense)
+                            isIncome -> stringResource(R.string.mv_new_income)
+                            else -> stringResource(R.string.mv_new_expense)
                         },
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Se guarda solo en este teléfono.",
+                        text = stringResource(R.string.mv_saved_locally),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -824,7 +827,7 @@ private fun MovementEditorSheet(
                     Box(modifier = Modifier.size(36.dp), contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = stringResource(R.string.mv_close),
                             tint = AppPalette.InkSoft,
                             modifier = Modifier.size(18.dp)
                         )
@@ -844,7 +847,7 @@ private fun MovementEditorSheet(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Monto",
+                    text = stringResource(R.string.mv_amount),
                     style = MaterialTheme.typography.labelMedium,
                     color = AppPalette.InkSoft
                 )
@@ -889,14 +892,14 @@ private fun MovementEditorSheet(
             }
 
             // 3. ¿Qué fue?
-            EditorSection("¿Qué fue?")
+            EditorSection(stringResource(R.string.mv_section_what))
             TextField(
                 value = description,
                 onValueChange = { description = it.take(80) },
                 modifier = Modifier.fillMaxWidth(),
                 placeholder = {
                     Text(
-                        text = if (isIncome) "Ej. Salario, venta, reembolso…" else "Ej. Almuerzo, taxi, mercado…",
+                        text = if (isIncome) stringResource(R.string.mv_hint_income) else stringResource(R.string.mv_hint_expense),
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
@@ -907,7 +910,7 @@ private fun MovementEditorSheet(
             )
 
             Spacer(Modifier.height(Spacing.md))
-            FieldLabel("Categoría")
+            FieldLabel(stringResource(R.string.mv_category))
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalArrangement = Arrangement.spacedBy(Spacing.sm)
@@ -920,18 +923,18 @@ private fun MovementEditorSheet(
                     )
                 }
                 ChoiceChip(
-                    label = if (categories.isEmpty()) "+ Crear categoría" else "+ Nueva",
+                    label = if (categories.isEmpty()) stringResource(R.string.mv_create_category) else stringResource(R.string.mv_new_short),
                     selected = false,
                     onClick = { showNewCategory = true }
                 )
             }
 
             // 4. ¿De dónde y cuándo?
-            EditorSection("¿De dónde y cuándo?")
-            FieldLabel("Cuenta")
+            EditorSection(stringResource(R.string.mv_section_where))
+            FieldLabel(stringResource(R.string.mv_account))
             if (accounts.isEmpty()) {
                 Text(
-                    text = "Necesitas una cuenta para registrar movimientos.",
+                    text = stringResource(R.string.mv_need_account),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.Coral
                 )
@@ -951,7 +954,7 @@ private fun MovementEditorSheet(
             }
 
             Spacer(Modifier.height(Spacing.md))
-            FieldLabel("Fecha")
+            FieldLabel(stringResource(R.string.mv_date))
             Surface(
                 onClick = { showDatePicker = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -975,7 +978,7 @@ private fun MovementEditorSheet(
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.weight(1f)
                     )
-                    Text("Cambiar", style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
+                    Text(stringResource(R.string.mv_change), style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
                 }
             }
 
@@ -1010,9 +1013,9 @@ private fun MovementEditorSheet(
             ) {
                 Text(
                     text = when {
-                        initial.id != null -> "Guardar cambios"
-                        isIncome -> "Registrar ingreso"
-                        else -> "Registrar gasto"
+                        initial.id != null -> stringResource(R.string.mv_save_changes)
+                        isIncome -> stringResource(R.string.mv_add_income)
+                        else -> stringResource(R.string.mv_add_expense)
                     },
                     style = MaterialTheme.typography.labelLarge
                 )
@@ -1020,9 +1023,9 @@ private fun MovementEditorSheet(
             if (!canSave) {
                 Text(
                     text = when {
-                        amount <= 0L -> "Escribe el monto para continuar."
-                        description.isBlank() -> "Escribe qué fue para continuar."
-                        else -> "Elige una cuenta para continuar."
+                        amount <= 0L -> stringResource(R.string.mv_need_amount)
+                        description.isBlank() -> stringResource(R.string.mv_need_description)
+                        else -> stringResource(R.string.mv_need_account_choice)
                     },
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkFaint,
@@ -1046,7 +1049,7 @@ private fun MovementEditorSheet(
                     )
                     Spacer(Modifier.width(Spacing.xs))
                     Text(
-                        text = if (isIncome) "Eliminar ingreso" else "Eliminar gasto",
+                        text = if (isIncome) stringResource(R.string.mv_delete_income) else stringResource(R.string.mv_delete_expense),
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
@@ -1074,12 +1077,12 @@ private fun MovementEditorSheet(
                         showDatePicker = false
                     }
                 ) {
-                    Text("Listo")
+                    Text(stringResource(R.string.mv_done))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.mv_cancel))
                 }
             }
         ) {
@@ -1104,11 +1107,10 @@ private fun MovementEditorSheet(
     if (showDeleteConfirm && initial.id != null) {
         AlertDialog(
             onDismissRequest = { showDeleteConfirm = false },
-            title = { Text("¿Eliminar movimiento?") },
+            title = { Text(stringResource(R.string.mv_delete_title)) },
             text = {
                 Text(
-                    "El movimiento desaparece de la lista, pero la operación queda " +
-                        "en el historial de la app."
+                    stringResource(R.string.mv_delete_message)
                 )
             },
             confirmButton = {
@@ -1119,12 +1121,12 @@ private fun MovementEditorSheet(
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = AppPalette.Coral)
                 ) {
-                    Text("Eliminar")
+                    Text(stringResource(R.string.mv_delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteConfirm = false }) {
-                    Text("Cancelar")
+                    Text(stringResource(R.string.mv_cancel))
                 }
             },
             containerColor = MaterialTheme.colorScheme.surface
@@ -1264,8 +1266,8 @@ private fun amountLabel(transaction: Transaction): String = when (transaction.ty
 private fun dayLabel(date: LocalDate): String {
     val today = Fechas.hoy()
     return when (date) {
-        today -> "Hoy"
-        today.minusDays(1) -> "Ayer"
+        today -> Idioma.text(R.string.mv_today)
+        today.minusDays(1) -> Idioma.text(R.string.mv_yesterday)
         else -> Fechas.diaYMes(date)
     }
 }

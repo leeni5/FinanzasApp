@@ -1,6 +1,8 @@
 package com.finanzasapp.ui.screens.movimientos
 
 import androidx.lifecycle.ViewModel
+import androidx.annotation.StringRes
+import com.finanzasapp.R
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -31,10 +33,10 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 /** Los tres filtros visibles de la lista. */
-enum class MovementFilter(val label: String) {
-    TODOS("Todos"),
-    GASTOS("Gastos"),
-    INGRESOS("Ingresos")
+enum class MovementFilter(@StringRes val labelRes: Int) {
+    TODOS(R.string.mv_filter_all),
+    GASTOS(R.string.mv_expenses),
+    INGRESOS(R.string.mv_income)
 }
 
 /**

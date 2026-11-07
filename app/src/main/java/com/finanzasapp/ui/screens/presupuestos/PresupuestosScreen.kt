@@ -1,5 +1,8 @@
 package com.finanzasapp.ui.screens.presupuestos
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.data.settings.Idioma
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -80,12 +83,12 @@ fun PresupuestosScreen() {
     var editing by remember { mutableStateOf<BudgetRow?>(null) }
 
     PageScaffold(
-        title = "Presupuestos",
-        subtitle = "Límites claros para no romper el mes."
+        title = stringResource(R.string.fz_pres_title),
+        subtitle = stringResource(R.string.fz_pres_subtitle)
     ) {
         if (state.loading) {
             Text(
-                text = "Leyendo tus límites…",
+                text = stringResource(R.string.fz_pres_loading),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -112,7 +115,7 @@ fun PresupuestosScreen() {
         }
 
         if (state.budgeted.isNotEmpty()) {
-            Section(title = "Con límite") {
+            Section(title = stringResource(R.string.fz_pres_with_limit)) {
                 BudgetList(
                     rows = state.budgeted,
                     onEdit = { editing = it }
@@ -121,13 +124,13 @@ fun PresupuestosScreen() {
         }
 
         if (state.unbudgeted.isNotEmpty()) {
-            Section(title = "Sin límite") {
+            Section(title = stringResource(R.string.fz_pres_without_limit)) {
                 BudgetList(
                     rows = state.unbudgeted,
                     onEdit = { editing = it }
                 )
                 Text(
-                    text = "Toca una categoría para asignarle un límite mensual.",
+                    text = stringResource(R.string.fz_pres_tap_to_assign),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -136,9 +139,8 @@ fun PresupuestosScreen() {
 
         if (state.budgeted.isEmpty() && state.unbudgeted.isEmpty()) {
             EmptyState(
-                title = "No hay categorías de gasto",
-                message = "Cuando exista al menos una categoría, aquí podrás asignarle " +
-                    "un límite y seguir su ritmo durante el mes."
+                title = stringResource(R.string.fz_pres_no_categories_title),
+                message = stringResource(R.string.fz_pres_no_categories_message)
             )
         }
     }
@@ -172,7 +174,7 @@ private fun MonthSelector(
         IconButton(onClick = onPrevious) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Mes anterior",
+                contentDescription = stringResource(R.string.fz_previous_month),
                 tint = AppPalette.InkSoft,
                 modifier = Modifier.size(20.dp)
             )
@@ -187,7 +189,7 @@ private fun MonthSelector(
         IconButton(onClick = onNext, enabled = canGoForward) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = "Mes siguiente",
+                contentDescription = stringResource(R.string.fz_next_month),
                 tint = if (canGoForward) AppPalette.InkSoft else AppPalette.SurfaceStrong,
                 modifier = Modifier.size(20.dp)
             )
@@ -201,14 +203,13 @@ private fun MonthSelector(
 private fun NoLimitsCard() {
     AppCard {
         Text(
-            text = "Aún no hay límites",
+            text = stringResource(R.string.fz_pres_no_limits_title),
             style = MaterialTheme.typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            text = "Asigna un presupuesto a tus categorías para ver cuánto te queda " +
-                "y si el ritmo del mes está en riesgo.",
+            text = stringResource(R.string.fz_pres_no_limits_message),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -222,7 +223,7 @@ private fun BudgetSummary(state: PresupuestosUiState) {
     AppCard {
         Text(
             text = if (state.isCurrentMonth) {
-                "Este mes"
+                stringResource(R.string.fz_this_month)
             } else {
                 Fechas.mesDe(state.month.atDay(1))
             },
@@ -231,7 +232,7 @@ private fun BudgetSummary(state: PresupuestosUiState) {
         )
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            text = if (over) "Excedido" else "Disponible",
+            text = if (over) stringResource(R.string.fz_pres_exceeded) else stringResource(R.string.fz_pres_available),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -241,7 +242,7 @@ private fun BudgetSummary(state: PresupuestosUiState) {
             color = if (over) AppPalette.Coral else MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "de ${Money.cop(state.totalBudget)}",
+            text = stringResource(R.string.fz_metas_of_amount, Money.cop(state.totalBudget)),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -254,13 +255,13 @@ private fun BudgetSummary(state: PresupuestosUiState) {
         Spacer(Modifier.height(Spacing.sm))
         Row {
             Text(
-                text = "${Money.cop(state.totalSpent)} gastado",
+                text = stringResource(R.string.fz_pres_spent, Money.cop(state.totalSpent)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "${Money.percent(state.progress)} usado",
+                text = stringResource(R.string.fz_pres_percent_used, Money.percent(state.progress)),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -272,13 +273,13 @@ private fun BudgetSummary(state: PresupuestosUiState) {
             Spacer(Modifier.height(Spacing.md))
             Row {
                 Text(
-                    text = "Quedan ${state.daysLeft} días",
+                    text = stringResource(R.string.fz_pres_days_left, state.daysLeft),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(Modifier.weight(1f))
                 Text(
-                    text = "${Money.cop(state.dailyAllowance)} por día",
+                    text = stringResource(R.string.fz_pres_per_day, Money.cop(state.dailyAllowance)),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -309,7 +310,7 @@ private fun BudgetAlert(rows: List<BudgetRow>) {
             Spacer(Modifier.width(Spacing.md))
             Column {
                 Text(
-                    text = if (exceeded) "Presupuesto excedido" else "Ritmo alto",
+                    text = if (exceeded) stringResource(R.string.fz_pres_budget_exceeded) else stringResource(R.string.fz_pres_high_pace),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -317,17 +318,15 @@ private fun BudgetAlert(rows: List<BudgetRow>) {
                 Text(
                     text = if (exceeded) {
                         if (count == 1) {
-                            "Hay 1 categoría fuera de su límite o con el ritmo del mes " +
-                                "en riesgo. Revisa el detalle abajo."
+                            stringResource(R.string.fz_pres_alert_exceeded_one)
                         } else {
-                            "Hay $count categorías fuera de su límite o con el ritmo del mes " +
-                                "en riesgo. Revisa el detalle abajo."
+                            stringResource(R.string.fz_pres_alert_exceeded_many, count)
                         }
                     } else {
                         if (count == 1) {
-                            "1 categoría va a un ritmo que agotará su límite antes de fin de mes."
+                            stringResource(R.string.fz_pres_alert_risk_one)
                         } else {
-                            "$count categorías van a un ritmo que agotará su límite antes de fin de mes."
+                            stringResource(R.string.fz_pres_alert_risk_many, count)
                         }
                     },
                     style = MaterialTheme.typography.bodySmall,
@@ -344,7 +343,7 @@ private fun CalmNote() {
         ColorDot(color = AppPalette.Green, size = 7.dp)
         Spacer(Modifier.width(Spacing.sm))
         Text(
-            text = "Vas dentro del presupuesto este mes.",
+            text = stringResource(R.string.fz_pres_within_budget),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -430,7 +429,7 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
                     )
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = "${Money.percent(row.progress)} usado",
+                        text = stringResource(R.string.fz_pres_percent_used, Money.percent(row.progress)),
                         style = MaterialTheme.typography.labelSmall,
                         color = AppPalette.InkFaint
                     )
@@ -439,13 +438,13 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
                 Spacer(Modifier.height(Spacing.xs))
                 Row {
                     Text(
-                        text = "Sin límite mensual",
+                        text = stringResource(R.string.fz_pres_no_monthly_limit),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(Modifier.weight(1f))
                     Text(
-                        text = "Asignar",
+                        text = stringResource(R.string.fz_pres_assign),
                         style = MaterialTheme.typography.labelMedium,
                         color = AppPalette.Accent
                     )
@@ -456,12 +455,12 @@ private fun BudgetRowItem(row: BudgetRow, onClick: () -> Unit) {
 }
 
 private fun statusText(row: BudgetRow): String = when (row.status) {
-    BudgetStatus.EXCEDIDO -> "${Money.cop(-row.remaining)} de más"
-    BudgetStatus.RIESGO -> "Ritmo alto"
-    BudgetStatus.COMPLETO -> "Límite alcanzado"
-    BudgetStatus.AL_LIMITE -> "${Money.cop(row.remaining)} disponibles"
-    BudgetStatus.NORMAL -> "${Money.cop(row.remaining)} disponibles"
-    BudgetStatus.SIN_LIMITE -> "Sin límite mensual"
+    BudgetStatus.EXCEDIDO -> Idioma.text(R.string.fz_pres_over_by, Money.cop(-row.remaining))
+    BudgetStatus.RIESGO -> Idioma.text(R.string.fz_pres_high_pace)
+    BudgetStatus.COMPLETO -> Idioma.text(R.string.fz_pres_limit_reached)
+    BudgetStatus.AL_LIMITE -> Idioma.text(R.string.fz_pres_remaining_available, Money.cop(row.remaining))
+    BudgetStatus.NORMAL -> Idioma.text(R.string.fz_pres_remaining_available, Money.cop(row.remaining))
+    BudgetStatus.SIN_LIMITE -> Idioma.text(R.string.fz_pres_no_monthly_limit)
 }
 
 /**
@@ -521,12 +520,12 @@ private fun BudgetEditorSheet(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Presupuesto de ${row.name}",
+                        text = stringResource(R.string.fz_pres_budget_for, row.name),
                         style = MaterialTheme.typography.headlineSmall,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Se aplica a todos los meses.",
+                        text = stringResource(R.string.fz_pres_applies_all_months),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -542,7 +541,7 @@ private fun BudgetEditorSheet(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Close,
-                            contentDescription = "Cerrar",
+                            contentDescription = stringResource(R.string.fz_close),
                             tint = AppPalette.InkSoft,
                             modifier = Modifier.size(18.dp)
                         )
@@ -554,7 +553,7 @@ private fun BudgetEditorSheet(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Gastado en ${Fechas.mesDe(month.atDay(1))}",
+                    text = stringResource(R.string.fz_pres_spent_in, Fechas.mesDe(month.atDay(1))),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f)
@@ -569,7 +568,7 @@ private fun BudgetEditorSheet(
             Spacer(Modifier.height(Spacing.lg))
 
             Text(
-                text = "Límite mensual",
+                text = stringResource(R.string.fz_pres_monthly_limit),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(bottom = Spacing.xs)
@@ -604,7 +603,7 @@ private fun BudgetEditorSheet(
 
             Spacer(Modifier.height(Spacing.sm))
             Text(
-                text = "Escribe 0 para dejar esta categoría sin límite.",
+                text = stringResource(R.string.fz_pres_zero_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -612,7 +611,7 @@ private fun BudgetEditorSheet(
             if (willExceed) {
                 Spacer(Modifier.height(Spacing.sm))
                 Text(
-                    text = "El gasto de este mes ya supera este límite.",
+                    text = stringResource(R.string.fz_pres_already_over),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.Coral
                 )
@@ -632,7 +631,7 @@ private fun BudgetEditorSheet(
                 )
             ) {
                 Text(
-                    text = if (amount == 0L) "Quitar límite" else "Guardar límite",
+                    text = if (amount == 0L) stringResource(R.string.fz_pres_remove_limit) else stringResource(R.string.fz_pres_save_limit),
                     style = MaterialTheme.typography.labelLarge
                 )
             }

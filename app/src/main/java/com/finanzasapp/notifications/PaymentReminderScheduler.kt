@@ -11,7 +11,9 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.finanzasapp.R
 import com.finanzasapp.data.db.AppDatabase
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.data.entity.ScheduledPayment
 import com.finanzasapp.ui.util.Fechas
 import java.time.Duration
@@ -37,9 +39,9 @@ object PaymentReminderScheduler {
     fun createChannel(context: Context) {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Pagos programados",
+            Idioma.text(R.string.aj_channel_name),
             NotificationManager.IMPORTANCE_DEFAULT
-        ).apply { description = "Avisos antes de que venza un pago." }
+        ).apply { description = Idioma.text(R.string.aj_channel_description) }
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
 

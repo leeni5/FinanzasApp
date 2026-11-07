@@ -5,6 +5,7 @@ import android.content.pm.ApplicationInfo
 import com.finanzasapp.data.db.AppDatabase
 import com.finanzasapp.data.seed.SeedData
 import com.finanzasapp.data.settings.SettingsStore
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.data.security.AppLock
 import com.finanzasapp.notifications.PaymentReminderScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -31,8 +32,13 @@ class FinanzasApp : Application() {
     /** Bloqueo con huella (opcional, se activa en Ajustes). */
     val appLock: AppLock by lazy { AppLock(this) }
 
+    override fun attachBaseContext(base: android.content.Context) {
+        super.attachBaseContext(Idioma.wrap(base))
+    }
+
     override fun onCreate() {
         super.onCreate()
+        Idioma.init(this)
 
         val isDebuggable = (applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
         PaymentReminderScheduler.createChannel(this)

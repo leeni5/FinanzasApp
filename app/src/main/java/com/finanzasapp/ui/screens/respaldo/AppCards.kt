@@ -37,6 +37,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.finanzasapp.FinanzasApp
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.ui.components.AppCard
 import com.finanzasapp.ui.components.IconBubble
 import com.finanzasapp.ui.theme.AppPalette
@@ -59,10 +62,9 @@ fun LockCard() {
             IconBubble(icon = Icons.Rounded.Fingerprint, tint = AppPalette.Violet, size = 44.dp)
             Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
-                Text("Bloqueo con huella", style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
+                Text(stringResource(R.string.aj_lock_title), style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
                 Text(
-                    "Pide tu huella (o el PIN del teléfono) al abrir la app y al volver " +
-                        "a ella después de 30 segundos.",
+                    stringResource(R.string.aj_lock_detail),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkSoft
                 )
@@ -78,7 +80,7 @@ fun LockCard() {
                         return@Switch
                     }
                     // Tanto para activar como para desactivar se confirma con la huella.
-                    lock.authenticate(activity, if (wanted) "Activar el bloqueo" else "Quitar el bloqueo") { ok, error ->
+                    lock.authenticate(activity, if (wanted) Idioma.text(R.string.aj_lock_enable) else Idioma.text(R.string.aj_lock_disable)) { ok, error ->
                         if (ok) {
                             lock.enabled = wanted
                             enabled = wanted
@@ -123,7 +125,7 @@ fun ShareApkCard() {
             }
             Toast.makeText(
                 context,
-                if (ok) "Instalador guardado." else "No se pudo guardar el instalador.",
+                if (ok) Idioma.text(R.string.aj_apk_saved) else Idioma.text(R.string.aj_apk_save_failed),
                 Toast.LENGTH_LONG
             ).show()
         }
@@ -134,10 +136,9 @@ fun ShareApkCard() {
             IconBubble(icon = Icons.Rounded.Android, tint = AppPalette.Teal, size = 44.dp)
             Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
-                Text("Descargar la app (APK)", style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
+                Text(stringResource(R.string.aj_apk_title), style = MaterialTheme.typography.titleMedium, color = AppPalette.Ink)
                 Text(
-                    "Comparte el instalador de esta versión ($version) por WhatsApp, Drive o correo, " +
-                        "o guárdalo en el teléfono. No lleva tus datos: quien lo instale empieza con la app vacía.",
+                    stringResource(R.string.aj_apk_detail, version),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkSoft
                 )
@@ -151,13 +152,13 @@ fun ShareApkCard() {
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent),
                 contentPadding = PaddingValues(vertical = Spacing.md)
-            ) { Text("Compartir") }
+            ) { Text(stringResource(R.string.aj_apk_share)) }
             OutlinedButton(
                 onClick = { launcher.launch("FinanzasApp-$version.apk") },
                 modifier = Modifier.weight(1f),
                 shape = MaterialTheme.shapes.medium,
                 contentPadding = PaddingValues(vertical = Spacing.md)
-            ) { Text("Guardar", color = AppPalette.Ink) }
+            ) { Text(stringResource(R.string.aj_apk_save), color = AppPalette.Ink) }
         }
     }
 }
@@ -177,16 +178,16 @@ private suspend fun shareApk(context: Context, version: String) {
         }.getOrNull()
     }
     if (file == null) {
-        Toast.makeText(context, "No se pudo preparar el instalador.", Toast.LENGTH_LONG).show()
+        Toast.makeText(context, Idioma.text(R.string.aj_apk_prepare_failed), Toast.LENGTH_LONG).show()
         return
     }
     val uri = FileProvider.getUriForFile(context, "${context.packageName}.archivos", file)
     val send = Intent(Intent.ACTION_SEND)
         .setType("application/vnd.android.package-archive")
         .putExtra(Intent.EXTRA_STREAM, uri)
-        .putExtra(Intent.EXTRA_TEXT, "FinanzasApp $version: instálala abriendo el archivo (Android pedirá permitir apps de esta fuente).")
+        .putExtra(Intent.EXTRA_TEXT, Idioma.text(R.string.aj_apk_share_text, version))
         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    context.startActivity(Intent.createChooser(send, "Compartir FinanzasApp").addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+    context.startActivity(Intent.createChooser(send, Idioma.text(R.string.aj_apk_share_chooser)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
 }
 
 private fun Context.findActivity(): Activity? {

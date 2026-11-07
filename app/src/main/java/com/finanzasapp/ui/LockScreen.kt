@@ -23,7 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.finanzasapp.R
 import com.finanzasapp.ui.components.IconBubble
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 
@@ -47,10 +49,10 @@ fun LockScreen(onUnlock: () -> Unit) {
     ) {
         IconBubble(icon = Icons.Rounded.Fingerprint, tint = AppPalette.Accent, size = 72.dp)
         Spacer(Modifier.height(Spacing.lg))
-        Text("FinanzasApp está bloqueada", style = MaterialTheme.typography.titleLarge, color = AppPalette.Ink)
+        Text(stringResource(R.string.aj_lockscreen_title), style = MaterialTheme.typography.titleLarge, color = AppPalette.Ink)
         Spacer(Modifier.height(Spacing.xs))
         Text(
-            "Usa tu huella o el bloqueo de tu teléfono para entrar.",
+            stringResource(R.string.aj_lockscreen_detail),
             style = MaterialTheme.typography.bodyMedium,
             color = AppPalette.InkSoft
         )
@@ -60,6 +62,6 @@ fun LockScreen(onUnlock: () -> Unit) {
             shape = MaterialTheme.shapes.medium,
             colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent),
             contentPadding = PaddingValues(horizontal = Spacing.xl, vertical = Spacing.md)
-        ) { Text("Desbloquear") }
+        ) { Text(stringResource(R.string.aj_lockscreen_unlock)) }
     }
 }

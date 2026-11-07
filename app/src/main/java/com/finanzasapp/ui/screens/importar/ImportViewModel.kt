@@ -1,6 +1,8 @@
 package com.finanzasapp.ui.screens.importar
 
 import android.content.Context
+import com.finanzasapp.data.settings.Idioma
+import com.finanzasapp.R
 import android.net.Uri
 import android.provider.OpenableColumns
 import androidx.lifecycle.ViewModel
@@ -92,11 +94,11 @@ class ImportViewModel(
                 val mime = context.contentResolver.getType(uri)
                 val bytes = withContext(Dispatchers.IO) {
                     context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                } ?: throw ImportParseException("No pudimos abrir el archivo seleccionado.")
+                } ?: throw ImportParseException(Idioma.text(R.string.mv_import_open_error))
 
                 if (bytes.size > MAX_BYTES) {
                     throw ImportParseException(
-                        "El archivo supera los 25 MB. Divídelo en partes más pequeñas."
+                        Idioma.text(R.string.mv_import_too_big)
                     )
                 }
 
@@ -117,7 +119,7 @@ class ImportViewModel(
                 _state.update {
                     it.copy(
                         phase = ImportPhase.ERROR,
-                        error = error.message ?: "No pudimos leer el archivo."
+                        error = error.message ?: Idioma.text(R.string.mv_import_read_error)
                     )
                 }
             }
@@ -137,7 +139,7 @@ class ImportViewModel(
                 _state.update {
                     it.copy(
                         phase = ImportPhase.ERROR,
-                        error = error.message ?: "No pudimos actualizar la vista previa."
+                        error = error.message ?: Idioma.text(R.string.mv_import_preview_error)
                     )
                 }
             }
@@ -155,7 +157,7 @@ class ImportViewModel(
                 _state.update {
                     it.copy(
                         phase = ImportPhase.ERROR,
-                        error = error.message ?: "No pudimos guardar los movimientos."
+                        error = error.message ?: Idioma.text(R.string.mv_import_save_error)
                     )
                 }
             }

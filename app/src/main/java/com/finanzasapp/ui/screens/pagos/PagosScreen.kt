@@ -1,5 +1,8 @@
 package com.finanzasapp.ui.screens.pagos
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.data.settings.Idioma
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -120,11 +123,11 @@ fun PagosScreen(onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(onClick = onBack, shape = CircleShape, color = AppPalette.SurfaceMuted) {
                         Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Volver", tint = AppPalette.Ink)
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.fz_back), tint = AppPalette.Ink)
                         }
                     }
                     Spacer(Modifier.width(Spacing.md))
-                    Text("Pagos programados", style = MaterialTheme.typography.headlineMedium, color = AppPalette.Ink)
+                    Text(stringResource(R.string.fz_pagos_title), style = MaterialTheme.typography.headlineMedium, color = AppPalette.Ink)
                 }
                 Spacer(Modifier.height(Spacing.md))
             }
@@ -133,28 +136,27 @@ fun PagosScreen(onBack: () -> Unit) {
                 payments == null -> Unit
                 all.isEmpty() -> item {
                     EmptyState(
-                        title = "Sin pagos programados",
-                        message = "Agrega el arriendo, los servicios o tus suscripciones. " +
-                            "Te avisamos 7 días, 2 días y el día del vencimiento.",
-                        actionLabel = "Agregar el primero",
+                        title = stringResource(R.string.fz_pagos_empty_title),
+                        message = stringResource(R.string.fz_pagos_empty_message),
+                        actionLabel = stringResource(R.string.fz_pagos_add_first),
                         onAction = { creating = true }
                     )
                 }
                 else -> {
                     if (overdue.isNotEmpty()) {
-                        item { SectionHeader("Vencidos", trailing = "${overdue.size}") }
+                        item { SectionHeader(stringResource(R.string.fz_pagos_overdue), trailing = "${overdue.size}") }
                         items(overdue, key = { it.id }) { p ->
                             PaymentCard(p, accounts, categories, onPay = { paying = p }, onClick = { editing = p })
                         }
                     }
                     if (upcoming.isNotEmpty()) {
-                        item { SectionHeader("Próximos", trailing = "${upcoming.size}", modifier = Modifier.padding(top = Spacing.sm)) }
+                        item { SectionHeader(stringResource(R.string.fz_pagos_upcoming), trailing = "${upcoming.size}", modifier = Modifier.padding(top = Spacing.sm)) }
                         items(upcoming, key = { it.id }) { p ->
                             PaymentCard(p, accounts, categories, onPay = { paying = p }, onClick = { editing = p })
                         }
                     }
                     if (paused.isNotEmpty()) {
-                        item { SectionHeader("Pausados o terminados", trailing = "${paused.size}", modifier = Modifier.padding(top = Spacing.sm)) }
+                        item { SectionHeader(stringResource(R.string.fz_pagos_paused), trailing = "${paused.size}", modifier = Modifier.padding(top = Spacing.sm)) }
                         items(paused, key = { it.id }) { p ->
                             PaymentCard(p, accounts, categories, onPay = null, onClick = { editing = p })
                         }
@@ -165,7 +167,7 @@ fun PagosScreen(onBack: () -> Unit) {
 
         ScrollAwareFab(
             visible = listState.isScrollingUp(),
-            description = "Nuevo pago programado",
+            description = stringResource(R.string.fz_pagos_new_description),
             onClick = { creating = true },
             modifier = Modifier.align(Alignment.BottomEnd).padding(end = Spacing.page, bottom = Spacing.lg)
         )
@@ -208,11 +210,11 @@ fun PagosScreen(onBack: () -> Unit) {
                     busy = false
                     paying = null
                     if (receipt == null) {
-                        snackbar.showSnackbar("Ese ciclo ya estaba pagado o el pago cambió.")
+                        snackbar.showSnackbar(Idioma.text(R.string.fz_pagos_cycle_already_paid))
                     } else {
                         val result = snackbar.showSnackbar(
-                            message = "Pago de ${payment.name} registrado",
-                            actionLabel = "Deshacer",
+                            message = Idioma.text(R.string.fz_pagos_paid_snackbar, payment.name),
+                            actionLabel = Idioma.text(R.string.fz_undo),
                             duration = SnackbarDuration.Long
                         )
                         if (result == SnackbarResult.ActionPerformed) {
@@ -263,8 +265,8 @@ private fun PaymentCard(
                     text = buildString {
                         append(
                             when {
-                                !payment.active && payment.frequency == PaymentFrequency.UNICA -> "Pagado"
-                                !payment.active -> "Pausado"
+                                !payment.active && payment.frequency == PaymentFrequency.UNICA -> stringResource(R.string.fz_pagos_paid)
+                                !payment.active -> stringResource(R.string.fz_pagos_paused_one)
                                 else -> Fechas.vencimiento(payment.nextDueDate)
                             }
                         )
@@ -290,7 +292,7 @@ private fun PaymentCard(
                         ) {
                             Icon(Icons.Rounded.CheckCircle, null, tint = AppPalette.OnAccent, modifier = Modifier.size(14.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Pagar", style = MaterialTheme.typography.labelMedium, color = AppPalette.OnAccent)
+                            Text(stringResource(R.string.fz_pagos_pay), style = MaterialTheme.typography.labelMedium, color = AppPalette.OnAccent)
                         }
                     }
                 }
@@ -311,17 +313,16 @@ private fun PayDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = MaterialTheme.colorScheme.surface,
-        title = { Text("¿Marcar como pagado?") },
+        title = { Text(stringResource(R.string.fz_pagos_mark_paid_title)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 Text(
-                    "Se registra un gasto de ${Money.cop(payment.amount)} por ${payment.name}, con fecha de hoy, " +
-                        "y el pago pasa a su siguiente vencimiento.",
+                    stringResource(R.string.fz_pagos_mark_paid_message, Money.cop(payment.amount), payment.name),
                     style = MaterialTheme.typography.bodyMedium,
                     color = AppPalette.InkSoft
                 )
                 if (payment.accountId == null) {
-                    Text("¿Desde qué cuenta?", style = MaterialTheme.typography.labelLarge, color = AppPalette.Ink)
+                    Text(stringResource(R.string.fz_pagos_from_account), style = MaterialTheme.typography.labelLarge, color = AppPalette.Ink)
                     ChipRow(accounts.map { it.id to it.name }, accountId) { accountId = it }
                 }
             }
@@ -331,9 +332,9 @@ private fun PayDialog(
                 onClick = { onConfirm(accountId) },
                 enabled = !busy && accountId != null,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text(if (busy) "Guardando…" else "Marcar pagado") }
+            ) { Text(if (busy) stringResource(R.string.fz_saving) else stringResource(R.string.fz_pagos_mark_paid)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss, enabled = !busy) { Text("Cancelar", color = AppPalette.InkSoft) } }
+        dismissButton = { TextButton(onClick = onDismiss, enabled = !busy) { Text(stringResource(R.string.fz_cancel), color = AppPalette.InkSoft) } }
     )
 }
 
@@ -380,38 +381,38 @@ private fun PaymentEditorSheet(
                 .animateContentSize(),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
-            Text(if (initial == null) "Nuevo pago" else "Editar pago", style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
+            Text(if (initial == null) stringResource(R.string.fz_pagos_new) else stringResource(R.string.fz_pagos_edit), style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
 
-            Field(name, { name = it.take(40) }, "Nombre", if (nameError) "Escribe un nombre." else null)
+            Field(name, { name = it.take(40) }, stringResource(R.string.fz_name), if (nameError) stringResource(R.string.fz_write_name) else null)
             Field(
-                amountText, { v -> amountText = v.filter(Char::isDigit).take(12) }, "Monto en pesos",
-                if (amountError) "El monto debe ser mayor que cero." else null,
+                amountText, { v -> amountText = v.filter(Char::isDigit).take(12) }, stringResource(R.string.fz_pagos_amount),
+                if (amountError) stringResource(R.string.fz_pagos_amount_error) else null,
                 KeyboardOptions(keyboardType = KeyboardType.Number),
                 com.finanzasapp.ui.components.ThousandsTransformation
             )
 
-            Label("Frecuencia")
+            Label(stringResource(R.string.fz_pagos_frequency))
             ChipRow(
                 PaymentFrequency.entries.map { it.ordinal.toLong() to it.label() },
                 frequency.ordinal.toLong()
             ) { frequency = PaymentFrequency.entries[it.toInt()] }
 
-            Label("Próximo vencimiento")
+            Label(stringResource(R.string.fz_pagos_next_due))
             Surface(onClick = { showDate = true }, shape = MaterialTheme.shapes.medium, color = AppPalette.SurfaceMuted, modifier = Modifier.fillMaxWidth()) {
                 Row(Modifier.padding(Spacing.md), verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Rounded.CalendarMonth, null, tint = AppPalette.InkSoft)
                     Spacer(Modifier.width(Spacing.md))
                     Text(Fechas.fechaLarga(date), style = MaterialTheme.typography.bodyMedium, color = AppPalette.Ink, modifier = Modifier.weight(1f))
-                    Text("Cambiar", style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
+                    Text(stringResource(R.string.fz_change), style = MaterialTheme.typography.labelMedium, color = AppPalette.Accent)
                 }
             }
 
-            Label("Cuenta")
+            Label(stringResource(R.string.fz_account))
             ChipRow(accounts.map { it.id to it.name }, accountId) { accountId = it }
-            if (accountError) ErrorText("Elige la cuenta desde la que se paga.")
+            if (accountError) ErrorText(stringResource(R.string.fz_pagos_account_error))
 
-            Label("Categoría del gasto (opcional)")
-            ChipRow(listOf(-1L to "Ninguna") + categories.map { it.id to it.name }, categoryId ?: -1L) {
+            Label(stringResource(R.string.fz_pagos_category))
+            ChipRow(listOf(-1L to stringResource(R.string.fz_pagos_none)) + categories.map { it.id to it.name }, categoryId ?: -1L) {
                 categoryId = it.takeIf { id -> id >= 0 }
             }
 
@@ -433,16 +434,16 @@ private fun PaymentEditorSheet(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text(if (initial == null) "Programar pago" else "Guardar cambios", style = MaterialTheme.typography.labelLarge) }
+            ) { Text(if (initial == null) stringResource(R.string.fz_pagos_schedule) else stringResource(R.string.fz_save_changes), style = MaterialTheme.typography.labelLarge) }
 
             if (initial != null) {
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     TextButton(onClick = { onToggleActive(initial) }) {
                         Icon(if (initial.active) Icons.Rounded.Pause else Icons.Rounded.PlayArrow, null, tint = AppPalette.InkSoft)
                         Spacer(Modifier.width(Spacing.xs))
-                        Text(if (initial.active) "Pausar" else "Reanudar", color = AppPalette.InkSoft)
+                        Text(if (initial.active) stringResource(R.string.fz_pagos_pause) else stringResource(R.string.fz_pagos_resume), color = AppPalette.InkSoft)
                     }
-                    TextButton(onClick = { showDelete = true }) { Text("Eliminar", color = AppPalette.Coral) }
+                    TextButton(onClick = { showDelete = true }) { Text(stringResource(R.string.fz_delete), color = AppPalette.Coral) }
                 }
             }
         }
@@ -460,9 +461,9 @@ private fun PaymentEditorSheet(
                         date = Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate()
                     }
                     showDate = false
-                }) { Text("Listo") }
+                }) { Text(stringResource(R.string.fz_done)) }
             },
-            dismissButton = { TextButton(onClick = { showDate = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { showDate = false }) { Text(stringResource(R.string.fz_cancel)) } }
         ) { DatePicker(state = state) }
     }
 
@@ -470,18 +471,18 @@ private fun PaymentEditorSheet(
         AlertDialog(
             onDismissRequest = { showDelete = false },
             containerColor = MaterialTheme.colorScheme.surface,
-            title = { Text("¿Eliminar ${initial.name}?") },
-            text = { Text("Se borra el pago y sus avisos. Los gastos ya registrados se quedan.") },
-            confirmButton = { TextButton(onClick = { showDelete = false; onDelete(initial) }) { Text("Eliminar", color = AppPalette.Coral) } },
-            dismissButton = { TextButton(onClick = { showDelete = false }) { Text("Cancelar") } }
+            title = { Text(stringResource(R.string.fz_pagos_delete_title, initial.name)) },
+            text = { Text(stringResource(R.string.fz_pagos_delete_message)) },
+            confirmButton = { TextButton(onClick = { showDelete = false; onDelete(initial) }) { Text(stringResource(R.string.fz_delete), color = AppPalette.Coral) } },
+            dismissButton = { TextButton(onClick = { showDelete = false }) { Text(stringResource(R.string.fz_cancel)) } }
         )
     }
 }
 
 private fun PaymentFrequency.label(): String = when (this) {
-    PaymentFrequency.MENSUAL -> "Mensual"
-    PaymentFrequency.ANUAL -> "Anual"
-    PaymentFrequency.UNICA -> "Una vez"
+    PaymentFrequency.MENSUAL -> Idioma.text(R.string.fz_freq_monthly)
+    PaymentFrequency.ANUAL -> Idioma.text(R.string.fz_freq_yearly)
+    PaymentFrequency.UNICA -> Idioma.text(R.string.fz_freq_once)
 }
 
 @Composable

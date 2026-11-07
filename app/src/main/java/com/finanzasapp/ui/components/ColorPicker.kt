@@ -40,6 +40,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.unit.dp
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.IdentityPalette
 import com.finanzasapp.ui.theme.Spacing
@@ -96,7 +98,7 @@ fun ColorPicker(
                     if (selected) {
                         Icon(
                             imageVector = Icons.Rounded.Check,
-                            contentDescription = "Elegido",
+                            contentDescription = stringResource(R.string.aj_color_selected),
                             tint = swatch.readableInk(),
                             modifier = Modifier.size(18.dp)
                         )
@@ -105,7 +107,7 @@ fun ColorPicker(
             }
         }
 
-        SliderRow("Tono") {
+        SliderRow(stringResource(R.string.aj_color_hue)) {
             GradientSlider(
                 fraction = hue / 360f,
                 brush = Brush.horizontalGradient(
@@ -114,7 +116,7 @@ fun ColorPicker(
                 onChange = { hue = it * 360f; emit() }
             )
         }
-        SliderRow("Intensidad") {
+        SliderRow(stringResource(R.string.aj_color_saturation)) {
             GradientSlider(
                 fraction = sat,
                 brush = Brush.horizontalGradient(
@@ -123,7 +125,7 @@ fun ColorPicker(
                 onChange = { sat = it; emit() }
             )
         }
-        SliderRow("Brillo") {
+        SliderRow(stringResource(R.string.aj_color_brightness)) {
             GradientSlider(
                 fraction = value,
                 brush = Brush.horizontalGradient(

@@ -6,6 +6,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Locale
+import com.finanzasapp.data.settings.Idioma
 
 /**
  * Fechas en español y en hora de Bogotá.
@@ -15,13 +16,16 @@ import java.util.Locale
 object Fechas {
 
     val Bogota: ZoneId = ZoneId.of("America/Bogota")
-    private val locale = Locale.forLanguageTag("es-CO")
+    // Formatos según el idioma elegido en Ajustes. Se piden en cada uso: son
+    // baratos y así un cambio de idioma se refleja sin reiniciar.
+    private val locale: Locale get() = Idioma.locale
+    private val en: Boolean get() = Idioma.isEnglish
 
-    private val monthYear = DateTimeFormatter.ofPattern("MMMM 'de' yyyy", locale)
-    private val longDate = DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", locale)
-    private val shortDate = DateTimeFormatter.ofPattern("d MMM", locale)
-    private val monthShort = DateTimeFormatter.ofPattern("MMM", locale)
-    private val weekDay = DateTimeFormatter.ofPattern("EEEE", locale)
+    private val monthYear get() = DateTimeFormatter.ofPattern(if (en) "MMMM yyyy" else "MMMM 'de' yyyy", locale)
+    private val longDate get() = DateTimeFormatter.ofPattern(if (en) "EEEE, MMMM d" else "EEEE, d 'de' MMMM", locale)
+    private val shortDate get() = DateTimeFormatter.ofPattern(if (en) "MMM d" else "d MMM", locale)
+    private val monthShort get() = DateTimeFormatter.ofPattern("MMM", locale)
+    private val weekDay get() = DateTimeFormatter.ofPattern("EEEE", locale)
 
     fun hoy(): LocalDate = LocalDate.now(Bogota)
 
@@ -43,9 +47,9 @@ object Fechas {
 
     /** "Buenos días", "Buenas tardes" o "Buenas noches" según la hora local. */
     fun saludo(): String = when (LocalTime.now(Bogota).hour) {
-        in 5..11 -> "Buenos días"
-        in 12..18 -> "Buenas tardes"
-        else -> "Buenas noches"
+        in 5..11 -> if (en) "Good morning" else "Buenos días"
+        in 12..18 -> if (en) "Good afternoon" else "Buenas tardes"
+        else -> if (en) "Good evening" else "Buenas noches"
     }
 
     /**
@@ -55,17 +59,17 @@ object Fechas {
     fun vencimiento(date: LocalDate, today: LocalDate = hoy()): String {
         val days = ChronoUnit.DAYS.between(today, date)
         return when {
-            days < 0 -> "Vencido"
-            days == 0L -> "Hoy"
-            days == 1L -> "Mañana"
-            days <= 7L -> "En $days días"
+            days < 0 -> if (en) "Overdue" else "Vencido"
+            days == 0L -> if (en) "Today" else "Hoy"
+            days == 1L -> if (en) "Tomorrow" else "Mañana"
+            days <= 7L -> if (en) "In $days days" else "En $days días"
             else -> corta(date)
         }
     }
 
     /** "2 de noviembre" a partir de hoy, para metas y resúmenes. */
     fun diaYMes(date: LocalDate): String =
-        capitalize(date.format(DateTimeFormatter.ofPattern("d 'de' MMMM", locale)))
+        capitalize(date.format(DateTimeFormatter.ofPattern(if (en) "MMMM d" else "d 'de' MMMM", locale)))
 
     private fun capitalize(text: String): String =
         text.replaceFirstChar { if (it.isLowerCase()) it.titlecase(locale) else it.toString() }

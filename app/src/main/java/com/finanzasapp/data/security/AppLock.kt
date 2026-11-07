@@ -1,5 +1,7 @@
 package com.finanzasapp.data.security
 
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
 import android.app.Activity
 import android.app.KeyguardManager
 import android.content.Context
@@ -47,12 +49,12 @@ class AppLock(context: Context) {
     fun authenticate(activity: Activity, title: String, onResult: (Boolean, String?) -> Unit) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
             // Android 8: solo el bloqueo de pantalla del sistema.
-            onResult(false, "Tu versión de Android no permite el bloqueo con huella en la app.")
+            onResult(false, Idioma.text(R.string.aj_lock_unsupported))
             return
         }
         val builder = BiometricPrompt.Builder(activity)
             .setTitle(title)
-            .setSubtitle("Usa tu huella o el bloqueo de tu teléfono")
+            .setSubtitle(Idioma.text(R.string.aj_lock_prompt_subtitle))
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             builder.setAllowedAuthenticators(AUTHENTICATORS)
         } else {
@@ -74,28 +76,28 @@ class AppLock(context: Context) {
                 }
             }
         )
-        }.onFailure { onResult(false, "No se pudo abrir la huella: ${it.message ?: "error del sistema"}.") }
+        }.onFailure { onResult(false, Idioma.text(R.string.aj_lock_open_failed, it.message ?: Idioma.text(R.string.aj_system_error))) }
     }
 
     /** null si se puede usar; si no, el motivo para mostrarlo. */
     fun unavailableReason(context: Context): String? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
-            return "Tu versión de Android no permite el bloqueo con huella en la app."
+            return Idioma.text(R.string.aj_lock_unsupported)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val manager = context.getSystemService(BiometricManager::class.java)
             val status = runCatching { manager.canAuthenticate(AUTHENTICATORS) }
-                .getOrElse { return "No se pudo consultar la huella: ${it.message ?: "error del sistema"}." }
+                .getOrElse { return Idioma.text(R.string.aj_lock_check_failed, it.message ?: Idioma.text(R.string.aj_system_error)) }
             return when (status) {
                 BiometricManager.BIOMETRIC_SUCCESS -> null
                 BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED ->
-                    "Primero registra una huella o un bloqueo de pantalla en los ajustes del teléfono."
-                else -> "Este teléfono no tiene huella ni bloqueo de pantalla disponible."
+                    Idioma.text(R.string.aj_lock_enroll_first)
+                else -> Idioma.text(R.string.aj_lock_no_hardware)
             }
         }
         val keyguard = context.getSystemService(KeyguardManager::class.java)
         return if (keyguard.isDeviceSecure) null
-        else "Primero configura un bloqueo de pantalla en los ajustes del teléfono."
+        else Idioma.text(R.string.aj_lock_setup_screen_lock)
     }
 
     private companion object {

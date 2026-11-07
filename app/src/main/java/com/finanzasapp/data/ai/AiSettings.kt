@@ -4,6 +4,8 @@ import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
+import androidx.annotation.StringRes
+import com.finanzasapp.R
 import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
@@ -20,31 +22,31 @@ enum class AiProvider(
     val label: String,
     val baseUrl: String,
     val keyUrl: String,
-    val note: String
+    @StringRes val note: Int
 ) {
     GROQ(
         "Groq",
         "https://api.groq.com/openai/v1",
         "console.groq.com/keys",
-        "Plan gratuito con límites diarios. Muy rápido."
+        R.string.rv_note_groq
     ),
     MISTRAL(
         "Mistral",
         "https://api.mistral.ai/v1",
         "console.mistral.ai/api-keys",
-        "Plan gratuito con teléfono verificado, sin tarjeta. Puede usar lo enviado para entrenar si no lo desactivas en su consola."
+        R.string.rv_note_mistral
     ),
     OPENROUTER(
         "OpenRouter",
         "https://openrouter.ai/api/v1",
         "openrouter.ai/keys",
-        "Da acceso a muchos modelos; los que terminan en «:free» no cobran."
+        R.string.rv_note_openrouter
     ),
     GEMINI(
         "Gemini",
         "https://generativelanguage.googleapis.com/v1beta/openai",
         "aistudio.google.com/apikey",
-        "Clave de Google AI Studio. En el plan gratuito Google puede usar lo enviado."
+        R.string.rv_note_gemini
     )
 }
 

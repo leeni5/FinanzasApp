@@ -1,5 +1,9 @@
 package com.finanzasapp.ui.screens.cuentas
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
+import com.finanzasapp.data.settings.Idioma
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -58,8 +62,8 @@ import com.finanzasapp.ui.util.Money
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-private enum class Filtro(val label: String) { TODOS("Todos"), INGRESOS("Ingresos"), GASTOS("Gastos") }
-private enum class Rango(val label: String) { MES("Este mes"), TODO("Todo") }
+private enum class Filtro(@StringRes val label: Int) { TODOS(R.string.fz_det_all), INGRESOS(R.string.fz_det_income), GASTOS(R.string.fz_det_expenses) }
+private enum class Rango(@StringRes val label: Int) { MES(R.string.fz_this_month), TODO(R.string.fz_det_all_time) }
 
 /**
  * Una cuenta por dentro: su saldo, en qué se gasta (torta por categoría) y
@@ -108,7 +112,7 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
     val groups = shown.groupBy { it.date }.toList()
 
     val slices = spending.map { DonutSlice(it.name, it.spent, it.color.asColor()) } +
-        if (uncategorized > 0) listOf(DonutSlice("Sin categoría", uncategorized, AppPalette.InkFaint)) else emptyList()
+        if (uncategorized > 0) listOf(DonutSlice(stringResource(R.string.fz_no_category), uncategorized, AppPalette.InkFaint)) else emptyList()
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -116,12 +120,12 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(Spacing.sm)
     ) {
         item {
-            BackTitle(account?.name ?: "Cuenta", onBack) {
+            BackTitle(account?.name ?: stringResource(R.string.fz_account), onBack) {
                 Surface(onClick = { editing = true }, shape = MaterialTheme.shapes.medium, color = AppPalette.SurfaceMuted) {
                     Row(Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Rounded.Edit, null, tint = AppPalette.Accent, modifier = Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp))
-                        Text("Editar", style = MaterialTheme.typography.labelLarge, color = AppPalette.Accent)
+                        Text(stringResource(R.string.fz_edit), style = MaterialTheme.typography.labelLarge, color = AppPalette.Accent)
                     }
                 }
             }
@@ -138,7 +142,7 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
                         Spacer(Modifier.width(Spacing.md))
                         Column {
                             Text(account.type.label(), style = MaterialTheme.typography.labelMedium, color = AppPalette.HeroInkSoft)
-                            Text(if (isCredit) "Deuda actual" else "Saldo", style = MaterialTheme.typography.bodySmall, color = AppPalette.HeroInkFaint)
+                            Text(if (isCredit) stringResource(R.string.fz_det_current_debt) else stringResource(R.string.fz_acc_balance), style = MaterialTheme.typography.bodySmall, color = AppPalette.HeroInkFaint)
                         }
                     }
                     Spacer(Modifier.height(Spacing.md))
@@ -150,7 +154,7 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
                     if (isCredit && account.creditLimit != null) {
                         Spacer(Modifier.height(Spacing.xs))
                         Text(
-                            "Cupo disponible ${Money.cop((account.creditLimit + balance).coerceAtLeast(0L))} de ${Money.cop(account.creditLimit)}",
+                            stringResource(R.string.fz_det_available_credit, Money.cop((account.creditLimit + balance).coerceAtLeast(0L)), Money.cop(account.creditLimit)),
                             style = MaterialTheme.typography.bodySmall,
                             color = AppPalette.HeroInkSoft
                         )
@@ -162,45 +166,45 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
         // Rango + entradas/salidas + torta.
         item {
             Spacer(Modifier.height(Spacing.sm))
-            Pills(Rango.entries.map { it.label }, rango.ordinal) { rango = Rango.entries[it] }
+            Pills(Rango.entries.map { stringResource(it.label) }, rango.ordinal) { rango = Rango.entries[it] }
             Spacer(Modifier.height(Spacing.sm))
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
-                Totals("Entró", income, AppPalette.Green, Modifier.weight(1f))
-                Totals("Salió", expenses, AppPalette.Coral, Modifier.weight(1f))
+                Totals(stringResource(R.string.fz_det_in), income, AppPalette.Green, Modifier.weight(1f))
+                Totals(stringResource(R.string.fz_det_out), expenses, AppPalette.Coral, Modifier.weight(1f))
             }
         }
 
         item {
             AppCard {
-                Text("¿En qué se gasta?", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+                Text(stringResource(R.string.fz_det_where_spent), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
                 Spacer(Modifier.height(Spacing.md))
                 if (slices.isEmpty()) {
                     Text(
-                        if (rango == Rango.MES) "Este mes no hay gastos en esta cuenta." else "Esta cuenta no tiene gastos.",
+                        if (rango == Rango.MES) stringResource(R.string.fz_det_no_expenses_month) else stringResource(R.string.fz_det_no_expenses),
                         style = MaterialTheme.typography.bodySmall,
                         color = AppPalette.InkSoft
                     )
                 } else {
-                    DonutChart(slices = slices, centerLabel = "Gastos")
+                    DonutChart(slices = slices, centerLabel = stringResource(R.string.fz_det_expenses))
                 }
             }
         }
 
         // Movimientos.
         item {
-            SectionHeader("Movimientos", trailing = "${shown.size}", modifier = Modifier.padding(top = Spacing.md))
+            SectionHeader(stringResource(R.string.fz_det_transactions), trailing = "${shown.size}", modifier = Modifier.padding(top = Spacing.md))
             Spacer(Modifier.height(Spacing.sm))
-            Pills(Filtro.entries.map { it.label }, filtro.ordinal) { filtro = Filtro.entries[it] }
+            Pills(Filtro.entries.map { stringResource(it.label) }, filtro.ordinal) { filtro = Filtro.entries[it] }
         }
 
         if (shown.isEmpty()) {
             item {
                 EmptyState(
-                    title = "Sin movimientos",
+                    title = stringResource(R.string.fz_det_no_transactions),
                     message = when (filtro) {
-                        Filtro.TODOS -> "Todavía no hay movimientos en esta cuenta."
-                        Filtro.INGRESOS -> "No hay ingresos en esta cuenta."
-                        Filtro.GASTOS -> "No hay gastos en esta cuenta."
+                        Filtro.TODOS -> stringResource(R.string.fz_det_no_transactions_all)
+                        Filtro.INGRESOS -> stringResource(R.string.fz_det_no_income)
+                        Filtro.GASTOS -> stringResource(R.string.fz_det_no_expenses_filter)
                     }
                 )
             }
@@ -259,7 +263,7 @@ private fun MovementCard(transaction: Transaction, category: com.finanzasapp.dat
         Spacer(Modifier.width(Spacing.lg))
         Column(Modifier.weight(1f)) {
             Text(transaction.displayName(), style = MaterialTheme.typography.titleSmall, color = ink, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text(category?.name ?: "Sin categoría", style = MaterialTheme.typography.bodySmall, color = inkSoft, maxLines = 1)
+            Text(category?.name ?: stringResource(R.string.fz_no_category), style = MaterialTheme.typography.bodySmall, color = inkSoft, maxLines = 1)
         }
         Text(
             (if (transaction.signedAmount() >= 0L) "+ " else "− ") + Money.cop(transaction.amount),
@@ -301,8 +305,8 @@ private fun Pills(options: List<String>, selected: Int, onSelect: (Int) -> Unit)
 private fun dayLabel(date: LocalDate): String {
     val today = Fechas.hoy()
     return when (date) {
-        today -> "Hoy"
-        today.minusDays(1) -> "Ayer"
+        today -> Idioma.text(R.string.fz_today)
+        today.minusDays(1) -> Idioma.text(R.string.fz_yesterday)
         else -> Fechas.diaYMes(date)
     }
 }

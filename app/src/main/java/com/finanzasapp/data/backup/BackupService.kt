@@ -6,7 +6,9 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.net.Uri
 import androidx.room.withTransaction
+import com.finanzasapp.R
 import com.finanzasapp.data.db.AppDatabase
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.data.entity.AuditLog
 import com.finanzasapp.data.entity.TransactionType
 import com.finanzasapp.data.model.displayName
@@ -91,7 +93,7 @@ object BackupService {
         password: CharArray
     ): Int = withContext(Dispatchers.IO) {
         if (password.size < MIN_PASSWORD) {
-            throw BackupException("La contraseña debe tener al menos $MIN_PASSWORD caracteres.")
+            throw BackupException(Idioma.text(R.string.aj_err_password_short, MIN_PASSWORD))
         }
         val tables = JSONObject()
         var movements = 0
@@ -116,7 +118,7 @@ object BackupService {
 
         val encrypted = encrypt(gzip(payload), password)
         val stream = context.contentResolver.openOutputStream(uri, "wt")
-            ?: throw BackupException("No se pudo escribir el archivo elegido.")
+            ?: throw BackupException(Idioma.text(R.string.aj_err_write))
         stream.use { it.write(encrypted) }
         database.systemDao().insertAudit(
             AuditLog(
@@ -135,24 +137,23 @@ object BackupService {
     suspend fun readBackup(context: Context, uri: Uri, password: CharArray): BackupContents =
         withContext(Dispatchers.IO) {
             val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
-                ?: throw BackupException("No se pudo leer el archivo elegido.")
+                ?: throw BackupException(Idioma.text(R.string.aj_err_read))
             val json = try {
                 JSONObject(String(gunzip(decrypt(bytes, password)), Charsets.UTF_8))
             } catch (error: BackupException) {
                 throw error
             } catch (error: Exception) {
-                throw BackupException("El archivo está dañado o no es una copia de FinanzasApp.")
+                throw BackupException(Idioma.text(R.string.aj_err_damaged))
             }
             if (json.optString("app") != "FinanzasApp") {
-                throw BackupException("El archivo no es una copia de FinanzasApp.")
+                throw BackupException(Idioma.text(R.string.aj_err_not_backup))
             }
             val schema = json.optInt("schema", -1)
             // Copias de versiones anteriores (desde la v4) se adaptan al restaurar;
             // una copia de una app más nueva no se puede leer aquí.
             if (schema < 4 || schema > AppDatabase.SCHEMA_VERSION) {
                 throw BackupException(
-                    "La copia es de otra versión de la base (v$schema; esta app usa " +
-                        "v${AppDatabase.SCHEMA_VERSION}). Actualiza la app para restaurarla."
+                    Idioma.text(R.string.aj_err_schema, schema, AppDatabase.SCHEMA_VERSION)
                 )
             }
             val tables = json.getJSONObject("tables")
@@ -211,14 +212,14 @@ object BackupService {
             val accounts = database.accountDao().all().associateBy { it.id }
             val csv = buildString {
                 append('﻿') // BOM: Excel abre las tildes bien.
-                appendLine("Fecha,Tipo,Descripción,Monto,Categoría,Cuenta,Notas")
+                appendLine(Idioma.text(R.string.aj_csv_header))
                 for (t in transactions) {
                     val (type, signed) = when (t.type) {
-                        TransactionType.INGRESO -> "Ingreso" to t.amount
-                        TransactionType.GASTO -> "Gasto" to -t.amount
+                        TransactionType.INGRESO -> Idioma.text(R.string.aj_csv_income) to t.amount
+                        TransactionType.GASTO -> Idioma.text(R.string.aj_csv_expense) to -t.amount
                         TransactionType.TRANSFERENCIA ->
-                            if (t.transferOut) "Transferencia salida" to -t.amount
-                            else "Transferencia entrada" to t.amount
+                            if (t.transferOut) Idioma.text(R.string.aj_csv_transfer_out) to -t.amount
+                            else Idioma.text(R.string.aj_csv_transfer_in) to t.amount
                     }
                     appendLine(
                         listOf(
@@ -234,7 +235,7 @@ object BackupService {
                 }
             }
             val stream = context.contentResolver.openOutputStream(uri, "wt")
-                ?: throw BackupException("No se pudo escribir el archivo elegido.")
+                ?: throw BackupException(Idioma.text(R.string.aj_err_write))
             stream.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
             database.systemDao().insertAudit(
                 AuditLog(
@@ -315,10 +316,10 @@ object BackupService {
         if (file.size < header + SALT_BYTES + IV_BYTES + 16 ||
             !file.copyOfRange(0, MAGIC.size).contentEquals(MAGIC)
         ) {
-            throw BackupException("El archivo no es una copia de FinanzasApp.")
+            throw BackupException(Idioma.text(R.string.aj_err_not_backup))
         }
         if (file[MAGIC.size] != FORMAT_VERSION) {
-            throw BackupException("La copia usa un formato que esta versión no conoce.")
+            throw BackupException(Idioma.text(R.string.aj_err_format))
         }
         val salt = file.copyOfRange(header, header + SALT_BYTES)
         val iv = file.copyOfRange(header + SALT_BYTES, header + SALT_BYTES + IV_BYTES)
@@ -329,7 +330,7 @@ object BackupService {
         return try {
             cipher.doFinal(body)
         } catch (error: AEADBadTagException) {
-            throw BackupException("La contraseña no es correcta o el archivo cambió.")
+            throw BackupException(Idioma.text(R.string.aj_err_password_wrong))
         }
     }
 

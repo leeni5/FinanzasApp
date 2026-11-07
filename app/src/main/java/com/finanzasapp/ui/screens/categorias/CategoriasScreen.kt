@@ -1,5 +1,7 @@
 package com.finanzasapp.ui.screens.categorias
 
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -78,15 +80,15 @@ fun CategoriasScreen(onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Surface(onClick = onBack, shape = CircleShape, color = AppPalette.SurfaceMuted) {
                         Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Volver", tint = AppPalette.Ink)
+                            Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.fz_back), tint = AppPalette.Ink)
                         }
                     }
                     Spacer(Modifier.width(Spacing.md))
-                    Text("Categorías", style = MaterialTheme.typography.headlineMedium, color = AppPalette.Ink)
+                    Text(stringResource(R.string.fz_cat_title), style = MaterialTheme.typography.headlineMedium, color = AppPalette.Ink)
                 }
                 Spacer(Modifier.padding(top = Spacing.sm))
                 Text(
-                    text = "Toca una para cambiar su nombre, icono o colores.",
+                    text = stringResource(R.string.fz_cat_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = AppPalette.InkSoft
                 )
@@ -100,7 +102,7 @@ fun CategoriasScreen(onBack: () -> Unit) {
             if (archived.isNotEmpty()) {
                 item {
                     SectionHeader(
-                        title = "Archivadas",
+                        title = stringResource(R.string.fz_cat_archived),
                         trailing = "${archived.size}",
                         modifier = Modifier.padding(top = Spacing.lg)
                     )
@@ -113,7 +115,7 @@ fun CategoriasScreen(onBack: () -> Unit) {
 
         ScrollAwareFab(
             visible = listState.isScrollingUp(),
-            description = "Nueva categoría",
+            description = stringResource(R.string.fz_cat_new),
             onClick = { creating = true },
             modifier = Modifier
                 .align(Alignment.BottomEnd)

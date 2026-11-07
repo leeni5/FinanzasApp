@@ -11,6 +11,7 @@ import androidx.work.WorkerParameters
 import com.finanzasapp.FinanzasApp
 import com.finanzasapp.MainActivity
 import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
 import com.finanzasapp.ui.util.Money
 
 /**
@@ -41,7 +42,7 @@ class PaymentReminderWorker(
         // Sin permiso, la app sigue funcionando: el aviso simplemente no sale.
         if (!PaymentReminderScheduler.canNotify(applicationContext)) return Result.success()
 
-        val title = if (days == 0) "Hoy vence ${payment.name}" else "${payment.name} vence en $days días"
+        val title = if (days == 0) Idioma.text(R.string.aj_notif_due_today, payment.name) else Idioma.text(R.string.aj_notif_due_in_days, payment.name, days)
         val text = if (days == 0) Money.cop(payment.amount) else "${payment.name} · ${Money.cop(payment.amount)}"
 
         val open = Intent(applicationContext, MainActivity::class.java).apply {

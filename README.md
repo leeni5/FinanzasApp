@@ -182,6 +182,20 @@ Las compilaciones de depuración siembran cuentas, categorías, movimientos de
 cuatro meses, pagos y una meta para poder probar la interfaz. La versión release
 arranca vacía: solo crea las categorías base y la cuenta "Efectivo".
 
+## Idioma (español / inglés)
+
+- Ajustes → Apariencia → Idioma. Lo guarda `Idioma` (preferencias privadas) y
+  se aplica envolviendo el contexto de la app y de la actividad
+  (`attachBaseContext`); cambiarlo recrea la pantalla.
+- Textos en recursos: `values/strings*.xml` (español, por defecto) y
+  `values-en/strings*.xml` (inglés), por áreas (`aj_`, `mv_`, `fz_`, `rv_`).
+  Fuera de Compose se usa `Idioma.text(R.string.x)`.
+- Fechas según el idioma (`Fechas`); los montos siguen en formato COP.
+- El chat responde en el idioma elegido y `PeriodDetector` entiende fechas en
+  inglés («last month», «in March», «last 3 months»).
+- No se traducen los datos del usuario (cuentas, categorías, notas) ni las
+  notas que la app guarda en movimientos.
+
 ## Presupuestos por mes
 
 - Tabla `category_budgets` (v5): `(categoryId, fromMonth, amount)`, con

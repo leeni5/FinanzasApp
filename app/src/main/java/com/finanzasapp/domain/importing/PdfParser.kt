@@ -1,6 +1,8 @@
 package com.finanzasapp.domain.importing
 
 import android.content.Context
+import com.finanzasapp.data.settings.Idioma
+import com.finanzasapp.R
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
@@ -28,8 +30,7 @@ object PdfParser {
             PDDocument.load(bytes).use { document ->
                 if (document.isEncrypted) {
                     throw ImportParseException(
-                        "El PDF está protegido con contraseña. " +
-                            "Expórtalo sin contraseña e inténtalo de nuevo."
+                        Idioma.text(R.string.mv_parse_pdf_password)
                     )
                 }
                 PDFTextStripper().getText(document)
@@ -38,7 +39,7 @@ object PdfParser {
             throw error
         } catch (error: Exception) {
             throw ImportParseException(
-                "No pudimos leer el PDF. Verifica que no esté dañado ni protegido."
+                Idioma.text(R.string.mv_parse_pdf_unreadable)
             )
         }
 

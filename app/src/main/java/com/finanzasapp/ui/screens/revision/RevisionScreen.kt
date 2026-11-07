@@ -51,6 +51,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.annotation.StringRes
+import com.finanzasapp.R
+import com.finanzasapp.data.settings.Idioma
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -74,9 +78,8 @@ import com.finanzasapp.ui.util.Money
 import kotlinx.coroutines.launch
 import org.json.JSONObject
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
-private enum class Tab(val label: String) { PENDIENTES("Por revisar"), REGLAS("Reglas"), HISTORIAL("Historial") }
+private enum class Tab(@StringRes val label: Int) { PENDIENTES(R.string.rv_tab_pending), REGLAS(R.string.rv_tab_rules), HISTORIAL(R.string.rv_tab_history) }
 
 /**
  * Bandeja «Por revisar», reglas de categorización e historial de cambios.
@@ -121,11 +124,11 @@ fun RevisionScreen(onBack: () -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(onClick = onBack, shape = CircleShape, color = AppPalette.SurfaceMuted) {
                     Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, "Volver", tint = AppPalette.Ink)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, stringResource(R.string.rv_back), tint = AppPalette.Ink)
                     }
                 }
                 Spacer(Modifier.width(Spacing.md))
-                Text("Revisión", style = MaterialTheme.typography.headlineMedium, color = AppPalette.Ink)
+                Text(stringResource(R.string.rv_title), style = MaterialTheme.typography.headlineMedium, color = AppPalette.Ink)
             }
             Spacer(Modifier.height(Spacing.md))
             Row(horizontalArrangement = Arrangement.spacedBy(Spacing.sm)) {
@@ -136,13 +139,14 @@ fun RevisionScreen(onBack: () -> Unit) {
                         Tab.REGLAS -> rules.size
                         Tab.HISTORIAL -> null
                     }
+                    val label = stringResource(option.label)
                     Surface(
                         onClick = { tab = option },
                         shape = MaterialTheme.shapes.small,
                         color = if (selected) AppPalette.Accent else AppPalette.SurfaceMuted
                     ) {
                         Text(
-                            text = if (count != null && count > 0) "${option.label} · $count" else option.label,
+                            text = if (count != null && count > 0) "$label · $count" else label,
                             style = MaterialTheme.typography.labelMedium,
                             color = if (selected) AppPalette.OnAccent else AppPalette.InkSoft,
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
@@ -158,9 +162,8 @@ fun RevisionScreen(onBack: () -> Unit) {
                 if (pending.isEmpty()) {
                     item {
                         EmptyState(
-                            title = "Nada por revisar",
-                            message = "Aquí llegan los movimientos importados sin categoría o " +
-                                "marcados como no pagados, para que los confirmes.",
+                            title = stringResource(R.string.rv_pending_empty_title),
+                            message = stringResource(R.string.rv_pending_empty_msg),
                             icon = Icons.Rounded.Checklist
                         )
                     }
@@ -168,13 +171,13 @@ fun RevisionScreen(onBack: () -> Unit) {
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
-                                "Toca uno para elegir su categoría y confirmarlo.",
+                                stringResource(R.string.rv_pending_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = AppPalette.InkSoft,
                                 modifier = Modifier.weight(1f)
                             )
                             TextButton(onClick = { confirmAll = true }) {
-                                Text("Confirmar todos", color = AppPalette.Accent)
+                                Text(stringResource(R.string.rv_confirm_all), color = AppPalette.Accent)
                             }
                         }
                     }
@@ -193,9 +196,7 @@ fun RevisionScreen(onBack: () -> Unit) {
                 item {
                     AppCard {
                         Text(
-                            "Si la descripción de un movimiento contiene el texto de la regla, " +
-                                "recibe esa categoría. Se usan al importar y solo rellenan " +
-                                "movimientos que llegan sin categoría.",
+                            stringResource(R.string.rv_rules_explainer),
                             style = MaterialTheme.typography.bodySmall,
                             color = AppPalette.InkSoft
                         )
@@ -205,14 +206,14 @@ fun RevisionScreen(onBack: () -> Unit) {
                             modifier = Modifier.fillMaxWidth(),
                             shape = MaterialTheme.shapes.medium,
                             colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-                        ) { Text("Nueva regla") }
+                        ) { Text(stringResource(R.string.rv_new_rule)) }
                     }
                 }
                 if (rules.isEmpty()) {
                     item {
                         EmptyState(
-                            title = "Sin reglas todavía",
-                            message = "Crea una aquí o al revisar un movimiento.",
+                            title = stringResource(R.string.rv_rules_empty_title),
+                            message = stringResource(R.string.rv_rules_empty_msg),
                             icon = Icons.Rounded.AutoFixHigh
                         )
                     }
@@ -226,15 +227,15 @@ fun RevisionScreen(onBack: () -> Unit) {
                 if (audit.isEmpty()) {
                     item {
                         EmptyState(
-                            title = "Sin cambios registrados",
-                            message = "Cada alta, edición o borrado queda anotado aquí.",
+                            title = stringResource(R.string.rv_history_empty_title),
+                            message = stringResource(R.string.rv_history_empty_msg),
                             icon = Icons.Rounded.History
                         )
                     }
                 } else {
                     item {
                         Text(
-                            "Los últimos ${audit.size} cambios. El historial no se puede editar ni borrar.",
+                            stringResource(R.string.rv_history_count, audit.size),
                             style = MaterialTheme.typography.bodySmall,
                             color = AppPalette.InkSoft
                         )
@@ -263,7 +264,7 @@ fun RevisionScreen(onBack: () -> Unit) {
                     ReviewActions.confirm(database, transaction.id, categoryId)
                     if (rulePattern != null && categoryId != null) {
                         val applied = RuleActions.create(database, rulePattern, categoryId)
-                        toast(if (applied > 0) "Regla creada; categorizó $applied movimientos más." else "Regla creada.")
+                        toast(if (applied > 0) context.getString(R.string.rv_rule_created_more, applied) else context.getString(R.string.rv_rule_created))
                     }
                 }
             }
@@ -278,7 +279,7 @@ fun RevisionScreen(onBack: () -> Unit) {
                 creatingRule = false
                 scope.launch {
                     val applied = RuleActions.create(database, pattern, categoryId)
-                    toast(if (applied > 0) "Regla creada; categorizó $applied movimientos." else "Regla creada.")
+                    toast(if (applied > 0) context.getString(R.string.rv_rule_created_n, applied) else context.getString(R.string.rv_rule_created))
                 }
             }
         )
@@ -287,31 +288,31 @@ fun RevisionScreen(onBack: () -> Unit) {
     deletingRule?.let { rule ->
         AlertDialog(
             onDismissRequest = { deletingRule = null },
-            title = { Text("¿Borrar la regla «${rule.pattern}»?") },
-            text = { Text("Los movimientos que ya categorizó se quedan como están.") },
+            title = { Text(stringResource(R.string.rv_delete_rule_title, rule.pattern)) },
+            text = { Text(stringResource(R.string.rv_delete_rule_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     deletingRule = null
                     scope.launch { RuleActions.delete(database, rule.id) }
-                }) { Text("Borrar", color = AppPalette.Coral) }
+                }) { Text(stringResource(R.string.rv_delete), color = AppPalette.Coral) }
             },
-            dismissButton = { TextButton(onClick = { deletingRule = null }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { deletingRule = null }) { Text(stringResource(R.string.rv_cancel)) } }
         )
     }
 
     if (confirmAll) {
         AlertDialog(
             onDismissRequest = { confirmAll = false },
-            title = { Text("¿Confirmar los ${pending.size} movimientos?") },
-            text = { Text("Salen de la bandeja con la categoría que tienen ahora; los que no tienen quedan «Sin categoría».") },
+            title = { Text(stringResource(R.string.rv_confirm_all_title, pending.size)) },
+            text = { Text(stringResource(R.string.rv_confirm_all_text)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmAll = false
                     val list = pending
                     scope.launch { ReviewActions.confirmAll(database, list) }
-                }) { Text("Confirmar todos") }
+                }) { Text(stringResource(R.string.rv_confirm_all)) }
             },
-            dismissButton = { TextButton(onClick = { confirmAll = false }) { Text("Cancelar") } }
+            dismissButton = { TextButton(onClick = { confirmAll = false }) { Text(stringResource(R.string.rv_cancel)) } }
         )
     }
 }
@@ -334,8 +335,8 @@ private fun PendingRow(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    "${Fechas.corta(transaction.date)} ${transaction.date.year} · ${account?.name ?: "Sin cuenta"} · " +
-                        (category?.name ?: "Sin categoría"),
+                    "${Fechas.corta(transaction.date)} ${transaction.date.year} · ${account?.name ?: stringResource(R.string.rv_no_account)} · " +
+                        (category?.name ?: stringResource(R.string.rv_no_category)),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (category == null) AppPalette.Amber else AppPalette.InkSoft,
                     maxLines = 1,
@@ -359,58 +360,64 @@ private fun RuleRow(rule: CategorizationRule, category: Category?, onDelete: () 
             IconBubble(icon = Icons.Rounded.AutoFixHigh, tint = AppPalette.Violet, size = 36.dp)
             Spacer(Modifier.width(Spacing.md))
             Column(Modifier.weight(1f)) {
-                Text("Contiene «${rule.pattern}»", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+                Text(stringResource(R.string.rv_rule_contains, rule.pattern), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
                 Text(
-                    "→ ${category?.name ?: "Categoría borrada"} · usada ${rule.timesApplied} " +
-                        if (rule.timesApplied == 1) "vez" else "veces",
+                    stringResource(
+                        if (rule.timesApplied == 1) R.string.rv_rule_used_once else R.string.rv_rule_used_many,
+                        category?.name ?: stringResource(R.string.rv_rule_deleted_category),
+                        rule.timesApplied
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = AppPalette.InkSoft
                 )
             }
-            Text("Borrar", style = MaterialTheme.typography.labelMedium, color = AppPalette.Coral)
+            Text(stringResource(R.string.rv_delete), style = MaterialTheme.typography.labelMedium, color = AppPalette.Coral)
         }
     }
 }
 
-private val timeFormat = DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Locale.forLanguageTag("es-CO"))
+private val timeFormat: DateTimeFormatter
+    get() = DateTimeFormatter.ofPattern("d MMM yyyy, h:mm a", Idioma.locale)
 
 @Composable
 private fun AuditRow(entry: AuditLog, categories: Map<Long, Category>, accounts: Map<Long, Account>) {
     val json = runCatching { JSONObject(entry.afterJson ?: entry.beforeJson ?: "{}") }.getOrNull() ?: JSONObject()
     val what = when (entry.entity) {
-        "transaction" -> "Movimiento"
-        "transfer" -> "Transferencia"
-        "category" -> "Categoría"
-        "account" -> "Cuenta"
-        "goal" -> "Meta"
-        "goal_contribution" -> "Aporte"
-        "app" -> "App"
-        "payment" -> "Pago programado"
-        "budget" -> "Presupuesto"
-        "rule" -> "Regla"
-        "import" -> "Importación"
-        "backup" -> "Datos"
-        "ia" -> "Consulta a la IA"
+        "transaction" -> stringResource(R.string.rv_ent_transaction)
+        "transfer" -> stringResource(R.string.rv_ent_transfer)
+        "category" -> stringResource(R.string.rv_ent_category)
+        "account" -> stringResource(R.string.rv_ent_account)
+        "goal" -> stringResource(R.string.rv_ent_goal)
+        "goal_contribution" -> stringResource(R.string.rv_ent_goal_contribution)
+        "app" -> stringResource(R.string.rv_ent_app)
+        "payment" -> stringResource(R.string.rv_ent_payment)
+        "budget" -> stringResource(R.string.rv_ent_budget)
+        "rule" -> stringResource(R.string.rv_ent_rule)
+        "import" -> stringResource(R.string.rv_ent_import)
+        "backup" -> stringResource(R.string.rv_ent_backup)
+        "ia" -> stringResource(R.string.rv_ent_ia)
         else -> entry.entity.replaceFirstChar { it.uppercase() }
     }
     // Concordancia: «Regla creada», «Movimiento creado».
     val feminine = entry.entity in setOf("transfer", "category", "account", "goal", "rule", "import")
-    fun gender(word: String) = if (feminine) word.dropLast(1) + "a" else word
+    fun gender(masculine: Int, feminineForm: Int) = if (feminine) feminineForm else masculine
     val action = when (entry.action) {
-        "CREADO" -> gender("creado")
-        "EDITADO" -> gender("editado")
-        "BORRADO" -> gender("borrado")
-        "ARCHIVADO" -> gender("archivado")
-        "RECUPERADO" -> gender("recuperado")
-        "REVISADO" -> gender("revisado")
-        "COMPLETADO" -> "completada"
-        "COPIA" -> "copia de seguridad creada"
-        "RESTAURADO" -> "restaurados desde una copia"
-        "EXPORTADO" -> "exportados a CSV"
-        "SEMBRADO" -> "preparada"
-        "CONSULTA" -> "enviada"
+        "CREADO" -> stringResource(gender(R.string.rv_act_created_m, R.string.rv_act_created_f))
+        "EDITADO" -> stringResource(gender(R.string.rv_act_edited_m, R.string.rv_act_edited_f))
+        "BORRADO" -> stringResource(gender(R.string.rv_act_deleted_m, R.string.rv_act_deleted_f))
+        "ARCHIVADO" -> stringResource(gender(R.string.rv_act_archived_m, R.string.rv_act_archived_f))
+        "RECUPERADO" -> stringResource(gender(R.string.rv_act_recovered_m, R.string.rv_act_recovered_f))
+        "REVISADO" -> stringResource(gender(R.string.rv_act_reviewed_m, R.string.rv_act_reviewed_f))
+        "COMPLETADO" -> stringResource(R.string.rv_act_completed)
+        "COPIA" -> stringResource(R.string.rv_act_backup)
+        "RESTAURADO" -> stringResource(R.string.rv_act_restored)
+        "EXPORTADO" -> stringResource(R.string.rv_act_exported)
+        "SEMBRADO" -> stringResource(R.string.rv_act_seeded)
+        "CONSULTA" -> stringResource(R.string.rv_act_query)
         else -> entry.action.lowercase()
     }
+    val movementsLabel = if (json.has("movimientos")) stringResource(R.string.rv_detail_movements, json.optInt("movimientos")) else null
+    val importedLabel = if (json.has("importados")) stringResource(R.string.rv_detail_imported, json.optInt("importados")) else null
     val detail = buildList {
         json.optString("descripcion").takeIf { it.isNotBlank() }?.let(::add)
         json.optString("name").takeIf { it.isNotBlank() }?.let(::add)
@@ -425,16 +432,16 @@ private fun AuditRow(entry: AuditLog, categories: Map<Long, Category>, accounts:
         }
         json.optString("proveedor").takeIf { it.isNotBlank() }?.let { add("$it · ${json.optString("modelo")}") }
         json.optString("periodo").takeIf { it.isNotBlank() }?.let(::add)
-        if (json.has("movimientos")) add("${json.optInt("movimientos")} movimientos")
-        if (json.has("importados")) add("${json.optInt("importados")} importados")
+        movementsLabel?.let(::add)
+        importedLabel?.let(::add)
     }.joinToString(" · ")
     val source = when (entry.source) {
-        "usuario" -> "Tú"
-        "importacion" -> "Importación"
-        "seed" -> "Datos de ejemplo"
-        "regla" -> "Regla"
-        "ia" -> "IA"
-        "pago_programado" -> "Pago programado"
+        "usuario" -> stringResource(R.string.rv_src_user)
+        "importacion" -> stringResource(R.string.rv_src_import)
+        "seed" -> stringResource(R.string.rv_src_seed)
+        "regla" -> stringResource(R.string.rv_src_rule)
+        "ia" -> stringResource(R.string.rv_src_ai)
+        "pago_programado" -> stringResource(R.string.rv_src_payment)
         else -> entry.source
     }
 
@@ -482,7 +489,7 @@ private fun ReviewSheet(
         ) {
             Text(transaction.displayName(), style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
             Text(
-                "${Fechas.diaYMes(transaction.date)} de ${transaction.date.year} · ${Money.cop(transaction.amount)}",
+                stringResource(R.string.rv_review_date, Fechas.diaYMes(transaction.date), transaction.date.year, Money.cop(transaction.amount)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = AppPalette.InkSoft
             )
@@ -490,7 +497,7 @@ private fun ReviewSheet(
                 Text(transaction.notes, style = MaterialTheme.typography.bodySmall, color = AppPalette.InkSoft)
             }
             Spacer(Modifier.height(Spacing.sm))
-            Text("Categoría", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.rv_category), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
             categories.forEach { category ->
                 CategoryRowCard(category, selected = category.id == categoryId) { categoryId = category.id }
             }
@@ -508,7 +515,7 @@ private fun ReviewSheet(
             ) {
                 Checkbox(checked = makeRule, onCheckedChange = null, enabled = categoryId != null)
                 Text(
-                    "Usar siempre esta categoría cuando la descripción contenga…",
+                    stringResource(R.string.rv_always_use),
                     style = MaterialTheme.typography.bodyMedium,
                     color = AppPalette.Ink
                 )
@@ -517,8 +524,8 @@ private fun ReviewSheet(
                 OutlinedTextField(
                     value = pattern,
                     onValueChange = { pattern = it },
-                    label = { Text("Texto de la regla") },
-                    supportingText = { Text("Deja solo la parte que se repite, por ejemplo «RAPPI» o «EXITO».") },
+                    label = { Text(stringResource(R.string.rv_rule_text)) },
+                    supportingText = { Text(stringResource(R.string.rv_rule_text_hint)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -529,7 +536,7 @@ private fun ReviewSheet(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text("Confirmar") }
+            ) { Text(stringResource(R.string.rv_confirm)) }
         }
     }
 }
@@ -560,16 +567,16 @@ private fun RuleSheet(
                 .padding(bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.sm)
         ) {
-            Text("Nueva regla", style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.rv_new_rule), style = MaterialTheme.typography.headlineSmall, color = AppPalette.Ink)
             OutlinedTextField(
                 value = pattern,
                 onValueChange = { pattern = it },
-                label = { Text("Si la descripción contiene") },
-                supportingText = { Text("No distingue mayúsculas ni tildes.") },
+                label = { Text(stringResource(R.string.rv_rule_if_contains)) },
+                supportingText = { Text(stringResource(R.string.rv_rule_case_hint)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            Text("va a la categoría", style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
+            Text(stringResource(R.string.rv_rule_goes_to), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
             categories.forEach { category ->
                 CategoryRowCard(category, selected = category.id == categoryId) { categoryId = category.id }
             }
@@ -580,7 +587,7 @@ private fun RuleSheet(
                 modifier = Modifier.fillMaxWidth().height(52.dp),
                 shape = MaterialTheme.shapes.medium,
                 colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
-            ) { Text("Guardar y aplicar") }
+            ) { Text(stringResource(R.string.rv_save_apply)) }
         }
     }
 }

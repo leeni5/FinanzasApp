@@ -42,6 +42,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 import com.finanzasapp.ui.theme.soft
@@ -132,7 +134,7 @@ fun SpeedDialFab(
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Add,
-                        contentDescription = if (expanded) "Cerrar" else "Registrar movimiento",
+                        contentDescription = if (expanded) stringResource(R.string.aj_fab_close) else stringResource(R.string.aj_fab_add),
                         modifier = Modifier
                             .size(26.dp)
                             .graphicsLayer { rotationZ = rotation }

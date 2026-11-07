@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Review -->
+    <string name="rv_tab_pending">To review</string>
+    <string name="rv_tab_rules">Rules</string>
+    <string name="rv_tab_history">History</string>
+    <string name="rv_back">Back</string>
+    <string name="rv_title">Review</string>
+    <string name="rv_pending_empty_title">Nothing to review</string>
+    <string name="rv_pending_empty_msg">Imported transactions without a category or marked as unpaid land here so you can confirm them.</string>
+    <string name="rv_pending_hint">Tap one to pick its category and confirm it.</string>
+    <string name="rv_confirm_all">Confirm all</string>
+    <string name="rv_rules_explainer">If a transaction\'s description contains the rule\'s text, it gets that category. Rules run on import and only fill in transactions that arrive without a category.</string>
+    <string name="rv_new_rule">New rule</string>
+    <string name="rv_rules_empty_title">No rules yet</string>
+    <string name="rv_rules_empty_msg">Create one here or while reviewing a transaction.</string>
+    <string name="rv_history_empty_title">No changes recorded</string>
+    <string name="rv_history_empty_msg">Every addition, edit or deletion is logged here.</string>
+    <string name="rv_history_count">The last %1$d changes. The history can\'t be edited or deleted.</string>
+    <string name="rv_rule_created_more">Rule created; it categorized %1$d more transactions.</string>
+    <string name="rv_rule_created_n">Rule created; it categorized %1$d transactions.</string>
+    <string name="rv_rule_created">Rule created.</string>
+    <string name="rv_delete_rule_title">Delete the rule «%1$s»?</string>
+    <string name="rv_delete_rule_text">Transactions it already categorized stay as they are.</string>
+    <string name="rv_delete">Delete</string>
+    <string name="rv_cancel">Cancel</string>
+    <string name="rv_confirm_all_title">Confirm the %1$d transactions?</string>
+    <string name="rv_confirm_all_text">They leave the inbox with their current category; those without one stay «Uncategorized».</string>
+    <string name="rv_no_account">No account</string>
+    <string name="rv_no_category">Uncategorized</string>
+    <string name="rv_rule_contains">Contains «%1$s»</string>
+    <string name="rv_rule_deleted_category">Deleted category</string>
+    <string name="rv_rule_used_once">→ %1$s · used %2$d time</string>
+    <string name="rv_rule_used_many">→ %1$s · used %2$d times</string>
+    <string name="rv_review_date">%1$s, %2$d · %3$s</string>
+    <string name="rv_category">Category</string>
+    <string name="rv_always_use">Always use this category when the description contains…</string>
+    <string name="rv_rule_text">Rule text</string>
+    <string name="rv_rule_text_hint">Keep only the part that repeats, for example «RAPPI» or «EXITO».</string>
+    <string name="rv_confirm">Confirm</string>
+    <string name="rv_rule_if_contains">If the description contains</string>
+    <string name="rv_rule_case_hint">Ignores case and accents.</string>
+    <string name="rv_rule_goes_to">goes to the category</string>
+    <string name="rv_save_apply">Save and apply</string>
+
+    <!-- History: entities -->
+    <string name="rv_ent_transaction">Transaction</string>
+    <string name="rv_ent_transfer">Transfer</string>
+    <string name="rv_ent_category">Category</string>
+    <string name="rv_ent_account">Account</string>
+    <string name="rv_ent_goal">Goal</string>
+    <string name="rv_ent_goal_contribution">Contribution</string>
+    <string name="rv_ent_app">App</string>
+    <string name="rv_ent_payment">Scheduled payment</string>
+    <string name="rv_ent_budget">Budget</string>
+    <string name="rv_ent_rule">Rule</string>
+    <string name="rv_ent_import">Import</string>
+    <string name="rv_ent_backup">Data</string>
+    <string name="rv_ent_ia">AI query</string>
+
+    <!-- History: actions -->
+    <string name="rv_act_created_m">created</string>
+    <string name="rv_act_created_f">created</string>
+    <string name="rv_act_edited_m">edited</string>
+    <string name="rv_act_edited_f">edited</string>
+    <string name="rv_act_deleted_m">deleted</string>
+    <string name="rv_act_deleted_f">deleted</string>
+    <string name="rv_act_archived_m">archived</string>
+    <string name="rv_act_archived_f">archived</string>
+    <string name="rv_act_recovered_m">restored</string>
+    <string name="rv_act_recovered_f">restored</string>
+    <string name="rv_act_reviewed_m">reviewed</string>
+    <string name="rv_act_reviewed_f">reviewed</string>
+    <string name="rv_act_completed">completed</string>
+    <string name="rv_act_backup">backup created</string>
+    <string name="rv_act_restored">restored from a backup</string>
+    <string name="rv_act_exported">exported to CSV</string>
+    <string name="rv_act_seeded">prepared</string>
+    <string name="rv_act_query">sent</string>
+    <string name="rv_detail_movements">%1$d transactions</string>
+    <string name="rv_detail_imported">%1$d imported</string>
+
+    <!-- History: source -->
+    <string name="rv_src_user">You</string>
+    <string name="rv_src_import">Import</string>
+    <string name="rv_src_seed">Sample data</string>
+    <string name="rv_src_rule">Rule</string>
+    <string name="rv_src_ai">AI</string>
+    <string name="rv_src_payment">Scheduled payment</string>
+
+    <!-- AI chat -->
+    <string name="rv_chat_status_reviewing">Checking your transactions</string>
+    <string name="rv_chat_status_thinking">%1$s is thinking</string>
+    <string name="rv_chat_title">Ask the AI</string>
+    <string name="rv_chat_not_configured">Not set up</string>
+    <string name="rv_chat_view_data">See what data is sent</string>
+    <string name="rv_chat_provider_model">Provider and model</string>
+    <string name="rv_chat_placeholder">Type your question</string>
+    <string name="rv_chat_stop">Stop</string>
+    <string name="rv_chat_send">Send</string>
+    <string name="rv_chat_data_title">What is sent to %1$s</string>
+    <string name="rv_chat_data_text">This, plus your fixed instructions and the conversation. Nothing else leaves the phone: no notes, no goals, no database.</string>
+    <string name="rv_chat_paste_key">Paste your %1$s key.</string>
+    <string name="rv_chat_no_models">%1$s returned no chat models for this key.</string>
+    <string name="rv_chat_setup_title">Connect an AI</string>
+    <string name="rv_chat_setup_text">Use your own key. It is stored encrypted on this phone and only used to talk to the provider you choose.</string>
+    <string name="rv_chat_key_url">Get the key at %1$s</string>
+    <string name="rv_chat_key_saved">Key saved · paste another to change it</string>
+    <string name="rv_chat_key_label">API key</string>
+    <string name="rv_chat_checking">Checking…</string>
+    <string name="rv_chat_check_key">Check key and see models</string>
+    <string name="rv_chat_model">Model</string>
+    <string name="rv_chat_use_model">Use %1$s</string>
+    <string name="rv_chat_key_deleted">%1$s key deleted from the phone.</string>
+    <string name="rv_chat_delete_key">Delete the %1$s key</string>
+
+    <!-- AI providers -->
+    <string name="rv_note_groq">Free plan with daily limits. Very fast.</string>
+    <string name="rv_note_mistral">Free plan with a verified phone number, no card. It may use what you send for training unless you turn that off in its console.</string>
+    <string name="rv_note_openrouter">Gives access to many models; those ending in «:free» cost nothing.</string>
+    <string name="rv_note_gemini">Google AI Studio key. On the free plan Google may use what you send.</string>
+
+    <!-- AI errors -->
+    <string name="rv_ai_no_text">The model returned no text. Try again or pick another model.</string>
+    <string name="rv_ai_offline">No internet connection. The app still works; the AI is unavailable right now.</string>
+    <string name="rv_ai_timeout">%1$s took too long to respond. Try again.</string>
+    <string name="rv_ai_io">Couldn\'t reach %1$s: %2$s.</string>
+    <string name="rv_ai_network_error">network error</string>
+    <string name="rv_ai_400">The request was not accepted</string>
+    <string name="rv_ai_401">The key is invalid or lacks permission</string>
+    <string name="rv_ai_404">This model isn\'t available for this key; pick another in Settings</string>
+    <string name="rv_ai_413">Too much data was sent; pick a shorter period</string>
+    <string name="rv_ai_429">You hit the free plan limit; wait a while or switch models</string>
+    <string name="rv_ai_5xx">The provider is having problems right now</string>
+    <string name="rv_ai_error_code">Error %1$d</string>
+</resources>

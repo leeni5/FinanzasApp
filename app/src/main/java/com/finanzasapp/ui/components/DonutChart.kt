@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.finanzasapp.R
+import androidx.compose.ui.res.stringResource
 import com.finanzasapp.ui.theme.AppPalette
 import com.finanzasapp.ui.theme.Spacing
 import com.finanzasapp.ui.util.Money
@@ -51,9 +53,10 @@ fun DonutChart(
     otherColor: Color = AppPalette.InkFaint
 ) {
     val total = slices.sumOf { it.value }.coerceAtLeast(1L)
-    val grouped = remember(slices, otherColor) {
+    val otherLabel = stringResource(R.string.aj_donut_other)
+    val grouped = remember(slices, otherColor, otherLabel) {
         val (big, small) = slices.filter { it.value > 0 }.partition { it.value * 100 / total >= 3 }
-        if (small.isEmpty()) big else big + DonutSlice("Otras", small.sumOf { it.value }, otherColor)
+        if (small.isEmpty()) big else big + DonutSlice(otherLabel, small.sumOf { it.value }, otherColor)
     }
     val progress = remember { Animatable(0f) }
     LaunchedEffect(grouped) { progress.animateTo(1f, tween(700, easing = EaseOutQuint)) }

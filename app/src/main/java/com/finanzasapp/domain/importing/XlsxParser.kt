@@ -1,6 +1,8 @@
 package com.finanzasapp.domain.importing
 
 import android.util.Xml
+import com.finanzasapp.data.settings.Idioma
+import com.finanzasapp.R
 import org.xmlpull.v1.XmlPullParser
 import java.io.ByteArrayInputStream
 import java.util.zip.ZipInputStream
@@ -17,7 +19,7 @@ object XlsxParser {
     fun parse(bytes: ByteArray, fileName: String): Pair<List<ParsedRow>, List<String>> {
         val rows = readRows(bytes)
         if (rows.isEmpty()) {
-            throw ImportParseException("La hoja de cálculo está vacía o no tiene una hoja legible.")
+            throw ImportParseException(Idioma.text(R.string.mv_parse_xlsx_empty))
         }
         return TableParser.parse(rows, fileName)
     }
@@ -43,8 +45,7 @@ object XlsxParser {
             }
         } catch (error: Exception) {
             throw ImportParseException(
-                "No pudimos abrir el archivo de Excel. " +
-                    "Guárdalo de nuevo como .xlsx e inténtalo otra vez."
+                Idioma.text(R.string.mv_parse_xlsx_open)
             )
         }
 
@@ -52,7 +53,7 @@ object XlsxParser {
             .filter { it.startsWith("xl/worksheets/") && it.endsWith(".xml") }
             .sorted()
             .firstOrNull()
-            ?: throw ImportParseException("El archivo de Excel no contiene ninguna hoja.")
+            ?: throw ImportParseException(Idioma.text(R.string.mv_parse_xlsx_no_sheet))
 
         val shared = entries["xl/sharedStrings.xml"]?.let(::readSharedStrings).orEmpty()
         return readSheet(entries.getValue(sheet), shared)
