@@ -43,6 +43,8 @@ interface AccountDao {
                a.initialBalance + COALESCE(SUM(
                    CASE WHEN t.type = 'INGRESO' THEN t.amount
                         WHEN t.type = 'GASTO' THEN -t.amount
+                        WHEN t.type = 'TRANSFERENCIA' AND t.transferOut = 1 THEN -t.amount
+                        WHEN t.type = 'TRANSFERENCIA' THEN t.amount
                         ELSE 0 END
                ), 0) AS balance
         FROM accounts a

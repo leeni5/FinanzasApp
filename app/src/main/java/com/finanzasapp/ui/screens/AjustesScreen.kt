@@ -52,6 +52,8 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Category
 import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.EventRepeat
+import androidx.compose.material.icons.rounded.FactCheck
+import com.finanzasapp.ui.screens.respaldo.BackupCard
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material.icons.rounded.NotificationsOff
 import androidx.compose.runtime.rememberCoroutineScope
@@ -91,7 +93,9 @@ private fun NavRow(
 fun AjustesScreen(
     onOpenCategories: () -> Unit = {},
     onOpenPayments: () -> Unit = {},
-    onOpenAccounts: () -> Unit = {}
+    onOpenAccounts: () -> Unit = {},
+    onOpenReview: () -> Unit = {},
+    onOpenChat: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val isDebuggable = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
@@ -100,6 +104,9 @@ fun AjustesScreen(
     val imports by database.systemDao()
         .observeImports()
         .collectAsStateWithLifecycle(initialValue = emptyList())
+    val pendingReview by database.transactionDao()
+        .observePendingReviewCount()
+        .collectAsStateWithLifecycle(initialValue = 0)
     val themeMode by app.settings.themeMode.collectAsStateWithLifecycle(initialValue = ThemeMode.OSCURO)
     val scope = rememberCoroutineScope()
     var showImport by remember { mutableStateOf(false) }
@@ -143,6 +150,13 @@ fun AjustesScreen(
             NavRow(Icons.Rounded.AccountBalanceWallet, AppPalette.Sky, "Cuentas", "Nequi, bancos, efectivo y tarjetas.", onOpenAccounts)
             NavRow(Icons.Rounded.Category, AppPalette.Violet, "Categorías", "Crea las tuyas con icono y colores.", onOpenCategories)
             NavRow(Icons.Rounded.EventRepeat, AppPalette.Teal, "Pagos programados", "Arriendo, servicios y suscripciones con aviso.", onOpenPayments)
+            NavRow(
+                Icons.Rounded.FactCheck,
+                if (pendingReview > 0) AppPalette.Amber else AppPalette.Green,
+                if (pendingReview > 0) "Revisión · $pendingReview por revisar" else "Revisión",
+                "Pendientes, reglas de categorías e historial de cambios.",
+                onOpenReview
+            )
         }
 
         SectionHeader(title = "Avisos")
@@ -231,9 +245,9 @@ fun AjustesScreen(
                 detail = "La copia de seguridad de Android está desactivada: tu base no se sube a Google Drive."
             )
             SecurityRow(
-                title = "Sin permiso de internet",
-                detail = "La app no puede enviar nada a ningún servidor. Cuando actives la IA, " +
-                    "pediremos red solo para esa función."
+                title = "Internet solo para la IA",
+                detail = "La app no envía nada a ningún servidor salvo cuando usas el chat con IA, " +
+                    "y antes te muestra exactamente qué datos salen."
             )
 
             if (isDebuggable) {
@@ -262,18 +276,26 @@ fun AjustesScreen(
                 Spacer(Modifier.width(Spacing.md))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Resúmenes con Gemini",
+                        text = "Chat con IA",
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "La IA será opcional y gratuita. Tu clave se guardará cifrada " +
-                            "y solo se enviará el texto que elijas analizar. Llega en la fase 7.",
+                        text = "Pregunta sobre tus gastos con Groq, Mistral, OpenRouter o Gemini y tu " +
+                            "propia clave, guardada cifrada. Antes de enviar ves qué datos salen. " +
+                            "La IA solo responde: no cambia tus movimientos.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
+            Spacer(Modifier.height(Spacing.md))
+            Button(
+                onClick = onOpenChat,
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.medium,
+                colors = ButtonDefaults.buttonColors(containerColor = AppPalette.Accent, contentColor = AppPalette.OnAccent)
+            ) { Text("Abrir el chat") }
         }
 
         SectionHeader(title = "Tus datos")
@@ -321,6 +343,8 @@ fun AjustesScreen(
             }
         }
 
+        BackupCard()
+
         if (imports.isNotEmpty()) {
             SectionHeader(title = "Últimas importaciones")
             AppCard(contentPadding = androidx.compose.foundation.layout.PaddingValues(
@@ -353,7 +377,7 @@ fun AjustesScreen(
             )
         }
         Text(
-            text = "FinanzasApp 0.6.0 · Fase 5 · Hecha para tus finanzas, no para tus datos.",
+            text = "FinanzasApp 0.8.0 · Fase 7 · Hecha para tus finanzas, no para tus datos.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier

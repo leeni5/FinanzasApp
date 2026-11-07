@@ -96,6 +96,8 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.automirrored.rounded.TrendingDown
 import androidx.compose.material.icons.automirrored.rounded.TrendingUp
+import androidx.compose.material.icons.rounded.SwapHoriz
+import androidx.compose.material.icons.rounded.AutoAwesome
 import com.finanzasapp.ui.components.SpeedDialAction
 import com.finanzasapp.ui.components.SpeedDialFab
 import com.finanzasapp.ui.components.CategoryBadge
@@ -125,7 +127,7 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 
 @Composable
-fun MovimientosScreen() {
+fun MovimientosScreen(onOpenChat: () -> Unit = {}) {
     val context = LocalContext.current
     val database = remember(context) {
         (context.applicationContext as FinanzasApp).database
@@ -143,6 +145,8 @@ fun MovimientosScreen() {
     }
 
     var editor by remember { mutableStateOf<MovementDraft?>(null) }
+    var creatingTransfer by remember { mutableStateOf(false) }
+    var viewingTransfer by remember { mutableStateOf<MovementRow?>(null) }
     var dialOpen by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var showImport by remember { mutableStateOf(false) }
@@ -169,6 +173,19 @@ fun MovimientosScreen() {
                         subtitle = "Tus ingresos y gastos, en orden.",
                         modifier = Modifier.weight(1f)
                     )
+                    Spacer(Modifier.width(Spacing.sm))
+                    Surface(
+                        onClick = onOpenChat,
+                        shape = MaterialTheme.shapes.medium,
+                        color = AppPalette.AccentSoft
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.AutoAwesome,
+                            contentDescription = "Preguntar a la IA",
+                            tint = AppPalette.Accent,
+                            modifier = Modifier.padding(9.dp).size(22.dp)
+                        )
+                    }
                     Spacer(Modifier.width(Spacing.sm))
                     Surface(
                         onClick = { showImport = true },
@@ -266,7 +283,13 @@ fun MovimientosScreen() {
                 ) { group ->
                     DayGroup(
                         group = group,
-                        onEdit = { row -> editor = row.toDraft() }
+                        onEdit = { row ->
+                            if (row.transaction.type == TransactionType.TRANSFERENCIA) {
+                                viewingTransfer = row
+                            } else {
+                                editor = row.toDraft()
+                            }
+                        }
                     )
                 }
             }
@@ -280,7 +303,15 @@ fun MovimientosScreen() {
             expanded = dialOpen,
             onExpandedChange = { dialOpen = it },
             visible = fabVisible,
-            actions = listOf(
+            actions = listOfNotNull(
+                // Hace falta más de una cuenta para transferir entre ellas.
+                if (activeAccounts.size >= 2) {
+                    SpeedDialAction("Transferencia", Icons.Rounded.SwapHoriz, AppPalette.Sky) {
+                        creatingTransfer = true
+                    }
+                } else {
+                    null
+                },
                 SpeedDialAction("Ingreso", Icons.AutoMirrored.Rounded.TrendingUp, incomeColor) {
                     editor = newMovement(activeCategories, activeAccounts, TransactionType.INGRESO)
                 },
@@ -307,6 +338,47 @@ fun MovimientosScreen() {
             },
             onCreateCategory = { category, onCreated ->
                 scope.launch { onCreated(CategoryActions.save(database, category)) }
+            }
+        )
+    }
+
+    if (creatingTransfer) {
+        TransferSheet(
+            accounts = activeAccounts,
+            onDismiss = { creatingTransfer = false },
+            onSave = { draft ->
+                creatingTransfer = false
+                scope.launch {
+                    TransferActions.create(
+                        database,
+                        draft.fromAccountId,
+                        draft.toAccountId,
+                        draft.amount,
+                        draft.date,
+                        draft.description
+                    )
+                }
+                viewModel.showMonth(draft.date)
+            }
+        )
+    }
+
+    viewingTransfer?.let { row ->
+        val transaction = row.transaction
+        val otherName = state.accounts.firstOrNull { it.id == row.counterpartAccountId }?.name ?: "otra cuenta"
+        val thisName = row.account?.name ?: "esta cuenta"
+        TransferInfoDialog(
+            description = transaction.displayName(),
+            amount = transaction.amount,
+            date = transaction.date,
+            fromName = if (transaction.transferOut) thisName else otherName,
+            toName = if (transaction.transferOut) otherName else thisName,
+            onDismiss = { viewingTransfer = null },
+            onDelete = {
+                viewingTransfer = null
+                transaction.transferGroupId?.let { group ->
+                    scope.launch { TransferActions.delete(database, group) }
+                }
             }
         )
     }
@@ -500,11 +572,12 @@ private fun DayGroup(
     group: MovementGroup,
     onEdit: (MovementRow) -> Unit
 ) {
+    // Las transferencias no suman al día: el dinero sigue siendo tuyo.
     val total = group.rows.sumOf { row ->
-        if (row.transaction.type == TransactionType.INGRESO) {
-            row.transaction.amount
-        } else {
-            -row.transaction.amount
+        when (row.transaction.type) {
+            TransactionType.INGRESO -> row.transaction.amount
+            TransactionType.GASTO -> -row.transaction.amount
+            TransactionType.TRANSFERENCIA -> 0L
         }
     }
 
@@ -573,7 +646,11 @@ private fun MovementRowItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            imageVector = IconCatalog.forCategory(category?.name, category?.icon),
+            imageVector = if (transaction.type == TransactionType.TRANSFERENCIA) {
+                Icons.Rounded.SwapHoriz
+            } else {
+                IconCatalog.forCategory(category?.name, category?.icon)
+            },
             contentDescription = null,
             tint = iconTint,
             modifier = Modifier.size(30.dp)
@@ -589,7 +666,11 @@ private fun MovementRowItem(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = row.account?.name ?: (category?.name ?: "Sin categoría"),
+                text = if (transaction.type == TransactionType.TRANSFERENCIA) {
+                    (if (transaction.transferOut) "Sale de " else "Llega a ") + (row.account?.name ?: "una cuenta")
+                } else {
+                    row.account?.name ?: (category?.name ?: "Sin categoría")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = inkSoft,
                 maxLines = 1,
@@ -1176,7 +1257,8 @@ private fun MovementRow.toDraft(): MovementDraft = MovementDraft(
 private fun amountLabel(transaction: Transaction): String = when (transaction.type) {
     TransactionType.INGRESO -> "+ ${Money.cop(transaction.amount)}"
     TransactionType.GASTO -> "− ${Money.cop(transaction.amount)}"
-    TransactionType.TRANSFERENCIA -> Money.cop(transaction.amount)
+    TransactionType.TRANSFERENCIA ->
+        (if (transaction.transferOut) "↗ " else "↘ ") + Money.cop(transaction.amount)
 }
 
 private fun dayLabel(date: LocalDate): String {

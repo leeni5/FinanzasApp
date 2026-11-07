@@ -41,6 +41,21 @@ interface TransactionDao {
     @Query("SELECT * FROM transactions WHERE id = :id")
     suspend fun findById(id: Long): Transaction?
 
+    /** Las dos patas de una transferencia. */
+    @Query("SELECT * FROM transactions WHERE transferGroupId = :groupId ORDER BY transferOut DESC")
+    suspend fun findTransferLegs(groupId: String): List<Transaction>
+
+    @Query("SELECT COUNT(*) FROM transactions WHERE requiresReview = 1")
+    fun observePendingReviewCount(): Flow<Int>
+
+    /** Gastos e ingresos sin categoría: candidatos para una regla nueva. */
+    @Query("SELECT * FROM transactions WHERE categoryId IS NULL AND type != 'TRANSFERENCIA'")
+    suspend fun uncategorized(): List<Transaction>
+
+    /** Todo, de lo más antiguo a lo más reciente, para exportar. */
+    @Query("SELECT * FROM transactions ORDER BY date ASC, id ASC")
+    suspend fun all(): List<Transaction>
+
     @Query("SELECT * FROM transactions WHERE uniqueHash = :hash LIMIT 1")
     suspend fun findByHash(hash: String): Transaction?
 

@@ -95,8 +95,9 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
     val categoryById = remember(categories) { categories.associateBy { it.id } }
 
     val inRange = movements.filter { !it.date.isBefore(from) }
-    val income = inRange.filter { it.type == TransactionType.INGRESO }.sumOf { it.amount }
-    val expenses = inRange.filter { it.type == TransactionType.GASTO }.sumOf { it.amount }
+    // En una cuenta, una transferencia también es una entrada o una salida.
+    val income = inRange.sumOf { it.signedAmount().coerceAtLeast(0L) }
+    val expenses = inRange.sumOf { (-it.signedAmount()).coerceAtLeast(0L) }
     val shown = movements.filter {
         when (filtro) {
             Filtro.TODOS -> true
@@ -206,7 +207,7 @@ fun CuentaDetalleScreen(accountId: Long, onBack: () -> Unit) {
         }
 
         items(groups, key = { it.first.toEpochDay() }) { (date, rows) ->
-            val total = rows.sumOf { if (it.type == TransactionType.INGRESO) it.amount else -it.amount }
+            val total = rows.sumOf { it.signedAmount() }
             Column(verticalArrangement = Arrangement.spacedBy(Spacing.sm)) {
                 Row(Modifier.fillMaxWidth().padding(top = Spacing.sm), verticalAlignment = Alignment.Bottom) {
                     Text(dayLabel(date), style = MaterialTheme.typography.titleSmall, color = AppPalette.Ink)
@@ -261,7 +262,7 @@ private fun MovementCard(transaction: Transaction, category: com.finanzasapp.dat
             Text(category?.name ?: "Sin categoría", style = MaterialTheme.typography.bodySmall, color = inkSoft, maxLines = 1)
         }
         Text(
-            (if (transaction.type == TransactionType.INGRESO) "+ " else "− ") + Money.cop(transaction.amount),
+            (if (transaction.signedAmount() >= 0L) "+ " else "− ") + Money.cop(transaction.amount),
             style = MaterialTheme.typography.titleSmall,
             color = ink
         )
@@ -304,4 +305,11 @@ private fun dayLabel(date: LocalDate): String {
         today.minusDays(1) -> "Ayer"
         else -> Fechas.diaYMes(date)
     }
+}
+
+/** Efecto del movimiento sobre el saldo de esta cuenta. */
+private fun com.finanzasapp.data.entity.Transaction.signedAmount(): Long = when (type) {
+    TransactionType.INGRESO -> amount
+    TransactionType.GASTO -> -amount
+    TransactionType.TRANSFERENCIA -> if (transferOut) -amount else amount
 }

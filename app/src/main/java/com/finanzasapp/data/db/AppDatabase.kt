@@ -37,7 +37,7 @@ import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
         ImportJob::class,
         AuditLog::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -74,7 +74,7 @@ abstract class AppDatabase : RoomDatabase() {
                 DB_NAME
             )
                 .openHelperFactory(SupportOpenHelperFactory(passphrase))
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build()
         }
 
@@ -105,5 +105,15 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE accounts ADD COLUMN logo TEXT NOT NULL DEFAULT ''")
             }
         }
+
+        /** v3 → v4: transactions.transferOut, la dirección de cada pata de una transferencia. */
+        val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE transactions ADD COLUMN transferOut INTEGER NOT NULL DEFAULT 0")
+            }
+        }
+
+        /** Versión del esquema; las copias de seguridad solo se restauran en la misma. */
+        const val SCHEMA_VERSION = 4
     }
 }

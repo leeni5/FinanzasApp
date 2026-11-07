@@ -19,6 +19,15 @@ interface SystemDao {
     @Update
     suspend fun updateRule(rule: CategorizationRule)
 
+    @Query("DELETE FROM categorization_rules WHERE id = :id")
+    suspend fun deleteRule(id: Long)
+
+    @Query("SELECT * FROM categorization_rules WHERE id = :id")
+    suspend fun findRule(id: Long): CategorizationRule?
+
+    @Query("UPDATE categorization_rules SET timesApplied = timesApplied + :times WHERE id = :id")
+    suspend fun addRuleApplications(id: Long, times: Int)
+
     @Query("SELECT * FROM categorization_rules ORDER BY priority DESC, timesApplied DESC")
     fun observeRules(): Flow<List<CategorizationRule>>
 
@@ -52,4 +61,7 @@ interface SystemDao {
 
     @Query("SELECT * FROM audit_log ORDER BY at DESC LIMIT :limit")
     suspend fun recentAudit(limit: Int = 100): List<AuditLog>
+
+    @Query("SELECT * FROM audit_log ORDER BY at DESC, id DESC LIMIT :limit")
+    fun observeRecentAudit(limit: Int): Flow<List<AuditLog>>
 }

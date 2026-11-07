@@ -1,5 +1,6 @@
 package com.finanzasapp.data.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
@@ -56,6 +57,11 @@ data class Transaction(
     val confidence: Float? = null,
     /** Une las dos patas de una misma transferencia. */
     val transferGroupId: String? = null,
+    /**
+     * Solo transferencias (desde la v4): true en la pata que sale de la
+     * cuenta, false en la que entra. Así el saldo sabe hacia dónde restar.
+     */
+    @ColumnInfo(defaultValue = "0") val transferOut: Boolean = false,
     val notes: String? = null,
     val createdAt: Instant,
     val updatedAt: Instant

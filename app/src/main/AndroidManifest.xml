@@ -2,9 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
-        Sin permiso de INTERNET a propósito: hoy la app no necesita red.
-        Cuando se active Gemini (fase 7), se añadirá solo para esa función.
+        Internet solo para el chat con IA (fase 7): la app no hace ninguna otra
+        petición de red, y sin clave configurada no se conecta a nada.
     -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Avisos locales de pagos programados (fase 5). Android 13+ lo pide en ejecución. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />

@@ -16,6 +16,7 @@ import com.finanzasapp.data.entity.Transaction
 import com.finanzasapp.data.entity.TransactionSource
 import com.finanzasapp.data.entity.TransactionType
 import com.finanzasapp.data.model.displayName
+import com.finanzasapp.data.rules.RuleActions
 import com.finanzasapp.domain.dedupe.UniqueHash
 import com.finanzasapp.domain.importing.BudgeTextParser
 import com.finanzasapp.domain.importing.CsvParser
@@ -249,9 +250,20 @@ class ImportService(
                 }
                 val localCounts = mutableMapOf<String, Int>()
                 val toInsert = mutableListOf<Transaction>()
+                // Las reglas solo rellenan filas que el archivo trae sin categoría.
+                val rules = RuleActions.matcher(database)
+                val ruleHits = mutableMapOf<Long, Int>()
 
                 for (row in preview.rows) {
+                    val rule = if (row.categoryName.isNullOrBlank() ||
+                        resolveCategory(row.categoryName, categoryByKey) == null
+                    ) {
+                        rules.match(row.description)
+                    } else {
+                        null
+                    }
                     val categoryId = resolveCategory(row.categoryName, categoryByKey)?.id
+                        ?: rule?.categoryId
                     val account = resolveAccount(row.accountName, accountByKey.values.toList(), accountByKey)
                         ?: fallbackAccount
 
@@ -271,6 +283,10 @@ class ImportService(
 
                     val hash = if (occurrence == 1) baseHash else "$baseHash#$occurrence"
 
+                    if (rule != null && categoryId == rule.categoryId) {
+                        ruleHits[rule.id] = (ruleHits[rule.id] ?: 0) + 1
+                    }
+
                     toInsert += Transaction(
                         accountId = account.id,
                         date = row.date,
@@ -279,7 +295,8 @@ class ImportService(
                         amount = amount,
                         type = row.type,
                         categoryId = categoryId,
-                        requiresReview = !row.paid,
+                        // Pendientes de pago o sin categoría: a la bandeja «Por revisar».
+                        requiresReview = !row.paid || categoryId == null,
                         uniqueHash = hash,
                         source = preview.format.toSource(),
                         createdAt = now,
@@ -289,6 +306,9 @@ class ImportService(
                 }
 
                 val ids = database.transactionDao().insertAll(toInsert)
+                ruleHits.forEach { (ruleId, times) ->
+                    database.systemDao().addRuleApplications(ruleId, times)
+                }
                 val audits = toInsert.mapIndexed { index, transaction ->
                     AuditLog(
                         entity = "transaction",

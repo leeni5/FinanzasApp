@@ -22,6 +22,8 @@ import com.finanzasapp.ui.screens.inicio.InicioScreen
 import com.finanzasapp.ui.screens.metas.MetasScreen
 import com.finanzasapp.ui.screens.movimientos.MovimientosScreen
 import com.finanzasapp.ui.screens.presupuestos.PresupuestosScreen
+import com.finanzasapp.ui.screens.revision.RevisionScreen
+import com.finanzasapp.ui.screens.chat.ChatScreen
 
 /** Duraciones de la transición entre pestañas, en milisegundos. */
 private const val ENTER_MS = 220
@@ -58,15 +60,25 @@ fun AppNavHost(
                 onOpenAccount = { id -> navController.navigate(Routes.cuenta(id)) }
             )
         }
-        composable(Destination.MOVIMIENTOS.route) { MovimientosScreen() }
+        composable(Destination.MOVIMIENTOS.route) {
+            MovimientosScreen(onOpenChat = { navController.navigate(Routes.CHAT) })
+        }
         composable(Destination.PRESUPUESTOS.route) { PresupuestosScreen() }
         composable(Destination.METAS.route) { MetasScreen() }
         composable(Destination.AJUSTES.route) {
             AjustesScreen(
                 onOpenCategories = { navController.navigate(Routes.CATEGORIAS) },
                 onOpenPayments = { navController.navigate(Routes.PAGOS) },
-                onOpenAccounts = { navController.navigate(Routes.CUENTAS) }
+                onOpenAccounts = { navController.navigate(Routes.CUENTAS) },
+                onOpenReview = { navController.navigate(Routes.REVISION) },
+                onOpenChat = { navController.navigate(Routes.CHAT) }
             )
+        }
+        composable(Routes.CHAT) {
+            ChatScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Routes.REVISION) {
+            RevisionScreen(onBack = { navController.popBackStack() })
         }
         composable(Routes.CUENTAS) {
             CuentasScreen(
@@ -97,6 +109,8 @@ object Routes {
     const val CATEGORIAS = "categorias"
     const val PAGOS = "pagos"
     const val CUENTAS = "cuentas"
+    const val REVISION = "revision"
+    const val CHAT = "chat"
     const val CUENTA = "cuenta/{id}"
     fun cuenta(id: Long) = "cuenta/$id"
 }

@@ -55,7 +55,9 @@ data class MovementDraft(
 data class MovementRow(
     val transaction: Transaction,
     val category: Category?,
-    val account: Account?
+    val account: Account?,
+    /** Solo transferencias: la cuenta de la otra pata. */
+    val counterpartAccountId: Long? = null
 )
 
 /** Movimientos de un mismo día, para agrupar la lista sin perder contexto. */
@@ -114,11 +116,17 @@ class MovimientosViewModel(private val database: AppDatabase) : ViewModel() {
         val accountsById = accounts.associateBy { it.id }
         val needle = UniqueHash.normalize(query)
 
+        val transferLegs = transactions
+            .filter { it.transferGroupId != null }
+            .groupBy { it.transferGroupId }
         val rows = transactions.map { transaction ->
             MovementRow(
                 transaction = transaction,
                 category = transaction.categoryId?.let(categoriesById::get),
-                account = accountsById[transaction.accountId]
+                account = accountsById[transaction.accountId],
+                counterpartAccountId = transferLegs[transaction.transferGroupId]
+                    ?.firstOrNull { it.id != transaction.id }
+                    ?.accountId
             )
         }
 
